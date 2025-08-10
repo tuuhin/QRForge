@@ -67,6 +67,9 @@ dependencies {
 	implementation(libs.androidx.material.icons.extended)
 	//qr
 	implementation(libs.zxing.core)
+	// fonts &splash
+	implementation(libs.androidx.ui.text.google.fonts)
+	implementation(libs.androidx.core.splashscreen)
 	//tests
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)
