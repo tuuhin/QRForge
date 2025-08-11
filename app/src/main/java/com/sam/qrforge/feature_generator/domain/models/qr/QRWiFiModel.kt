@@ -1,0 +1,34 @@
+package com.sam.qrforge.feature_generator.domain.models.qr
+
+import com.sam.qrforge.feature_generator.domain.enums.QRDataFormat
+
+data class QRWiFiModel(
+	val ssid: String? = null,
+	val password: String? = null,
+	val encryption: WifiEncryption = WifiEncryption.NO_PASS,
+	val isHidden: Boolean = false,
+) : QRDataModel(type = QRDataFormat.TYPE_WIFI) {
+
+	enum class WifiEncryption {
+		WEP, WPA, NO_PASS
+	}
+
+	override fun toQRString(): String {
+		return buildString {
+			append("WIFI")
+			ssid?.let { append("S:$ssid") }
+			append(";")
+			val encryptionString = when (encryption) {
+				WifiEncryption.WEP -> "WEP"
+				WifiEncryption.WPA -> "WPA"
+				WifiEncryption.NO_PASS -> "nopass"
+			}
+			append("T:$encryptionString")
+			// only add a pass code if Wi-Fi encryption is added
+			if (encryption != WifiEncryption.NO_PASS) password?.let { append("P:$password") }
+			// no need to add is hidden to false
+			if (isHidden) append("H:true")
+			append(";;")
+		}
+	}
+}
