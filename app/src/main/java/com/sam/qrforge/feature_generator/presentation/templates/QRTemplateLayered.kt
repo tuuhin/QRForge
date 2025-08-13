@@ -1,0 +1,112 @@
+package com.sam.qrforge.feature_generator.presentation.templates
+
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.sam.qrforge.R
+import com.sam.qrforge.feature_generator.presentation.models.QRColorLayer
+import com.sam.qrforge.feature_generator.presentation.models.QROverlayColor
+import com.sam.qrforge.feature_generator.presentation.models.QRUIModel
+import com.sam.qrforge.feature_generator.presentation.util.GeneratorPreviewFake
+import com.sam.qrforge.feature_generator.presentation.util.dataBitsOffset
+import com.sam.qrforge.feature_generator.presentation.util.finderOffsets
+import com.sam.qrforge.ui.theme.QRForgeTheme
+
+@Composable
+fun QRTemplateLayered(
+	model: QRUIModel,
+	coloredLayers: () -> QRColorLayer = { QRColorLayer() },
+	contentMargin: Dp = 2.dp,
+	roundness: Float = .5f,
+	bitsSizeMultiplier: Float = 1f,
+	isDiamond: Boolean = false,
+	modifier: Modifier = Modifier,
+	backgroundColor: Color = MaterialTheme.colorScheme.background,
+	fallbackContentColor: Color = MaterialTheme.colorScheme.onBackground,
+	fallbackBlendMode: BlendMode = BlendMode.Difference,
+) {
+	Spacer(
+		modifier = modifier
+			.defaultMinSize(
+				minWidth = dimensionResource(R.dimen.min_qr_size),
+				minHeight = dimensionResource(R.dimen.min_qr_size)
+			)
+			.drawWithCache {
+
+				val blockSize = size.width / model.widthInBlocks
+
+				val finders = model.finderOffsets(blockSize)
+				val blocks = model.dataBitsOffset(blockSize)
+
+				onDrawBehind {
+
+					val layers = coloredLayers().copyEnsureOneExists(fallbackContentColor)
+						.copyEnsuresOnlyValidOffsets()
+						.layers
+
+					val limitMarginWidth = contentMargin.coerceIn(0.dp, 20.dp).toPx()
+					val limitedRoundness = roundness.coerceIn(0f..1f)
+					val bitsMultiplier = bitsSizeMultiplier.coerceIn(.2f..1.5f)
+
+					// draw background
+					drawRect(color = backgroundColor)
+
+					val scaleFactor = 1 - (2 * limitMarginWidth / size.width)
+
+					// draw blocks
+					for (layer in layers) {
+						drawDataBlocks(
+							blocks = blocks,
+							blockSize,
+							fractionOffset = layer.offset,
+							bitsColor = layer.color,
+							scaleFactor = scaleFactor,
+							roundness = limitedRoundness,
+							multiplier = bitsMultiplier,
+							isDiamond = isDiamond,
+							blendMode = layer.blendMode ?: fallbackBlendMode
+						)
+						drawFindersClassic(
+							finders = finders,
+							blockSize = blockSize,
+							fractionOffset = layer.offset,
+							roundness = limitedRoundness,
+							scaleFactor = scaleFactor,
+							isDiamond = isDiamond,
+							color = layer.color,
+							blendMode = layer.blendMode ?: fallbackBlendMode
+						)
+					}
+				}
+			},
+	)
+}
+
+@PreviewLightDark
+@Composable
+private fun QRTemplateLayeredPreview() = QRForgeTheme {
+	QRTemplateLayered(
+		model = GeneratorPreviewFake.FAKE_GENERATED_UI_MODEL,
+		backgroundColor = MaterialTheme.colorScheme.background,
+		coloredLayers = {
+			QRColorLayer(
+				listOf(
+					QROverlayColor(Color.Yellow, Offset(.14f, -.14f)),
+					QROverlayColor(Color.Red, Offset(.14f, .14f)),
+					QROverlayColor(Color.Green, Offset(-.12f, -.14f)),
+					QROverlayColor(Color.Blue, Offset(-.12f, .2f)),
+				)
+			)
+		}
+	)
+}
