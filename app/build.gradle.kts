@@ -4,6 +4,9 @@ plugins {
 	alias(libs.plugins.android.application)
 	alias(libs.plugins.kotlin.android)
 	alias(libs.plugins.kotlin.compose)
+	alias(libs.plugins.ksp)
+	alias(libs.plugins.kotlinx.serialization)
+	alias(libs.plugins.androidx.room)
 }
 
 android {
@@ -44,6 +47,10 @@ kotlin {
 	}
 }
 
+room {
+	schemaDirectory("$projectDir/schemas")
+}
+
 dependencies {
 
 	implementation(libs.androidx.core.ktx)
@@ -63,18 +70,23 @@ dependencies {
 	implementation(libs.koin.android)
 	implementation(libs.koin.compose)
 	implementation(libs.koin.android.startup)
-	// icons
+	//room
+	implementation(libs.androidx.room.ktx)
+	implementation(libs.androidx.room.runtime)
+	ksp(libs.androidx.room.compiler)
+	// others
 	implementation(libs.androidx.material.icons.extended)
-	//qr
 	implementation(libs.zxing.core)
-	// fonts &splash
 	implementation(libs.androidx.ui.text.google.fonts)
 	implementation(libs.androidx.core.splashscreen)
+	implementation(libs.kotlinx.datetime)
+	implementation(libs.kotlinx.collections.immutable)
 	//tests
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
 	androidTestImplementation(platform(libs.androidx.compose.bom))
+	androidTestImplementation(libs.androidx.room.testing)
 	androidTestImplementation(libs.androidx.ui.test.junit4)
 	debugImplementation(libs.androidx.ui.tooling)
 	debugImplementation(libs.androidx.ui.test.manifest)

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <dimen name="sc_padding">12dp</dimen>
-  <dimen name="min_qr_size">200dp</dimen>
+  <dimen name="min_qr_size">64dp</dimen>
+  <dimen name="card_internal_padding">8dp</dimen>
 </resources>

@@ -12,8 +12,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
-import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
+import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @Composable
@@ -22,7 +22,7 @@ fun QRTemplateBasic(
 	modifier: Modifier = Modifier,
 	roundness: Float = 0f,
 	bitsSizeMultiplier: Float = 1f,
-	contentMargin: Dp = 4.dp,
+	contentMargin: Dp = 0.dp,
 	showFrame: Boolean = false,
 	isDiamond: Boolean = false,
 	backgroundColor: Color = MaterialTheme.colorScheme.background,

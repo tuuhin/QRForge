@@ -1,3 +1,10 @@
 <resources>
   <string name="app_name">QRForge</string>
+  <string name="qr_format_email">Email</string>
+  <string name="qr_format_phone">Phone</string>
+  <string name="qr_format_url">URL</string>
+  <string name="qr_format_wifi">Wifi</string>
+  <string name="qr_format_text">Text</string>
+  <string name="qr_format_sms">Sms</string>
+  <string name="qr_format_geo">Geo</string>
 </resources>
