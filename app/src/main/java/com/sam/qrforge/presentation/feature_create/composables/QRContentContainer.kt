@@ -3,8 +3,19 @@ package com.sam.qrforge.presentation.feature_create.composables
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -78,21 +90,32 @@ fun QRContentContainer(
 			color = MaterialTheme.colorScheme.onSurface
 		)
 		Spacer(modifier = Modifier.height(8.dp))
-		Crossfade(
+		AnimatedContent(
 			targetState = selectedType,
+			transitionSpec = {
+				slideInVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)) + expandIn(
+					expandFrom = Alignment.TopCenter,
+					animationSpec = tween(durationMillis = 400, easing = FastOutLinearInEasing)
+				) togetherWith
+						slideOutVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)) + shrinkOut(
+					shrinkTowards = Alignment.BottomCenter,
+					animationSpec = tween(durationMillis = 400, easing = EaseInOut)
+				) using SizeTransform(clip = false)
+			},
+			contentAlignment = Alignment.Center,
 			modifier = modifier
 				.fillMaxWidth()
 				.animateContentSize()
 		) { type ->
 			when (type) {
 				QRDataType.TYPE_EMAIL -> QRFormatEmailInput(onStateChange = onContentChange)
-
-				QRDataType.TYPE_TEXT, QRDataType.TYPE_URL -> QRFormatTextInput(onStateChange = onContentChange)
+				QRDataType.TYPE_TEXT -> QRFormatTextInput(onStateChange = onContentChange)
+				QRDataType.TYPE_URL -> QRFormatURLInput(onStateChange = onContentChange)
 				QRDataType.TYPE_WIFI -> QRFormatWifiInput(onContentChange = onContentChange)
 				QRDataType.TYPE_GEO -> QRFormatGeoInput(
 					initialState = (content as? QRGeoPointModel) ?: QRGeoPointModel(),
 					onStateChange = onContentChange,
-					onUseCurrentLocation = dropUnlessResumed {
+					onUseLastKnownLocation = dropUnlessResumed {
 						if (hasLocationPermission) onUseCurrentLocation()
 						else permissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
 					},

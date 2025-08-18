@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -42,14 +41,6 @@ class CreateNewQRViewModel(
 			initialValue = null
 		)
 
-	val isContentValid = _contentModel
-		.map { it.toQRString().isNotEmpty() }
-		.distinctUntilChanged()
-		.stateIn(
-			scope = viewModelScope,
-			started = SharingStarted.Eagerly,
-			initialValue = false
-		)
 
 	private val _uiEvents = MutableSharedFlow<UIEvent>()
 	override val uiEvents: SharedFlow<UIEvent>
@@ -90,9 +81,11 @@ class CreateNewQRViewModel(
 		result.fold(
 			onSuccess = { contacts ->
 				_contentModel.update { content ->
-					if (content is QRTelephoneModel) content.copy(number = contacts.phoneNumber)
-					if (content is QRSmsModel) content.copy(phoneNumber = contacts.phoneNumber)
-					else content
+					when (content) {
+						is QRTelephoneModel -> content.copy(number = contacts.phoneNumber)
+						is QRSmsModel -> content.copy(phoneNumber = contacts.phoneNumber)
+						else -> content
+					}
 				}
 			},
 			onFailure = {

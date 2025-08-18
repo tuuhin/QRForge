@@ -25,15 +25,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,26 +43,21 @@ import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRGeoPointModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(FlowPreview::class)
 @Composable
 fun QRFormatGeoInput(
-	modifier: Modifier = Modifier,
 	onStateChange: (QRGeoPointModel) -> Unit,
+	modifier: Modifier = Modifier,
 	initialState: QRGeoPointModel = QRGeoPointModel(),
-	onUseCurrentLocation: () -> Unit = {},
+	onUseLastKnownLocation: () -> Unit = {},
 	shape: Shape = MaterialTheme.shapes.large,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 	contentColor: Color = contentColorFor(containerColor),
 	contentPadding: PaddingValues = PaddingValues(12.dp),
 ) {
 
-	val currentOnStateChange by rememberUpdatedState(onStateChange)
+	val focusManager = LocalFocusManager.current
 	val focusRequester = remember { FocusRequester() }
 
 	var latitude by rememberSaveable(initialState.lat) { mutableStateOf(initialState.lat.toString()) }
@@ -77,9 +73,7 @@ fun QRFormatGeoInput(
 		val model = QRGeoPointModel(latAsDouble, longAsDouble)
 
 		snapshotFlow { model }
-			.distinctUntilChanged()
-			.debounce(100.milliseconds)
-			.collectLatest { currentOnStateChange(it) }
+			.collectLatest { onStateChange(it) }
 	}
 
 	Surface(
@@ -118,7 +112,7 @@ fun QRFormatGeoInput(
 					)
 				}
 				Button(
-					onClick = onUseCurrentLocation,
+					onClick = onUseLastKnownLocation,
 					shape = MaterialTheme.shapes.large,
 					contentPadding = PaddingValues(vertical = 12.dp),
 					modifier = Modifier.weight(1f)
@@ -140,7 +134,11 @@ fun QRFormatGeoInput(
 				horizontalArrangement = Arrangement.SpaceBetween,
 				verticalAlignment = Alignment.CenterVertically
 			) {
-				Text("Latitude")
+				Text(
+					text = "Latitude",
+					style = MaterialTheme.typography.titleMedium,
+					color = MaterialTheme.colorScheme.secondary
+				)
 				OutlinedTextField(
 					value = latitude,
 					onValueChange = { value -> latitude = value },
@@ -160,7 +158,11 @@ fun QRFormatGeoInput(
 				horizontalArrangement = Arrangement.SpaceBetween,
 				verticalAlignment = Alignment.CenterVertically
 			) {
-				Text("Longitude")
+				Text(
+					text = "Longitude",
+					style = MaterialTheme.typography.titleMedium,
+					color = MaterialTheme.colorScheme.secondary
+				)
 				OutlinedTextField(
 					value = longitude,
 					onValueChange = { value -> longitude = value },
@@ -171,8 +173,10 @@ fun QRFormatGeoInput(
 						imeAction = ImeAction.Done,
 						keyboardType = KeyboardType.Decimal
 					),
-					keyboardActions = KeyboardActions(onDone = { focusRequester.freeFocus() }),
-					modifier = Modifier.width(120.dp),
+					keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+					modifier = Modifier
+						.focusRequester(focusRequester)
+						.width(120.dp),
 				)
 			}
 		}

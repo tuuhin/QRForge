@@ -5,13 +5,17 @@ import com.sam.qrforge.domain.enums.QRDataType
 data class QRWiFiModel(
 	val ssid: String? = null,
 	val password: String? = null,
-	val encryption: WifiEncryption = WifiEncryption.NO_PASS,
+	val encryption: WifiEncryption = WifiEncryption.WPA,
 	val isHidden: Boolean = false,
 ) : QRContentModel(type = QRDataType.TYPE_WIFI) {
 
 	enum class WifiEncryption {
 		WEP, WPA, NO_PASS
 	}
+
+	override val isValid: Boolean
+		get() = if (encryption == WifiEncryption.NO_PASS) ssid?.isNotEmpty() == true
+		else ssid?.isNotEmpty() == true && password?.isNotEmpty() == true
 
 	override fun toQRString(): String {
 		return buildString {

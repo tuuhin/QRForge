@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -42,7 +41,7 @@ fun QRDataTypeSelector(
 		verticalArrangement = Arrangement.spacedBy(4.dp)
 	) {
 		Text(
-			text = "Choose QR Format",
+			text = "Choose Format",
 			style = MaterialTheme.typography.titleLarge,
 			color = MaterialTheme.colorScheme.primary
 		)
@@ -53,7 +52,7 @@ fun QRDataTypeSelector(
 		)
 		Spacer(modifier = Modifier.height(8.dp))
 		FlowRow(
-			horizontalArrangement = Arrangement.spacedBy(12.dp),
+			horizontalArrangement = Arrangement.Center,
 			verticalArrangement = Arrangement.spacedBy(6.dp),
 			modifier = Modifier.fillMaxWidth(),
 		) {
@@ -62,6 +61,7 @@ fun QRDataTypeSelector(
 					type = type,
 					onClick = { onSelectType(type) },
 					isSelected = type == selectedType,
+					modifier = Modifier.padding(horizontal = 4.dp)
 				)
 			}
 		}
@@ -77,8 +77,8 @@ private fun QRDataTypeCard(
 	shape: Shape = MaterialTheme.shapes.extraLarge,
 	unselectedContainerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
 	onUnSelectedContainer: Color = MaterialTheme.colorScheme.secondary,
-	selectedContainerColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
-	onSelectedContainer: Color = MaterialTheme.colorScheme.onTertiaryContainer,
+	selectedContainerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
+	onSelectedContainer: Color = MaterialTheme.colorScheme.onSecondaryContainer,
 ) {
 	val containerColor by animateColorAsState(if (isSelected) selectedContainerColor else unselectedContainerColor)
 	val contentColor by animateColorAsState(if (isSelected) onSelectedContainer else onUnSelectedContainer)
@@ -88,10 +88,11 @@ private fun QRDataTypeCard(
 		color = containerColor,
 		contentColor = contentColor,
 		shape = shape,
-		border = if (isSelected) BorderStroke(2.dp, onSelectedContainer) else null
+		border = if (isSelected) BorderStroke(2.dp, onSelectedContainer) else null,
+		modifier = modifier,
 	) {
 		Box(
-			modifier = modifier
+			modifier = Modifier
 				.padding(vertical = 10.dp)
 				.defaultMinSize(minWidth = 80.dp, minHeight = 80.dp),
 			contentAlignment = Alignment.Center,

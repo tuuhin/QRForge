@@ -36,36 +36,32 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
-import com.sam.qrforge.domain.models.qr.QRPlainTextModel
-import com.sam.qrforge.ui.theme.QRForgeTheme
-import kotlinx.coroutines.flow.collectLatest
+import com.sam.qrforge.domain.models.qr.QRURLModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun QRFormatTextInput(
+fun QRFormatURLInput(
 	modifier: Modifier = Modifier,
-	onStateChange: (QRPlainTextModel) -> Unit,
-	initialState: QRPlainTextModel = QRPlainTextModel(),
+	onStateChange: (QRURLModel) -> Unit,
+	initialState: QRURLModel = QRURLModel(),
 	contentPadding: PaddingValues = PaddingValues(12.dp),
 	shape: Shape = MaterialTheme.shapes.large,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 	contentColor: Color = contentColorFor(containerColor),
 ) {
-
 	val focusManager = LocalFocusManager.current
 	val clipboardManager = LocalClipboard.current
 
 	val scope = rememberCoroutineScope()
 
-	var textField by rememberSaveable { mutableStateOf(initialState.text) }
+	var textField by rememberSaveable { mutableStateOf(initialState.url ?: "") }
 
 	LaunchedEffect(textField) {
-		val model = QRPlainTextModel(textField)
-		snapshotFlow { model }
-			.collectLatest { onStateChange(it) }
+		val uriModel = QRURLModel(textField)
+		snapshotFlow { uriModel }
+			.collect { onStateChange(it) }
 	}
 
 	Surface(
@@ -124,28 +120,18 @@ fun QRFormatTextInput(
 			OutlinedTextField(
 				value = textField,
 				onValueChange = { value -> textField = value },
-				placeholder = { Text(text = "QR text content") },
+				placeholder = { Text(text = "Your url content") },
 				shape = shape,
-				minLines = 4,
-				maxLines = 10,
+				maxLines = 2,
+				minLines = 2,
 				singleLine = false,
 				keyboardOptions = KeyboardOptions(
 					imeAction = ImeAction.Done,
-					keyboardType = KeyboardType.Text
+					keyboardType = KeyboardType.Uri
 				),
 				keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
 				modifier = Modifier.fillMaxWidth(),
 			)
 		}
 	}
-}
-
-
-@PreviewLightDark
-@Composable
-private fun QRFormatTextInputPreview() = QRForgeTheme {
-	QRFormatTextInput(
-		onStateChange = {},
-		contentPadding = PaddingValues(12.dp)
-	)
 }

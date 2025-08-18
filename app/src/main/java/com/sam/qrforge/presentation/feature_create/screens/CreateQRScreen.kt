@@ -1,15 +1,12 @@
 package com.sam.qrforge.presentation.feature_create.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandIn
-import androidx.compose.animation.shrinkOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -19,20 +16,25 @@ import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
+import com.sam.qrforge.domain.models.qr.QRGeoPointModel
 import com.sam.qrforge.domain.models.qr.QRPlainTextModel
+import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.feature_create.CreateNewQREvents
+import com.sam.qrforge.presentation.feature_create.composables.GenerateQRBottomBarAction
 import com.sam.qrforge.presentation.feature_create.composables.QRContentContainer
 import com.sam.qrforge.presentation.feature_create.composables.QRDataTypeSelector
 import com.sam.qrforge.ui.theme.QRForgeTheme
@@ -43,46 +45,41 @@ fun CreateQRScreen(
 	modifier: Modifier = Modifier,
 	content: QRContentModel,
 	onEvent: (CreateNewQREvents) -> Unit = {},
-	isContentValid: Boolean = true,
 	navigation: @Composable () -> Unit = {},
 	onGenerateQR: () -> Unit = {},
 ) {
 
 	val snackBarHostState = LocalSnackBarState.current
+	val layoutDirection = LocalLayoutDirection.current
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
 	Scaffold(
 		topBar = {
 			MediumTopAppBar(
-				title = { Text("Create QR Code") },
+				title = { Text(text = "Create QR Code") },
 				navigationIcon = navigation,
 				scrollBehavior = scrollBehavior,
-				actions = {
-					AnimatedVisibility(
-						visible = isContentValid,
-						enter = slideInVertically() + expandIn(),
-						exit = slideOutVertically() + shrinkOut()
-					) {
-						TextButton(
-							onClick = onGenerateQR,
-							enabled = isContentValid
-						) {
-							Text(text = "Generate")
-						}
-					}
-				}
+			)
+		},
+		bottomBar = {
+			GenerateQRBottomBarAction(
+				showBottomBar = content.isValid,
+				onGenerateQR = onGenerateQR
 			)
 		},
 		snackbarHost = { SnackbarHost(snackBarHostState) },
-		modifier = modifier
-			.nestedScroll(scrollBehavior.nestedScrollConnection)
-			.imePadding()
+		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
 	) { scPadding ->
 		LazyColumn(
-			contentPadding = scPadding,
+			contentPadding = PaddingValues(
+				top = scPadding.calculateTopPadding(),
+				bottom = scPadding.calculateBottomPadding(),
+				start = scPadding.calculateStartPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding),
+				end = scPadding.calculateEndPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding)
+			),
 			modifier = Modifier
-				.padding(dimensionResource(R.dimen.sc_padding))
-				.fillMaxSize(),
+				.fillMaxSize()
+				.imePadding(),
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.spacedBy(12.dp)
 		) {
@@ -108,16 +105,27 @@ fun CreateQRScreen(
 	}
 }
 
+private class QRContentPreviewParams : CollectionPreviewParameterProvider<QRContentModel>(
+	listOf(
+		QRPlainTextModel("Hello"),
+		QRTelephoneModel("0000000000"),
+		QRGeoPointModel(23.0, 67.0)
+	)
+)
+
 @PreviewLightDark
 @Composable
-private fun CreateQRScreenPreview() = QRForgeTheme {
+private fun CreateQRScreenPreview(
+	@PreviewParameter(QRContentPreviewParams::class)
+	content: QRContentModel,
+) = QRForgeTheme {
 	CreateQRScreen(
-		content = QRPlainTextModel("Something"),
+		content = content,
 		navigation = {
 			Icon(
-				imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back Arrow"
+				imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+				contentDescription = "Back Arrow"
 			)
-
 		},
 	)
 }

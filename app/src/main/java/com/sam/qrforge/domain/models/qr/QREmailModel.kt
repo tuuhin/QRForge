@@ -7,10 +7,13 @@ import java.nio.charset.StandardCharsets
 
 @Suppress("DEPRECATION")
 data class QREmailModel(
-	val address: String,
+	val address: String = "",
 	val subject: String? = null,
 	val body: String? = null
 ) : QRContentModel(type = QRDataType.TYPE_EMAIL) {
+
+	override val isValid: Boolean
+		get() = address.isNotEmpty()
 
 	override fun toQRString(): String {
 		return buildString {

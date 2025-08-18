@@ -14,10 +14,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,6 +32,7 @@ import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun QRFormatPhoneInput(
@@ -43,7 +46,16 @@ fun QRFormatPhoneInput(
 	contentColor: Color = contentColorFor(containerColor),
 ) {
 
-	var phNumber by rememberSaveable { mutableStateOf(initialState.number ?: "") }
+	var phNumber by rememberSaveable(initialState.number) {
+		mutableStateOf(initialState.number ?: "")
+	}
+
+	LaunchedEffect(phNumber) {
+		val model = QRTelephoneModel(phNumber)
+
+		snapshotFlow { model }
+			.collectLatest { onStateChange(model) }
+	}
 
 	Surface(
 		shape = shape,

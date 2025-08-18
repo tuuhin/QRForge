@@ -21,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -32,6 +31,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -40,17 +40,13 @@ import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRSmsModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(FlowPreview::class)
 @Composable
 fun QRFormatSMSInput(
-	modifier: Modifier = Modifier,
 	onStateChange: (QRSmsModel) -> Unit,
+	modifier: Modifier = Modifier,
 	initialState: QRSmsModel = QRSmsModel(),
 	onOpenContacts: () -> Unit = {},
 	contentPadding: PaddingValues = PaddingValues(12.dp),
@@ -58,11 +54,12 @@ fun QRFormatSMSInput(
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 	contentColor: Color = contentColorFor(containerColor),
 ) {
+	val focusManager = LocalFocusManager.current
 	val clipboardManager = LocalClipboard.current
+
 	val scope = rememberCoroutineScope()
 
 	val focusRequester = remember { FocusRequester() }
-	val currentOnStateChange by rememberUpdatedState(onStateChange)
 
 	var phNumber by rememberSaveable(initialState.phoneNumber) {
 		mutableStateOf(initialState.phoneNumber ?: "")
@@ -72,8 +69,7 @@ fun QRFormatSMSInput(
 	LaunchedEffect(phNumber, message) {
 		val model = QRSmsModel(phoneNumber = phNumber, message = message)
 		snapshotFlow { model }
-			.debounce(100.milliseconds)
-			.collectLatest { currentOnStateChange(it) }
+			.collectLatest { onStateChange(it) }
 	}
 
 	Surface(
@@ -108,8 +104,7 @@ fun QRFormatSMSInput(
 					),
 					keyboardActions = KeyboardActions(
 						onNext = { focusRequester.requestFocus() },
-					),
-					shape = shape,
+					), shape = shape,
 					maxLines = 1,
 					singleLine = true,
 					modifier = Modifier.weight(1f)
@@ -135,7 +130,7 @@ fun QRFormatSMSInput(
 					keyboardType = KeyboardType.Text,
 					imeAction = ImeAction.Done
 				),
-				keyboardActions = KeyboardActions(onDone = { focusRequester.freeFocus() }),
+				keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
 				shape = shape,
 				minLines = 3,
 				maxLines = 5,
