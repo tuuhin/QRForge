@@ -1,0 +1,18 @@
+package com.sam.qrforge.data.utils
+
+import android.Manifest
+import android.content.Context
+import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker
+
+val Context.hasLocationPermission: Boolean
+	get() = ContextCompat.checkSelfPermission(
+		this,
+		Manifest.permission.ACCESS_COARSE_LOCATION
+	) == PermissionChecker.PERMISSION_GRANTED
+
+val Context.hasReadContactsPermission: Boolean
+	get() = ContextCompat.checkSelfPermission(
+		this,
+		Manifest.permission.READ_CONTACTS
+	) == PermissionChecker.PERMISSION_GRANTED

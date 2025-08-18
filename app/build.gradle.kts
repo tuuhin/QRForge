@@ -69,10 +69,12 @@ dependencies {
 	implementation(libs.koin.core)
 	implementation(libs.koin.android)
 	implementation(libs.koin.compose)
+	implementation(libs.koin.compose.navigation)
 	implementation(libs.koin.android.startup)
 	//room
 	implementation(libs.androidx.room.ktx)
 	implementation(libs.androidx.room.runtime)
+	implementation(libs.gms.play.services.location)
 	ksp(libs.androidx.room.compiler)
 	// others
 	implementation(libs.androidx.material.icons.extended)
