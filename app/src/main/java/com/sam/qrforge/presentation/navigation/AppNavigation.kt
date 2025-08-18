@@ -15,6 +15,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionScopeProvider
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
+import com.sam.qrforge.presentation.feature_create.createNewQRRoute
+import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -41,7 +43,7 @@ fun AppNavigation(
 				navController = navController,
 				startDestination = NavRoutes.CreateRoute
 			) {
-
+				createNewQRRoute(controller = navController)
 			}
 		}
 	}

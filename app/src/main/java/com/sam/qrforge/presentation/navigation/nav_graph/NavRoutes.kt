@@ -1,4 +1,4 @@
-package com.sam.qrforge.presentation.navigation
+package com.sam.qrforge.presentation.navigation.nav_graph
 
 import kotlinx.serialization.Serializable
 
