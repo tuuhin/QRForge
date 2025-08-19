@@ -10,14 +10,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -25,6 +29,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,30 +41,72 @@ import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.ui.theme.QRForgeTheme
+import kotlinx.coroutines.launch
 
 @Composable
-fun GeneratedQRContainer(
+fun GeneratedQRContainerWithActions(
 	modifier: Modifier = Modifier,
 	generated: GeneratedQRUIModel? = null,
 	isQRGenerationError: Boolean = false,
-	contentColor: Color = MaterialTheme.colorScheme.tertiary,
+	contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-	AnimatedContent(
-		targetState = generated != null,
-		transitionSpec = { fadeIn() + expandIn() togetherWith fadeOut() + shrinkOut() },
-		modifier = modifier.defaultMinSize(minWidth = 220.dp, minHeight = 220.dp)
-	) { isReady ->
-		if (isReady && generated != null)
-			QRTemplateBasic(
-				model = generated,
-				roundness = .5f,
-				backgroundColor = Color.Transparent,
-				bitsColor = contentColor,
-				finderColor = contentColor,
-			)
-		else GeneratedQRNoContentOrError(isError = isQRGenerationError)
-	}
+	val graphicsLayer = rememberGraphicsLayer()
+	val scope = rememberCoroutineScope()
 
+	Column(
+		modifier = modifier,
+		horizontalAlignment = Alignment.CenterHorizontally
+	) {
+		AnimatedContent(
+			targetState = generated != null,
+			transitionSpec = { fadeIn() + expandIn() togetherWith fadeOut() + shrinkOut() },
+			modifier = Modifier.size(300.dp)
+		) { isReady ->
+			if (isReady && generated != null)
+				QRTemplateBasic(
+					model = generated,
+					graphicsLayer = graphicsLayer,
+					roundness = .5f,
+					backgroundColor = Color.Transparent,
+					bitsColor = contentColor,
+					finderColor = contentColor,
+				)
+			else GeneratedQRNoContentOrError(isError = isQRGenerationError)
+		}
+		Row(
+			horizontalArrangement = Arrangement.spacedBy(12.dp),
+			verticalAlignment = Alignment.CenterVertically
+		) {
+			Button(
+				onClick = {
+					scope.launch {
+						val bitmap = graphicsLayer.toImageBitmap()
+					}
+				},
+				colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+				shape = MaterialTheme.shapes.medium,
+			) {
+				Icon(
+					painter = painterResource(R.drawable.ic_export),
+					contentDescription = "Export"
+				)
+				Spacer(modifier = Modifier.width(4.dp))
+				Text(text = "Export")
+			}
+			Button(
+				onClick = {},
+				colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+				shape = MaterialTheme.shapes.medium,
+			) {
+				Icon(
+					painter = painterResource(R.drawable.ic_share),
+					contentDescription = "Share"
+				)
+				Spacer(modifier = Modifier.width(4.dp))
+				Text(text = "Share")
+			}
+		}
+	}
 }
 
 @Composable
@@ -123,7 +170,7 @@ private fun GeneratedQRContainerPreview(
 	generated: GeneratedQRUIModel?
 ) = QRForgeTheme {
 	Surface {
-		GeneratedQRContainer(
+		GeneratedQRContainerWithActions(
 			generated = generated,
 			modifier = Modifier.width(IntrinsicSize.Max)
 		)

@@ -22,19 +22,21 @@ data class QREmailModel(
 
 			// prepare the params
 			val params = mutableListOf<String>()
-			subject?.let {
+			subject?.let { subject ->
+				if (subject.isEmpty()) return@let
 				val encodedSubject = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
 					URLEncoder.encode(subject, StandardCharsets.UTF_8)
 				else
 					URLEncoder.encode(subject)
 				params.add("subject=$encodedSubject")
 			}
-			body?.let {
-				val encodedSubject = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-					URLEncoder.encode(subject, StandardCharsets.UTF_8)
+			body?.let { body ->
+				if (body.isEmpty()) return@let
+				val encodedBody = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+					URLEncoder.encode(body, StandardCharsets.UTF_8)
 				else
-					URLEncoder.encode(subject)
-				params.add("body=$encodedSubject")
+					URLEncoder.encode(body)
+				params.add("body=$encodedBody")
 			}
 			if (params.isNotEmpty()) {
 				append("?")

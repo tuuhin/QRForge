@@ -72,8 +72,8 @@ fun CreateQRScreen(
 	) { scPadding ->
 		LazyColumn(
 			contentPadding = PaddingValues(
-				top = scPadding.calculateTopPadding(),
-				bottom = scPadding.calculateBottomPadding(),
+				top = scPadding.calculateTopPadding() + dimensionResource(R.dimen.sc_padding),
+				bottom = scPadding.calculateBottomPadding() + dimensionResource(R.dimen.sc_padding),
 				start = scPadding.calculateStartPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding),
 				end = scPadding.calculateEndPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding)
 			),
