@@ -1,0 +1,84 @@
+package com.sam.qrforge.presentation.common.composables
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
+import com.sam.qrforge.presentation.common.models.QRColorLayer
+import com.sam.qrforge.presentation.common.models.QRDecorationOption
+import com.sam.qrforge.presentation.common.models.QRTemplateOption
+import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
+import com.sam.qrforge.presentation.common.templates.QRTemplateLayered
+import com.sam.qrforge.presentation.common.templates.QRTemplateMinimalistic
+
+@Composable
+fun QRMasterTemplate(
+	model: GeneratedQRUIModel,
+	modifier: Modifier = Modifier,
+	size: DpSize = DpSize(300.dp, 300.dp),
+	graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
+	decoration: QRDecorationOption = QRDecorationOption.QRDecorationOptionBasic(),
+) {
+	AnimatedContent(
+		targetState = decoration.templateType,
+		modifier = modifier,
+		contentAlignment = Alignment.Center
+	) { template ->
+		when (template) {
+			QRTemplateOption.BASIC -> {
+				val type = decoration as? QRDecorationOption.QRDecorationOptionBasic
+				QRTemplateBasic(
+					model = model,
+					roundness = type?.roundness ?: 0f,
+					bitsSizeMultiplier = type?.bitsSizeMultiplier ?: 1f,
+					isDiamond = type?.isDiamond ?: false,
+					contentMargin = type?.contentMargin ?: 0.dp,
+					finderColor = type?.findersColor ?: MaterialTheme.colorScheme.onSurface,
+					bitsColor = type?.bitsColor ?: MaterialTheme.colorScheme.onSurface,
+					backgroundColor = type?.backGroundColor ?: Color.Transparent,
+					showFrame = type?.showFrame ?: false,
+					frameColor = type?.frameColor ?: MaterialTheme.colorScheme.onSurface,
+					graphicsLayer = graphicsLayer,
+					modifier = Modifier.size(size)
+				)
+			}
+
+			QRTemplateOption.MINIMALISTIC -> {
+				val type = decoration as? QRDecorationOption.QRDecorationOptionMinimal
+
+				QRTemplateMinimalistic(
+					model = model,
+					roundness = type?.roundness ?: 0f,
+					bitsSizeMultiplier = type?.bitsSizeMultiplier ?: 1f,
+					isDiamond = type?.isDiamond ?: false,
+					contentMargin = type?.contentMargin ?: 0.dp,
+					finderColor = type?.findersColor ?: MaterialTheme.colorScheme.onSurface,
+					modifier = Modifier.size(size)
+				)
+
+			}
+
+			QRTemplateOption.COLOR_LAYERED -> {
+				val type = decoration as? QRDecorationOption.QRDecorationOptionColorLayer
+				QRTemplateLayered(
+					model = model,
+					coloredLayers = type?.coloredLayers ?: { QRColorLayer.COLOR_BLOCKS },
+					roundness = type?.roundness ?: 0f,
+					bitsSizeMultiplier = type?.bitsSizeMultiplier ?: 1f,
+					isDiamond = type?.isDiamond ?: false,
+					contentMargin = type?.contentMargin ?: 0.dp,
+					backgroundColor = type?.backGroundColor ?: Color.Transparent,
+					modifier = Modifier.size(size)
+				)
+			}
+		}
+	}
+}

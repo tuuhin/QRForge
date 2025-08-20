@@ -11,12 +11,18 @@ import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 import com.sam.qrforge.domain.provider.ContactsDataProvider
 import com.sam.qrforge.domain.provider.LocationProvider
 import com.sam.qrforge.presentation.common.mappers.toUIModel
+import com.sam.qrforge.presentation.common.models.QRDecorationOption
+import com.sam.qrforge.presentation.common.models.QRDecorationOption.QRDecorationOptionBasic
+import com.sam.qrforge.presentation.common.models.QRDecorationOption.QRDecorationOptionColorLayer
+import com.sam.qrforge.presentation.common.models.QRDecorationOption.QRDecorationOptionMinimal
+import com.sam.qrforge.presentation.common.models.QRTemplateOption
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.UIEvent
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -48,6 +54,8 @@ class CreateNewQRViewModel(
 			initialValue = null
 		)
 
+	private val _decoration = MutableStateFlow<QRDecorationOption>(QRDecorationOptionBasic())
+	val decoration = _decoration.asStateFlow()
 
 	private val _uiEvents = MutableSharedFlow<UIEvent>()
 	override val uiEvents: SharedFlow<UIEvent>
@@ -63,6 +71,25 @@ class CreateNewQRViewModel(
 
 			is CreateNewQREvents.CheckContactsDetails -> findContactsFromURI(event.uri)
 			CreateNewQREvents.CheckLastKnownLocation -> checkLastKnownLocation()
+			is CreateNewQREvents.OnDecorationChange -> onDecorationChange(event.decoration)
+			is CreateNewQREvents.OnQRTemplateChange -> onTemplateChange(event.template)
+		}
+	}
+
+	private fun onTemplateChange(template: QRTemplateOption) {
+		val newModel = when (template) {
+			QRTemplateOption.BASIC -> QRDecorationOptionBasic()
+			QRTemplateOption.MINIMALISTIC -> QRDecorationOptionMinimal()
+			QRTemplateOption.COLOR_LAYERED -> QRDecorationOptionColorLayer()
+		}
+		_decoration.update { newModel }
+	}
+
+	private fun onDecorationChange(decoration: QRDecorationOption) {
+		val currentTemplate = _decoration.value.templateType
+		val newTemplateType = decoration.templateType
+		if (currentTemplate == newTemplateType) {
+			_decoration.update { decoration }
 		}
 	}
 

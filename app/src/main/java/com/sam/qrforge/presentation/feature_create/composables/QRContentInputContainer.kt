@@ -43,7 +43,7 @@ import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 import com.sam.qrforge.presentation.feature_create.contracts.PickContactsActivityResult
 
 @Composable
-fun QRContentContainer(
+fun QRContentInputContainer(
 	content: QRContentModel,
 	onContentChange: (QRContentModel) -> Unit,
 	onUseCurrentLocation: () -> Unit,

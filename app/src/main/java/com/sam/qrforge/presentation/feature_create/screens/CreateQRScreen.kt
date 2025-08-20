@@ -34,8 +34,8 @@ import com.sam.qrforge.domain.models.qr.QRPlainTextModel
 import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.feature_create.CreateNewQREvents
-import com.sam.qrforge.presentation.feature_create.composables.GenerateQRBottomBarAction
-import com.sam.qrforge.presentation.feature_create.composables.QRContentContainer
+import com.sam.qrforge.presentation.feature_create.composables.CreateQRBottomBarAction
+import com.sam.qrforge.presentation.feature_create.composables.QRContentInputContainer
 import com.sam.qrforge.presentation.feature_create.composables.QRDataTypeSelector
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
@@ -46,7 +46,7 @@ fun CreateQRScreen(
 	content: QRContentModel,
 	onEvent: (CreateNewQREvents) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
-	onGenerateQR: () -> Unit = {},
+	onPreviewQR: () -> Unit = {},
 ) {
 
 	val snackBarHostState = LocalSnackBarState.current
@@ -62,9 +62,9 @@ fun CreateQRScreen(
 			)
 		},
 		bottomBar = {
-			GenerateQRBottomBarAction(
+			CreateQRBottomBarAction(
 				showBottomBar = content.isValid,
-				onGenerateQR = onGenerateQR
+				onGenerateQR = onPreviewQR
 			)
 		},
 		snackbarHost = { SnackbarHost(snackBarHostState) },
@@ -91,7 +91,7 @@ fun CreateQRScreen(
 				)
 			}
 			item {
-				QRContentContainer(
+				QRContentInputContainer(
 					selectedType = content.type,
 					content = content,
 					onUseCurrentLocation = { onEvent(CreateNewQREvents.CheckLastKnownLocation) },

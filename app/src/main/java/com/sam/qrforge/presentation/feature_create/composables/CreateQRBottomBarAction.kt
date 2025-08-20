@@ -34,7 +34,7 @@ import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun GenerateQRBottomBarAction(
+fun CreateQRBottomBarAction(
 	showBottomBar: Boolean,
 	onGenerateQR: () -> Unit,
 	modifier: Modifier = Modifier
@@ -72,7 +72,7 @@ fun GenerateQRBottomBarAction(
 				)
 				Spacer(modifier = Modifier.width(4.dp))
 				Text(
-					text = "Generate",
+					text = "Preview",
 					style = MaterialTheme.typography.titleMedium
 				)
 			}

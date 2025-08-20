@@ -2,6 +2,8 @@ package com.sam.qrforge.presentation.feature_create
 
 import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.domain.models.qr.QRContentModel
+import com.sam.qrforge.presentation.common.models.QRDecorationOption
+import com.sam.qrforge.presentation.common.models.QRTemplateOption
 
 sealed interface CreateNewQREvents {
 
@@ -10,4 +12,6 @@ sealed interface CreateNewQREvents {
 
 	data object CheckLastKnownLocation : CreateNewQREvents
 	data class CheckContactsDetails(val uri: String) : CreateNewQREvents
+	data class OnDecorationChange(val decoration: QRDecorationOption) : CreateNewQREvents
+	data class OnQRTemplateChange(val template: QRTemplateOption) : CreateNewQREvents
 }
