@@ -12,6 +12,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,8 +24,8 @@ import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.roundToIntSize
 import com.sam.qrforge.R
 import com.sam.qrforge.data.processing.FloydSteinBergAlgo
-import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
+import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlin.math.roundToInt
 
@@ -30,13 +33,14 @@ import kotlin.math.roundToInt
 fun QRTemplateHalfTone(
 	model: GeneratedQRUIModel,
 	modifier: Modifier = Modifier,
-	contentMargin: Dp = 10.dp,
-	roundness: Float = 1f,
+	contentMargin: Dp = 0.dp,
+	roundness: Float = 0f,
 	imageScale: Float = .7f,
 	showQRBackground: Boolean = false,
 	showTimingPatterns: Boolean = false,
-	showAlignmentPatterns: Boolean = true,
+	showAlignmentPatterns: Boolean = false,
 	image: ImageBitmap? = null,
+	graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
 	backgroundColor: Color = MaterialTheme.colorScheme.background,
 	bitsColor: Color = MaterialTheme.colorScheme.onBackground,
 	finderPatternColor: Color = MaterialTheme.colorScheme.primary,
@@ -98,62 +102,66 @@ fun QRTemplateHalfTone(
 
 				onDrawBehind {
 					// draw background
-					drawRect(color = backgroundColor)
+					graphicsLayer.record {
+						drawRect(color = backgroundColor)
 
-					// draw full sized qr background
-					if (showQRBackground) {
+						// draw full sized qr background
+						if (showQRBackground) {
+							drawDataBlocks(
+								blocks = blocks,
+								blockSize = blockSize,
+								scaleFactor = scaleFactor,
+								bitsColor = bitsColor,
+							)
+						}
+						// draw the image
+						diffusedImage?.let {
+							drawImage(
+								image = diffusedImage,
+								dstOffset = imageOffset.round(),
+								dstSize = imageSize.roundToIntSize(),
+							)
+						}
+
+						// draw the actual qr
 						drawDataBlocks(
-							blocks = blocks,
-							blockSize = blockSize,
+							blocks = smallerBlocks,
+							blockSize = imageBlockSize.toFloat(),
 							scaleFactor = scaleFactor,
+							roundness = limitedRoundness,
 							bitsColor = bitsColor,
 						)
-					}
-					// draw the image
-					diffusedImage?.let {
-						drawImage(
-							image = diffusedImage,
-							dstOffset = imageOffset.round(),
-							dstSize = imageSize.roundToIntSize(),
+
+						// draw timings
+						drawTimingBlocks(
+							blocks = timingBlocks,
+							blockSize = blockSize,
+							evenBitsColor = timingPatternColor,
+							oddBitsColor = backgroundColor,
+							roundness = roundness,
+							scaleFactor = scaleFactor
+						)
+						// show alignment patterns
+						drawAlignmentBlocks(
+							alignments = alignmentBlocks,
+							blockSize = blockSize,
+							color = alignmentPatternColor,
+							scaleFactor = scaleFactor,
+							roundness = limitedRoundness
+						)
+						// draw the finders
+						drawFindersClassic(
+							finders = findersBlocks,
+							blockSize = blockSize,
+							color = finderPatternColor,
+							backgroundColor = backgroundColor,
+							isTransparent = false,
+							roundness = limitedRoundness,
+							scaleFactor = scaleFactor,
 						)
 					}
-
-					// draw the actual qr
-					drawDataBlocks(
-						blocks = smallerBlocks,
-						blockSize = imageBlockSize.toFloat(),
-						scaleFactor = scaleFactor,
-						roundness = limitedRoundness,
-						bitsColor = bitsColor,
-					)
-
-					// draw timings
-					drawTimingBlocks(
-						blocks = timingBlocks,
-						blockSize = blockSize,
-						evenBitsColor = timingPatternColor,
-						oddBitsColor = backgroundColor,
-						roundness = roundness,
-						scaleFactor = scaleFactor
-					)
-					// show alignment patterns
-					drawAlignmentBlocks(
-						alignments = alignmentBlocks,
-						blockSize = blockSize,
-						color = alignmentPatternColor,
-						scaleFactor = scaleFactor,
-						roundness = limitedRoundness
-					)
-					// draw the finders
-					drawFindersClassic(
-						finders = findersBlocks,
-						blockSize = blockSize,
-						color = finderPatternColor,
-						backgroundColor = backgroundColor,
-						isTransparent = false,
-						roundness = limitedRoundness,
-						scaleFactor = scaleFactor,
-					)
+					// draw layer
+					drawLayer(graphicsLayer)
 				}
 			},
 	)

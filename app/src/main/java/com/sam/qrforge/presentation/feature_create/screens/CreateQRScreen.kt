@@ -33,18 +33,18 @@ import com.sam.qrforge.domain.models.qr.QRGeoPointModel
 import com.sam.qrforge.domain.models.qr.QRPlainTextModel
 import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
-import com.sam.qrforge.presentation.feature_create.CreateNewQREvents
 import com.sam.qrforge.presentation.feature_create.composables.CreateQRBottomBarAction
 import com.sam.qrforge.presentation.feature_create.composables.QRContentInputContainer
 import com.sam.qrforge.presentation.feature_create.composables.QRDataTypeSelector
+import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateQRScreen(
-	modifier: Modifier = Modifier,
 	content: QRContentModel,
-	onEvent: (CreateNewQREvents) -> Unit = {},
+	modifier: Modifier = Modifier,
+	onEvent: (CreateQREvents) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
 	onPreviewQR: () -> Unit = {},
 ) {
@@ -86,7 +86,7 @@ fun CreateQRScreen(
 			item {
 				QRDataTypeSelector(
 					selectedType = content.type,
-					onSelectType = { onEvent(CreateNewQREvents.OnQRDataTypeChange(it)) },
+					onSelectType = { onEvent(CreateQREvents.OnQRDataTypeChange(it)) },
 					modifier = Modifier.fillMaxWidth()
 				)
 			}
@@ -94,11 +94,9 @@ fun CreateQRScreen(
 				QRContentInputContainer(
 					selectedType = content.type,
 					content = content,
-					onUseCurrentLocation = { onEvent(CreateNewQREvents.CheckLastKnownLocation) },
-					onReadContactsDetails = { onEvent(CreateNewQREvents.CheckContactsDetails(it)) },
-					onContentChange = { content ->
-						onEvent(CreateNewQREvents.OnUpdateQRContent(content))
-					},
+					onUseCurrentLocation = { onEvent(CreateQREvents.CheckLastKnownLocation) },
+					onReadContactsDetails = { uri -> onEvent(CreateQREvents.CheckContactsDetails(uri)) },
+					onContentChange = { content -> onEvent(CreateQREvents.OnUpdateQRContent(content)) },
 				)
 			}
 		}

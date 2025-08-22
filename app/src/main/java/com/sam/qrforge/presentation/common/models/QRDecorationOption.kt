@@ -30,17 +30,18 @@ sealed class QRDecorationOption(val templateType: QRTemplateOption) {
 		val contentMargin: Dp = 0.dp,
 		val isDiamond: Boolean = false,
 		val showBackground: Boolean = false,
-		val findersColor: Color = Color.Black,
+		val findersColor: Color? = null,
+		val bitsColor: Color? = null,
 	) : QRDecorationOption(QRTemplateOption.MINIMALISTIC)
 
 	@Stable
 	data class QRDecorationOptionColorLayer(
 		val coloredLayers: () -> QRColorLayer = { QRColorLayer.COLOR_DISCO },
 		val contentMargin: Dp = 0.dp,
-		val roundness: Float = .5f,
+		val roundness: Float = 0f,
 		val bitsSizeMultiplier: Float = 1f,
 		val isDiamond: Boolean = false,
-		val backGroundColor: Color = Color.White,
+		val backGroundColor: Color? = null,
 	) : QRDecorationOption(templateType = QRTemplateOption.COLOR_LAYERED)
 
 }

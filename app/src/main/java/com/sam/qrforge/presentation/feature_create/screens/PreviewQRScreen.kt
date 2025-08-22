@@ -9,8 +9,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -27,9 +30,8 @@ import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
-import com.sam.qrforge.presentation.feature_create.CreateNewQREvents
-import com.sam.qrforge.presentation.feature_create.composables.PreviewQRCodeTopAppBar
 import com.sam.qrforge.presentation.feature_create.composables.PreviewQRScreenContent
+import com.sam.qrforge.presentation.feature_create.state.QRDecorationEvents
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @OptIn(
@@ -42,8 +44,9 @@ fun PreviewQRScreen(
 	modifier: Modifier = Modifier,
 	generated: GeneratedQRUIModel? = null,
 	templateDecoration: QRDecorationOption = QRDecorationOption.QRDecorationOptionBasic(),
-	onEvent: (CreateNewQREvents) -> Unit = {},
+	onEvent: (QRDecorationEvents) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
+	onNavigateToSave: () -> Unit = {},
 ) {
 
 	val snackBarHostState = LocalSnackBarState.current
@@ -53,10 +56,15 @@ fun PreviewQRScreen(
 
 	Scaffold(
 		topBar = {
-			PreviewQRCodeTopAppBar(
-				onSaveQR = {},
-				navigation = navigation,
-				scrollBehavior = scrollBehavior
+			MediumTopAppBar(
+				title = { Text(text = "Preview QR Code") },
+				navigationIcon = navigation,
+				scrollBehavior = scrollBehavior,
+				actions = {
+					TextButton(onClick = onNavigateToSave) {
+						Text("Save")
+					}
+				},
 			)
 		},
 		snackbarHost = { SnackbarHost(snackBarHostState) },
@@ -68,8 +76,8 @@ fun PreviewQRScreen(
 			content = content,
 			generated = generated,
 			templateDecoration = templateDecoration,
-			onDecorationChange = { onEvent(CreateNewQREvents.OnDecorationChange(it)) },
-			onTemplateChange = { onEvent(CreateNewQREvents.OnQRTemplateChange(it)) },
+			onDecorationChange = { onEvent(QRDecorationEvents.OnDecorationChange(it)) },
+			onTemplateChange = { onEvent(QRDecorationEvents.OnQRTemplateChange(it)) },
 			contentPadding = PaddingValues(
 				top = scPadding.calculateTopPadding(),
 				bottom = scPadding.calculateBottomPadding(),

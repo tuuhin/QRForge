@@ -7,6 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
@@ -20,6 +23,7 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 fun QRTemplateBasic(
 	model: GeneratedQRUIModel,
 	modifier: Modifier = Modifier,
+	graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
 	roundness: Float = 0f,
 	bitsSizeMultiplier: Float = 1f,
 	contentMargin: Dp = 0.dp,
@@ -47,34 +51,37 @@ fun QRTemplateBasic(
 					val bitsMultiplier = bitsSizeMultiplier.coerceIn(.2f..1.5f)
 					val limitMarginWidth = contentMargin.coerceIn(0.dp, 20.dp).toPx()
 
-					// draw background
-					drawRect(color = backgroundColor)
+					graphicsLayer.record {    // draw background
+						drawRect(color = backgroundColor)
 
-					val totalMargin = limitMarginWidth + (model.margin * blockSize)
-					val scaleFactor = 1 - (2 * limitMarginWidth / size.width)
+						val totalMargin = limitMarginWidth + (model.margin * blockSize)
+						val scaleFactor = 1 - (2 * limitMarginWidth / size.width)
 
-					if (showFrame) drawFrame(totalMargin, blockSize, frameColor, limitRoundness)
+						if (showFrame) drawFrame(totalMargin, blockSize, frameColor, limitRoundness)
 
-					// blocks
-					drawDataBlocks(
-						blocks = blocks,
-						blockSize = blockSize,
-						scaleFactor = scaleFactor,
-						bitsColor = bitsColor,
-						roundness = limitRoundness,
-						multiplier = bitsMultiplier,
-						isDiamond = isDiamond,
-					)
+						// blocks
+						drawDataBlocks(
+							blocks = blocks,
+							blockSize = blockSize,
+							scaleFactor = scaleFactor,
+							bitsColor = bitsColor,
+							roundness = limitRoundness,
+							multiplier = bitsMultiplier,
+							isDiamond = isDiamond,
+						)
 
-					// draw the finders
-					drawFindersClassic(
-						finders = finders,
-						blockSize = blockSize,
-						color = finderColor,
-						isDiamond = isDiamond,
-						roundness = limitRoundness,
-						scaleFactor = scaleFactor
-					)
+						// draw the finders
+						drawFindersClassic(
+							finders = finders,
+							blockSize = blockSize,
+							color = finderColor,
+							isDiamond = isDiamond,
+							roundness = limitRoundness,
+							scaleFactor = scaleFactor
+						)
+					}
+					//draw the layer
+					drawLayer(graphicsLayer)
 				}
 			},
 	)

@@ -6,18 +6,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
-import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRColorLayer
-import com.sam.qrforge.presentation.common.models.QROverlayColor
+import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @Composable
@@ -25,10 +26,11 @@ fun QRTemplateLayered(
 	model: GeneratedQRUIModel,
 	modifier: Modifier = Modifier,
 	coloredLayers: () -> QRColorLayer = { QRColorLayer() },
-	contentMargin: Dp = 2.dp,
-	roundness: Float = .5f,
+	contentMargin: Dp = 0.dp,
+	roundness: Float = 0f,
 	bitsSizeMultiplier: Float = 1f,
 	isDiamond: Boolean = false,
+	graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
 	backgroundColor: Color = MaterialTheme.colorScheme.background,
 	fallbackContentColor: Color = MaterialTheme.colorScheme.onBackground,
 	fallbackBlendMode: BlendMode = BlendMode.Difference,
@@ -56,35 +58,38 @@ fun QRTemplateLayered(
 					val limitedRoundness = roundness.coerceIn(0f..1f)
 					val bitsMultiplier = bitsSizeMultiplier.coerceIn(.2f..1.5f)
 
-					// draw background
-					drawRect(color = backgroundColor)
+					graphicsLayer.record {// draw background
+						drawRect(color = backgroundColor)
 
-					val scaleFactor = 1 - (2 * limitMarginWidth / size.width)
+						val scaleFactor = 1 - (2 * limitMarginWidth / size.width)
 
-					// draw blocks
-					for (layer in layers) {
-						drawDataBlocks(
-							blocks = blocks,
-							blockSize,
-							fractionOffset = layer.offset,
-							bitsColor = layer.color,
-							scaleFactor = scaleFactor,
-							roundness = limitedRoundness,
-							multiplier = bitsMultiplier,
-							isDiamond = isDiamond,
-							blendMode = layer.blendMode ?: fallbackBlendMode
-						)
-						drawFindersClassic(
-							finders = finders,
-							blockSize = blockSize,
-							fractionOffset = layer.offset,
-							roundness = limitedRoundness,
-							scaleFactor = scaleFactor,
-							isDiamond = isDiamond,
-							color = layer.color,
-							blendMode = layer.blendMode ?: fallbackBlendMode
-						)
+						// draw blocks
+						for (layer in layers) {
+							drawDataBlocks(
+								blocks = blocks,
+								blockSize,
+								fractionOffset = layer.offset,
+								bitsColor = layer.color,
+								scaleFactor = scaleFactor,
+								roundness = limitedRoundness,
+								multiplier = bitsMultiplier,
+								isDiamond = isDiamond,
+								blendMode = layer.blendMode ?: fallbackBlendMode
+							)
+							drawFindersClassic(
+								finders = finders,
+								blockSize = blockSize,
+								fractionOffset = layer.offset,
+								roundness = limitedRoundness,
+								scaleFactor = scaleFactor,
+								isDiamond = isDiamond,
+								color = layer.color,
+								blendMode = layer.blendMode ?: fallbackBlendMode
+							)
+						}
 					}
+					// draw the layer
+					drawLayer(graphicsLayer)
 				}
 			},
 	)
@@ -96,15 +101,6 @@ private fun QRTemplateLayeredPreview() = QRForgeTheme {
 	QRTemplateLayered(
 		model = PreviewFakes.FAKE_GENERATED_UI_MODEL,
 		backgroundColor = MaterialTheme.colorScheme.background,
-		coloredLayers = {
-			QRColorLayer(
-				listOf(
-					QROverlayColor(Color.Yellow, Offset(.14f, -.14f)),
-					QROverlayColor(Color.Red, Offset(.14f, .14f)),
-					QROverlayColor(Color.Green, Offset(-.12f, -.14f)),
-					QROverlayColor(Color.Blue, Offset(-.12f, .2f)),
-				)
-			)
-		}
+		coloredLayers = { QRColorLayer.COLOR_BLOCKS }
 	)
 }

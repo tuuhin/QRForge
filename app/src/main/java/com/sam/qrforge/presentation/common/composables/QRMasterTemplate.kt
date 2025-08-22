@@ -1,6 +1,14 @@
 package com.sam.qrforge.presentation.common.composables
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.EaseInExpo
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -30,6 +38,13 @@ fun QRMasterTemplate(
 	AnimatedContent(
 		targetState = decoration.templateType,
 		modifier = modifier,
+		transitionSpec = {
+			fadeIn(initialAlpha = .3f) + scaleIn(
+				animationSpec = tween(400, easing = EaseInExpo)
+			) togetherWith fadeOut(targetAlpha = .2f) + scaleOut(
+				animationSpec = tween(durationMillis = 400, easing = EaseOut)
+			)
+		},
 		contentAlignment = Alignment.Center
 	) { template ->
 		when (template) {
@@ -41,11 +56,11 @@ fun QRMasterTemplate(
 					bitsSizeMultiplier = type?.bitsSizeMultiplier ?: 1f,
 					isDiamond = type?.isDiamond ?: false,
 					contentMargin = type?.contentMargin ?: 0.dp,
-					finderColor = type?.findersColor ?: MaterialTheme.colorScheme.onSurface,
-					bitsColor = type?.bitsColor ?: MaterialTheme.colorScheme.onSurface,
+					finderColor = type?.findersColor ?: MaterialTheme.colorScheme.onBackground,
+					bitsColor = type?.bitsColor ?: MaterialTheme.colorScheme.onBackground,
 					backgroundColor = type?.backGroundColor ?: Color.Transparent,
 					showFrame = type?.showFrame ?: false,
-					frameColor = type?.frameColor ?: MaterialTheme.colorScheme.onSurface,
+					frameColor = type?.frameColor ?: MaterialTheme.colorScheme.onBackground,
 					graphicsLayer = graphicsLayer,
 					modifier = Modifier.size(size)
 				)
@@ -60,7 +75,9 @@ fun QRMasterTemplate(
 					bitsSizeMultiplier = type?.bitsSizeMultiplier ?: 1f,
 					isDiamond = type?.isDiamond ?: false,
 					contentMargin = type?.contentMargin ?: 0.dp,
-					finderColor = type?.findersColor ?: MaterialTheme.colorScheme.onSurface,
+					bitsColor = type?.bitsColor ?: MaterialTheme.colorScheme.onBackground,
+					finderColor = type?.findersColor ?: MaterialTheme.colorScheme.onBackground,
+					showBackground = type?.showBackground ?: false,
 					modifier = Modifier.size(size)
 				)
 
@@ -75,7 +92,7 @@ fun QRMasterTemplate(
 					bitsSizeMultiplier = type?.bitsSizeMultiplier ?: 1f,
 					isDiamond = type?.isDiamond ?: false,
 					contentMargin = type?.contentMargin ?: 0.dp,
-					backgroundColor = type?.backGroundColor ?: Color.Transparent,
+					backgroundColor = type?.backGroundColor ?: MaterialTheme.colorScheme.background,
 					modifier = Modifier.size(size)
 				)
 			}

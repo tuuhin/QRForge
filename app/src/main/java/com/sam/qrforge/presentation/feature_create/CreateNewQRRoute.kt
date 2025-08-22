@@ -15,6 +15,7 @@ import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
 import com.sam.qrforge.presentation.feature_create.screens.CreateQRScreen
 import com.sam.qrforge.presentation.feature_create.screens.PreviewQRScreen
+import com.sam.qrforge.presentation.feature_create.screens.SaveQRScreen
 import com.sam.qrforge.presentation.navigation.animatedComposable
 import com.sam.qrforge.presentation.navigation.nav_graph.CreateNewQRNavGraph
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
@@ -33,7 +34,7 @@ fun NavGraphBuilder.createNewQRRoute(controller: NavController) = navigation<Nav
 		CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 			CreateQRScreen(
 				content = currentContent,
-				onEvent = viewModel::onEvents,
+				onEvent = viewModel::onCreateEvents,
 				onPreviewQR = dropUnlessResumed {
 					controller.navigate(CreateNewQRNavGraph.PreviewGeneratedQRRoute)
 				},
@@ -57,12 +58,40 @@ fun NavGraphBuilder.createNewQRRoute(controller: NavController) = navigation<Nav
 		val content by viewModel.qrContent.collectAsStateWithLifecycle()
 		val decoration by viewModel.decoration.collectAsStateWithLifecycle()
 
+		UIEventsSideEffect(events = viewModel::uiEvents)
+
 		CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 			PreviewQRScreen(
 				generated = generated,
 				content = content,
 				templateDecoration = decoration,
-				onEvent = viewModel::onEvents,
+				onEvent = viewModel::onDecorationEvents,
+				onNavigateToSave = dropUnlessResumed {
+					controller.navigate(CreateNewQRNavGraph.SaveGeneratedQRRoute)
+				},
+				navigation = {
+					if (controller.previousBackStackEntry != null)
+						IconButton(onClick = dropUnlessResumed { controller.popBackStack() }) {
+							Icon(
+								imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+								contentDescription = "Back Arrow"
+							)
+						}
+				},
+			)
+		}
+	}
+
+	animatedComposable<CreateNewQRNavGraph.SaveGeneratedQRRoute> { backStack ->
+		val viewModel = backStack.sharedKoinViewModel<CreateNewQRViewModel>(controller)
+		val state by viewModel.saveQRState.collectAsStateWithLifecycle()
+
+		UIEventsSideEffect(events = viewModel::uiEvents)
+
+		CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
+			SaveQRScreen(
+				state = state,
+				onEvent = viewModel::onSaveEvent,
 				navigation = {
 					if (controller.previousBackStackEntry != null)
 						IconButton(onClick = dropUnlessResumed { controller.popBackStack() }) {

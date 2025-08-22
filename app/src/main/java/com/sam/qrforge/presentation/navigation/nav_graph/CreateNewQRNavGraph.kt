@@ -6,8 +6,11 @@ import kotlinx.serialization.Serializable
 sealed interface CreateNewQRNavGraph {
 
 	@Serializable
-	data object CreateNewQRRoute: CreateNewQRNavGraph
+	data object CreateNewQRRoute : CreateNewQRNavGraph
 
 	@Serializable
-	data object PreviewGeneratedQRRoute: CreateNewQRNavGraph
+	data object PreviewGeneratedQRRoute : CreateNewQRNavGraph
+
+	@Serializable
+	data object SaveGeneratedQRRoute : CreateNewQRNavGraph
 }

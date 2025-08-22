@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
+import com.sam.qrforge.data.contracts.PickContactsContract
 import com.sam.qrforge.data.utils.hasLocationPermission
 import com.sam.qrforge.data.utils.hasReadContactsPermission
 import com.sam.qrforge.domain.enums.QRDataType
@@ -40,7 +41,6 @@ import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.domain.models.qr.QRGeoPointModel
 import com.sam.qrforge.domain.models.qr.QRSmsModel
 import com.sam.qrforge.domain.models.qr.QRTelephoneModel
-import com.sam.qrforge.presentation.feature_create.contracts.PickContactsActivityResult
 
 @Composable
 fun QRContentInputContainer(
@@ -71,7 +71,7 @@ fun QRContentInputContainer(
 	)
 
 	val readContactsLauncher = rememberLauncherForActivityResult(
-		contract = PickContactsActivityResult(),
+		contract = PickContactsContract(),
 		onResult = { uri -> onReadContactsDetails(uri.toString()) },
 	)
 

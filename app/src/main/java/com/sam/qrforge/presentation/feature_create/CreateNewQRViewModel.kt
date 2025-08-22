@@ -18,6 +18,10 @@ import com.sam.qrforge.presentation.common.models.QRDecorationOption.QRDecoratio
 import com.sam.qrforge.presentation.common.models.QRTemplateOption
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.UIEvent
+import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
+import com.sam.qrforge.presentation.feature_create.state.QRDecorationEvents
+import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenEvents
+import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -36,6 +40,9 @@ class CreateNewQRViewModel(
 	private val contactsProvider: ContactsDataProvider,
 	private val locationProvider: LocationProvider,
 ) : AppViewModel() {
+
+	private val _saveQRState = MutableStateFlow(SaveQRScreenState())
+	val saveQRState = _saveQRState.asStateFlow()
 
 	private val _contentModel = MutableStateFlow<QRContentModel>(QRPlainTextModel(""))
 	val qrContent = _contentModel.onStart { onGenerateQR() }
@@ -61,19 +68,38 @@ class CreateNewQRViewModel(
 	override val uiEvents: SharedFlow<UIEvent>
 		get() = _uiEvents
 
-	fun onEvents(event: CreateNewQREvents) {
+	fun onCreateEvents(event: CreateQREvents) {
 		when (event) {
-			is CreateNewQREvents.OnUpdateQRContent -> _contentModel.update { event.content }
-			is CreateNewQREvents.OnQRDataTypeChange -> {
+			is CreateQREvents.OnQRDataTypeChange -> {
 				val model = event.type.toNewModel()
 				_contentModel.update { model }
 			}
 
-			is CreateNewQREvents.CheckContactsDetails -> findContactsFromURI(event.uri)
-			CreateNewQREvents.CheckLastKnownLocation -> checkLastKnownLocation()
-			is CreateNewQREvents.OnDecorationChange -> onDecorationChange(event.decoration)
-			is CreateNewQREvents.OnQRTemplateChange -> onTemplateChange(event.template)
+			is CreateQREvents.OnUpdateQRContent -> onQRContentChange(event.content)
+			is CreateQREvents.CheckContactsDetails -> findContactsFromURI(event.uri)
+			CreateQREvents.CheckLastKnownLocation -> checkLastKnownLocation()
 		}
+	}
+
+	fun onDecorationEvents(event: QRDecorationEvents) {
+		when (event) {
+			is QRDecorationEvents.OnDecorationChange -> onDecorationChange(event.decoration)
+			is QRDecorationEvents.OnQRTemplateChange -> onTemplateChange(event.template)
+		}
+	}
+
+	fun onSaveEvent(event: SaveQRScreenEvents) {
+		when (event) {
+			is SaveQRScreenEvents.OnSaveQRDescChange -> _saveQRState.update { state->state.copy(desc = event.textValue) }
+			is SaveQRScreenEvents.OnSaveQRTitleChange -> _saveQRState.update { state->state.copy(title = event.textValue) }
+			SaveQRScreenEvents.OnSave -> onSaveQR()
+		}
+	}
+
+	private fun onQRContentChange(content: QRContentModel) {
+		_contentModel.update { content }
+		// update the screen state
+
 	}
 
 	private fun onTemplateChange(template: QRTemplateOption) {
@@ -91,6 +117,10 @@ class CreateNewQRViewModel(
 		if (currentTemplate == newTemplateType) {
 			_decoration.update { decoration }
 		}
+	}
+
+	private fun onSaveQR() {
+
 	}
 
 	private fun checkLastKnownLocation() = viewModelScope.launch {
