@@ -9,16 +9,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.roundToIntSize
@@ -39,7 +46,7 @@ fun QRTemplateHalfTone(
 	showQRBackground: Boolean = false,
 	showTimingPatterns: Boolean = false,
 	showAlignmentPatterns: Boolean = false,
-	image: ImageBitmap? = null,
+	painter: Painter? = null,
 	graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
 	backgroundColor: Color = MaterialTheme.colorScheme.background,
 	bitsColor: Color = MaterialTheme.colorScheme.onBackground,
@@ -48,6 +55,10 @@ fun QRTemplateHalfTone(
 	timingPatternColor: Color = MaterialTheme.colorScheme.primary,
 	imageColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
+
+	val density = LocalDensity.current
+	val layoutDirection = LocalLayoutDirection.current
+
 	Spacer(
 		modifier = modifier
 			.defaultMinSize(
@@ -86,9 +97,11 @@ fun QRTemplateHalfTone(
 					(size.height - imageSize.height) * .5f
 				)
 
+				val image = painterToBitmap(painter, density, layoutDirection)
+
 				val diffusedImage = image?.let {
 					FloydSteinBergAlgo.runAlgo(
-						bitmap = image,
+						bitmap = it,
 						finalImageSize = imageSize.roundToIntSize(),
 						blockSize = imageBlockSize,
 						blackMaskColor = imageColor.toArgb(),
@@ -165,6 +178,27 @@ fun QRTemplateHalfTone(
 				}
 			},
 	)
+}
+
+private fun painterToBitmap(
+	painter: Painter?,
+	density: Density,
+	layoutDirection: LayoutDirection
+): ImageBitmap? {
+	if (painter == null) return null
+	val imageBitmap = ImageBitmap(
+		painter.intrinsicSize.width.roundToInt(),
+		painter.intrinsicSize.height.roundToInt()
+	)
+	val canvas = Canvas(imageBitmap)
+
+	// Draw the painter onto the Canvas backed by the ImageBitmap
+	CanvasDrawScope().draw(density, layoutDirection, canvas, painter.intrinsicSize) {
+		with(painter) {
+			draw(size)
+		}
+	}
+	return imageBitmap
 }
 
 @Preview

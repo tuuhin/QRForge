@@ -1,7 +1,6 @@
 package com.sam.qrforge.presentation.feature_create.composables
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -9,36 +8,32 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.Button
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
-import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
-import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun CreateQRBottomBarAction(
+fun ExportShareActions(
 	showBottomBar: Boolean,
-	onGenerateQR: () -> Unit,
+	onShare: () -> Unit,
+	onExport: () -> Unit,
 	modifier: Modifier = Modifier
 ) {
 	AnimatedVisibility(
@@ -59,24 +54,32 @@ fun CreateQRBottomBarAction(
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.Center
 		) {
-			Button(
-				onClick = onGenerateQR,
-				enabled = showBottomBar,
-				contentPadding = PaddingValues(vertical = 16.dp),
-				modifier = Modifier
-					.widthIn(min = dimensionResource(R.dimen.bottom_bar_button_min_size))
-					.sharedBoundsWrapper(SharedTransitionKeys.CREATE_QR_SCREEN_TO_GENERATE_SCREEN),
+			FloatingActionButton(
+				onClick = onShare,
+				elevation = FloatingActionButtonDefaults.loweredElevation(defaultElevation = 0.dp),
+				shape = MaterialTheme.shapes.extraLarge,
+				containerColor = MaterialTheme.colorScheme.secondaryContainer,
+				contentColor = MaterialTheme.colorScheme.onSecondaryContainer
 			) {
 				Icon(
-					painter = painterResource(R.drawable.ic_qr_simplified),
-					contentDescription = "QR code",
-					modifier = Modifier.size(28.dp)
+					painter = painterResource(R.drawable.ic_share),
+					contentDescription = "Share icon"
+				)
+			}
+			Spacer(modifier = Modifier.width(20.dp))
+			ExtendedFloatingActionButton(
+				onClick = onExport,
+				elevation = FloatingActionButtonDefaults.loweredElevation(defaultElevation = 0.dp),
+				shape = MaterialTheme.shapes.extraLarge,
+				containerColor = MaterialTheme.colorScheme.primaryContainer,
+				contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+			) {
+				Icon(
+					painter = painterResource(R.drawable.ic_export),
+					contentDescription = "Export",
 				)
 				Spacer(modifier = Modifier.width(4.dp))
-				Text(
-					text = "Preview",
-					style = MaterialTheme.typography.titleMedium
-				)
+				Text(text = "Export", style = MaterialTheme.typography.titleMedium)
 			}
 		}
 	}

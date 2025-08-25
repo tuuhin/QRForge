@@ -25,13 +25,12 @@ import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.domain.models.qr.QRPlainTextModel
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
-import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
+import com.sam.qrforge.presentation.feature_create.composables.ExportShareActions
 import com.sam.qrforge.presentation.feature_create.composables.PreviewQRScreenContent
-import com.sam.qrforge.presentation.feature_create.state.QRDecorationEvents
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @OptIn(
@@ -43,10 +42,9 @@ fun PreviewQRScreen(
 	content: QRContentModel,
 	modifier: Modifier = Modifier,
 	generated: GeneratedQRUIModel? = null,
-	templateDecoration: QRDecorationOption = QRDecorationOption.QRDecorationOptionBasic(),
-	onEvent: (QRDecorationEvents) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
 	onNavigateToSave: () -> Unit = {},
+	onNavigateToExport: () -> Unit = {},
 ) {
 
 	val snackBarHostState = LocalSnackBarState.current
@@ -67,6 +65,13 @@ fun PreviewQRScreen(
 				},
 			)
 		},
+		bottomBar = {
+			ExportShareActions(
+				showBottomBar = generated != null,
+				onShare = {},
+				onExport = onNavigateToExport,
+			)
+		},
 		snackbarHost = { SnackbarHost(snackBarHostState) },
 		modifier = modifier
 			.nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -75,12 +80,9 @@ fun PreviewQRScreen(
 		PreviewQRScreenContent(
 			content = content,
 			generated = generated,
-			templateDecoration = templateDecoration,
-			onDecorationChange = { onEvent(QRDecorationEvents.OnDecorationChange(it)) },
-			onTemplateChange = { onEvent(QRDecorationEvents.OnQRTemplateChange(it)) },
 			contentPadding = PaddingValues(
-				top = scPadding.calculateTopPadding(),
-				bottom = scPadding.calculateBottomPadding(),
+				top = scPadding.calculateTopPadding() + dimensionResource(R.dimen.sc_padding),
+				bottom = scPadding.calculateBottomPadding() + dimensionResource(R.dimen.sc_padding),
 				start = scPadding.calculateStartPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding),
 				end = scPadding.calculateEndPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding)
 			),

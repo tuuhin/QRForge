@@ -11,15 +11,9 @@ import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 import com.sam.qrforge.domain.provider.ContactsDataProvider
 import com.sam.qrforge.domain.provider.LocationProvider
 import com.sam.qrforge.presentation.common.mappers.toUIModel
-import com.sam.qrforge.presentation.common.models.QRDecorationOption
-import com.sam.qrforge.presentation.common.models.QRDecorationOption.QRDecorationOptionBasic
-import com.sam.qrforge.presentation.common.models.QRDecorationOption.QRDecorationOptionColorLayer
-import com.sam.qrforge.presentation.common.models.QRDecorationOption.QRDecorationOptionMinimal
-import com.sam.qrforge.presentation.common.models.QRTemplateOption
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.UIEvent
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
-import com.sam.qrforge.presentation.feature_create.state.QRDecorationEvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenEvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenState
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,6 +27,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
 class CreateNewQRViewModel(
@@ -61,8 +56,7 @@ class CreateNewQRViewModel(
 			initialValue = null
 		)
 
-	private val _decoration = MutableStateFlow<QRDecorationOption>(QRDecorationOptionBasic())
-	val decoration = _decoration.asStateFlow()
+
 
 	private val _uiEvents = MutableSharedFlow<UIEvent>()
 	override val uiEvents: SharedFlow<UIEvent>
@@ -81,46 +75,27 @@ class CreateNewQRViewModel(
 		}
 	}
 
-	fun onDecorationEvents(event: QRDecorationEvents) {
-		when (event) {
-			is QRDecorationEvents.OnDecorationChange -> onDecorationChange(event.decoration)
-			is QRDecorationEvents.OnQRTemplateChange -> onTemplateChange(event.template)
-		}
-	}
-
 	fun onSaveEvent(event: SaveQRScreenEvents) {
 		when (event) {
-			is SaveQRScreenEvents.OnSaveQRDescChange -> _saveQRState.update { state->state.copy(desc = event.textValue) }
-			is SaveQRScreenEvents.OnSaveQRTitleChange -> _saveQRState.update { state->state.copy(title = event.textValue) }
+			is SaveQRScreenEvents.OnSaveQRDescChange -> _saveQRState.update { state ->
+				state.copy(desc = event.textValue)
+			}
+
+			is SaveQRScreenEvents.OnSaveQRTitleChange -> _saveQRState.update { state ->
+				state.copy(title = event.textValue)
+			}
+
 			SaveQRScreenEvents.OnSave -> onSaveQR()
 		}
 	}
 
 	private fun onQRContentChange(content: QRContentModel) {
-		_contentModel.update { content }
+		val newContent = _contentModel.updateAndGet { content }
 		// update the screen state
 
 	}
 
-	private fun onTemplateChange(template: QRTemplateOption) {
-		val newModel = when (template) {
-			QRTemplateOption.BASIC -> QRDecorationOptionBasic()
-			QRTemplateOption.MINIMALISTIC -> QRDecorationOptionMinimal()
-			QRTemplateOption.COLOR_LAYERED -> QRDecorationOptionColorLayer()
-		}
-		_decoration.update { newModel }
-	}
-
-	private fun onDecorationChange(decoration: QRDecorationOption) {
-		val currentTemplate = _decoration.value.templateType
-		val newTemplateType = decoration.templateType
-		if (currentTemplate == newTemplateType) {
-			_decoration.update { decoration }
-		}
-	}
-
 	private fun onSaveQR() {
-
 	}
 
 	private fun checkLastKnownLocation() = viewModelScope.launch {

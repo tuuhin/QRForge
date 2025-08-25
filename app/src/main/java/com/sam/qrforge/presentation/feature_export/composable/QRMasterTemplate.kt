@@ -1,4 +1,4 @@
-package com.sam.qrforge.presentation.common.composables
+package com.sam.qrforge.presentation.feature_export.composable
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.EaseInExpo

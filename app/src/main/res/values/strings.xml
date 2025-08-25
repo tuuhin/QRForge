@@ -7,4 +7,14 @@
   <string name="qr_format_text">Text</string>
   <string name="qr_format_sms">Sms</string>
   <string name="qr_format_geo">Geo</string>
+  <string name="qr_edit_property_roundness_title">Roundness</string>
+  <string name="qr_edit_property_roundness_text">Make corners for blocks rounded</string>
+  <string name="qr_edit_property_margin_title">Margin</string>
+  <string name="qr_edit_property_margin_text">Add extra margin around the generated qr</string>
+  <string name="qr_edit_property_bits_size_title">Bits Size</string>
+  <string name="qr_edit_property_bits_size_text">Increase the data bits size</string>
+  <string name="qr_edit_property_finder_shape_diamond_title">Finder shape</string>
+  <string name="qr_edit_property_finder_shape_diamond_text">Use diamonds as shapes</string>
+  <string name="qr_edit_property_show_frame_title">Show frame</string>
+  <string name="qr_edit_property_show_frame_text">Include an additional frame to QR</string>
 </resources>

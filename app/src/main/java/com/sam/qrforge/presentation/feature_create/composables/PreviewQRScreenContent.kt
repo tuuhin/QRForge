@@ -1,134 +1,71 @@
 package com.sam.qrforge.presentation.feature_create.composables
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.EaseInBounce
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
-import com.sam.qrforge.presentation.common.composables.QRTemplatePicker
+import com.sam.qrforge.presentation.common.composables.FailedOrMissingQRContent
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
-import com.sam.qrforge.presentation.common.models.QRDecorationOption
-import com.sam.qrforge.presentation.common.models.QRDecorationOption.QRDecorationOptionBasic
-import com.sam.qrforge.presentation.common.models.QRTemplateOption
-import com.sam.qrforge.presentation.common.utils.PreviewFakes
+import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 
 @Composable
 fun PreviewQRScreenContent(
 	content: QRContentModel,
 	modifier: Modifier = Modifier,
-	onDecorationChange: (QRDecorationOption) -> Unit,
-	onTemplateChange: (QRTemplateOption) -> Unit = {},
-	templateDecoration: QRDecorationOption = QRDecorationOptionBasic(),
 	generated: GeneratedQRUIModel? = null,
 	contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-	LazyColumn(
-		contentPadding = contentPadding,
-		modifier = modifier,
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.spacedBy(12.dp)
-	) {
-		stickyHeader {
-			GeneratedQRWithActions(
-				generated = generated,
-				templateDecoration = templateDecoration
-			)
-		}
-		item {
-			QRContentStringCard(content = content)
-		}
-		item {
-			QRTemplatePicker(
-				model = PreviewFakes.FAKE_GENERATED_UI_MODEL_SMALL,
-				selectedTemplate = templateDecoration.templateType,
-				onTemplateChange = onTemplateChange,
-				modifier = Modifier.fillMaxWidth()
-			)
-		}
-		item {
-			EditQRDecoration(
-				decoration = templateDecoration,
-				onDecorationChange = onDecorationChange,
-				modifier = Modifier.fillMaxWidth()
-			)
-		}
+
+	val isQRPresent by remember(generated) {
+		derivedStateOf { generated != null }
 	}
-}
 
-@Composable
-private fun QRContentStringCard(
-	content: QRContentModel,
-	modifier: Modifier = Modifier,
-	shape: Shape = MaterialTheme.shapes.large,
-	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
-	contentPadding: PaddingValues = PaddingValues(12.dp),
-) {
-
-	Surface(
-		shape = shape,
-		color = containerColor,
-		modifier = modifier.fillMaxWidth(),
+	Column(
+		modifier = modifier.padding(contentPadding),
+		horizontalAlignment = Alignment.CenterHorizontally,
+		verticalArrangement = Arrangement.Center
 	) {
-		Row(
-			modifier = Modifier
-				.heightIn(80.dp)
-				.padding(contentPadding),
-			verticalAlignment = Alignment.CenterVertically
-		) {
-			Column(
-				modifier = Modifier.weight(1f),
-				verticalArrangement = Arrangement.spacedBy(2.dp)
-			) {
-				Text(
-					text = "Content",
-					style = MaterialTheme.typography.titleMedium,
-					color = MaterialTheme.colorScheme.secondary
+		AnimatedContent(
+			targetState = isQRPresent,
+			transitionSpec = {
+				fadeIn(
+					initialAlpha = .4f,
+					animationSpec = tween(durationMillis = 200, easing = EaseInBounce)
+				) + expandIn() togetherWith fadeOut(
+					targetAlpha = .1f,
+					animationSpec = tween(durationMillis = 90)
+				) + shrinkOut()
+			},
+			modifier = Modifier.size(300.dp)
+		) { isReady ->
+			if (isReady && generated != null)
+				QRTemplateBasic(
+					model = generated,
+					modifier = Modifier.fillMaxSize()
 				)
-				Text(
-					text = content.toQRString(),
-					style = MaterialTheme.typography.bodyMedium,
-					color = MaterialTheme.colorScheme.onSurfaceVariant,
-					maxLines = 2,
-					overflow = TextOverflow.Ellipsis
-				)
-			}
-			Button(
-				onClick = {
-
-				},
-				modifier = Modifier.size(36.dp),
-				contentPadding = PaddingValues(all = 8.dp),
-				shape = MaterialTheme.shapes.medium,
-				colors = ButtonDefaults.buttonColors(
-					containerColor = MaterialTheme.colorScheme.secondaryContainer,
-					contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-				)
-			) {
-				Icon(
-					painter = painterResource(R.drawable.ic_copy),
-					contentDescription = "Action Copy",
-				)
-			}
+			else FailedOrMissingQRContent(isError = false)
 		}
+		Spacer(modifier = Modifier.heightIn(20.dp))
+		ContentStringCard(content = content)
 	}
 }
