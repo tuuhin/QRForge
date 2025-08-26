@@ -8,6 +8,7 @@ import com.sam.qrforge.domain.models.CreateNewQRModel
 import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.domain.repository.SavedQRDataRepository
 import com.sam.qrforge.domain.repository.exception.CannotFindMatchingIdException
+import com.sam.qrforge.domain.repository.exception.UnableToProcessSQLException
 import com.sam.qrforge.domain.util.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +25,22 @@ class SaveQRDataRepoImpl(private val dao: QRDataDao) : SavedQRDataRepository {
 			val new = dao.fetchQREntityById(id)
 				?: return Result.failure(CannotFindMatchingIdException())
 			Result.success(new.toModel())
-		} catch (e: SQLException) {
+		} catch (_: SQLException) {
+			Result.failure(UnableToProcessSQLException())
+		} catch (e: Exception) {
+			Result.failure(e)
+		}
+	}
+
+	override suspend fun updateQRModel(model: SavedQRModel): Result<SavedQRModel> {
+		return try {
+			dao.insertNewQR(model.toEntity())
+			val new = dao.fetchQREntityById(model.id)
+				?: return Result.failure(CannotFindMatchingIdException())
+			Result.success(new.toModel())
+		} catch (_: SQLException) {
+			Result.failure(UnableToProcessSQLException())
+		} catch (e: Exception) {
 			Result.failure(e)
 		}
 	}
@@ -38,9 +54,25 @@ class SaveQRDataRepoImpl(private val dao: QRDataDao) : SavedQRDataRepository {
 			}
 			.flowOn(Dispatchers.IO)
 			.onStart { emit(Resource.Loading) }
-			.catch { err->
-				if (err is SQLException) emit(Resource.Error(err,"Issue with db cannot read data"))
+			.catch { err ->
+				if (err is SQLException) emit(
+					Resource.Error(
+						UnableToProcessSQLException(),
+						"Issue with db cannot read data"
+					)
+				)
 				else emit(Resource.Error(Exception(err)))
 			}
+	}
+
+	override suspend fun deleteQRModel(model: SavedQRModel): Result<Unit> {
+		return try {
+			dao.deleteQREntity(model.toEntity())
+			Result.success(Unit)
+		} catch (_: SQLException) {
+			Result.failure(UnableToProcessSQLException())
+		} catch (e: Exception) {
+			Result.failure(e)
+		}
 	}
 }

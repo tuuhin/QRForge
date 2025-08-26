@@ -32,4 +32,22 @@ class QRGeneratorFacadeImpl : QRGeneratorFacade {
 			}
 		}
 	}
+
+	override suspend fun generate(contentString: String): Result<GeneratedQRModel> {
+		return withContext(Dispatchers.Default) {
+			try {
+				val matrix = writer.encode(
+					contentString,
+					BarcodeFormat.QR_CODE,
+					0,
+					0,
+				)
+				Result.success(matrix.toModel())
+			} catch (e: WriterException) {
+				Result.failure(e)
+			} catch (e: Exception) {
+				Result.failure(e)
+			}
+		}
+	}
 }

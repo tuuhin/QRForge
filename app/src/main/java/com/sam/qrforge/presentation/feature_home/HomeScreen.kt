@@ -1,10 +1,7 @@
 package com.sam.qrforge.presentation.feature_home
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,38 +14,46 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import com.sam.qrforge.R
-import com.sam.qrforge.domain.models.SavedQRModel
+import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
-import com.sam.qrforge.presentation.feature_home.composables.SavedQRDataList
+import com.sam.qrforge.presentation.feature_home.composables.HomeScreenContent
+import com.sam.qrforge.presentation.feature_home.state.HomeScreenEvents
+import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
 import com.sam.qrforge.presentation.navigation.animatedComposable
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import org.koin.androidx.compose.koinViewModel
 
 fun NavGraphBuilder.homeRoute(controller: NavController) = animatedComposable<NavRoutes.HomeRoute> {
 
 	val viewModel = koinViewModel<HomeViewModel>()
+	val qrHistory by viewModel.savedQR.collectAsStateWithLifecycle()
+	val typeFilter by viewModel.typeFilter.collectAsStateWithLifecycle()
+	val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
 	UIEventsSideEffect(events = viewModel::uiEvents)
 
 	CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 		HomeScreen(
-			qrHistory = persistentListOf(),
+			qrHistory = qrHistory,
+			selectedTypeFilter = typeFilter,
+			isContentReady = !isLoading,
+			onEvent = viewModel::onEvent,
 			onNavigateToCreateNew = dropUnlessResumed { controller.navigate(NavRoutes.CreateRoute) },
 		)
 	}
@@ -57,8 +62,11 @@ fun NavGraphBuilder.homeRoute(controller: NavController) = animatedComposable<Na
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreen(
-	qrHistory: ImmutableList<SavedQRModel>,
+	qrHistory: ImmutableList<SavedAndGeneratedQRModel>,
+	onEvent: (HomeScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
+	selectedTypeFilter: QRDataType? = null,
+	isContentReady: Boolean = true,
 	onNavigateToCreateNew: () -> Unit = {},
 ) {
 
@@ -73,28 +81,38 @@ private fun HomeScreen(
 			)
 		},
 		floatingActionButton = {
-			ExtendedFloatingActionButton(onClick = onNavigateToCreateNew) {
-				Icon(Icons.Default.Add, contentDescription = null)
-				Spacer(modifier = Modifier.width(4.dp))
-				Text(text = "New")
-			}
+			ExtendedFloatingActionButton(
+				onClick = onNavigateToCreateNew,
+				icon = {
+					Icon(
+						imageVector = Icons.Default.Add,
+						contentDescription = "Create new"
+					)
+				},
+				text = { Text(text = "Create") },
+			)
 		},
 		snackbarHost = { SnackbarHost(snackBarHostState) },
 		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
 	) { scPadding ->
-		Column(
+		HomeScreenContent(
+			generatedQR = qrHistory,
+			selectedQRType = selectedTypeFilter,
+			isContentReady = isContentReady,
+			onEvent = onEvent,
+			contentPadding = scPadding,
 			modifier = Modifier
-				.fillMaxSize()
-				.padding(scPadding)
-				.padding(dimensionResource(R.dimen.sc_padding))
-		) {
-			SavedQRDataList(qrHistory)
-		}
+				.padding(horizontal = dimensionResource(R.dimen.sc_padding))
+				.fillMaxSize(),
+		)
 	}
 }
 
 @PreviewLightDark
 @Composable
 private fun HomeScreenPreview() = QRForgeTheme {
-	HomeScreen(qrHistory = PreviewFakes.FAKE_IMMUTABLE_LIST_QR_MODEL)
+	HomeScreen(
+		qrHistory = PreviewFakes.FAKE_IMMUTABLE_LIST_QR_MODEL,
+		onEvent = {},
+	)
 }

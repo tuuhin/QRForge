@@ -11,4 +11,8 @@ interface SavedQRDataRepository {
 
 	fun fetchAllSavedQR(): Flow<Resource<List<SavedQRModel>, Exception>>
 
+	suspend fun deleteQRModel(model: SavedQRModel): Result<Unit>
+
+	suspend fun updateQRModel(model: SavedQRModel): Result<SavedQRModel>
+
 }

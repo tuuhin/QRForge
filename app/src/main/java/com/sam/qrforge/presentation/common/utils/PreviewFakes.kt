@@ -4,11 +4,39 @@ package com.sam.qrforge.presentation.common.utils
 
 import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Clock
+import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.datetime.LocalDateTime
 import kotlin.time.ExperimentalTime
 
+private const val FAKE_UI_MATRIX_25_X_25 =
+	"""
+	0000000000000000000000000
+	0000000000000000000000000
+	0011111110010110111111100
+	0010000010011100100000100
+	0010111010110110101110100
+	0010111010010100101110100
+	0010111010001010101110100
+	0010000010000010100000100
+	0011111110101010111111100
+	0000000000110110000000000
+	0011101111111101100010000
+	0011011000011000100101000
+	0001101010011010001011100
+	0010110101000000100001100
+	0000011110111010101000100
+	0000000000100101010110000
+	0011111110101101110001100
+	0010000010111111011101100
+	0010111010100101110010100
+	0010111010001000100011000
+	0010111010101010001000100
+	0010000010110000100011100
+	0011111110110010101010100
+	0000000000000000000000000
+	0000000000000000000000000
+	"""
 
 private const val FAKE_UI_MATRIX_29_X_29 =
 	"""
@@ -94,6 +122,12 @@ object PreviewFakes {
 			.toBooleanArray()
 	}
 
+	val FAKE_GENERATED_UI_MODEL_SMALL = GeneratedQRUIModel(
+		dimension = 25,
+		margin = 2,
+		boolArray = strToBoolArray(FAKE_UI_MATRIX_25_X_25)
+	)
+
 	val FAKE_GENERATED_UI_MODEL = GeneratedQRUIModel(
 		dimension = 29,
 		margin = 2,
@@ -109,9 +143,17 @@ object PreviewFakes {
 
 	val FAKE_QR_MODEL = SavedQRModel(
 		id = 0L,
-		title = "Some data",
-		desc = "Some extra description",
-		createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+		title = "Basic Test",
+		isFav = true,
+		desc = "A basic qr showing some data",
+		createdAt = LocalDateTime(2025, 8, 15, 0, 0, 0),
 	)
+
+	val FAKE_IMMUTABLE_LIST_QR_MODEL = List(20) {
+		SavedAndGeneratedQRModel(
+			FAKE_QR_MODEL,
+			FAKE_GENERATED_UI_MODEL
+		)
+	}.toImmutableList()
 }
 

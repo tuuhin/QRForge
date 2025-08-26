@@ -22,6 +22,17 @@ fun CreateNewQRModel.toEntity() = QRDataEntity(
 	),
 )
 
+fun SavedQRModel.toEntity() = QRDataEntity(
+	id = id,
+	title = title,
+	desc = desc,
+	content = content,
+	type = format,
+	createdAt = createdAt,
+	modifiedAt = modifiedAt,
+	isFavourite = isFav,
+)
+
 fun QRDataEntity.toModel() = SavedQRModel(
 	id = id ?: -1L,
 	title = title,
