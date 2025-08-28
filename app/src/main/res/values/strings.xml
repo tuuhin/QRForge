@@ -17,4 +17,12 @@
   <string name="qr_edit_property_finder_shape_diamond_text">Use diamonds as shapes</string>
   <string name="qr_edit_property_show_frame_title">Show frame</string>
   <string name="qr_edit_property_show_frame_text">Include an additional frame to QR</string>
+  <string name="action_scan">Scan</string>
+  <string name="create_qr_screen_title">Create QR Code</string>
+  <string name="select_qr_format_title">Choose Format</string>
+  <string name="select_qr_format_desc">What kind of QR code do you want to make?</string>
+  <string name="select_qr_content_title">QR Content</string>
+  <string name="select_qr_content_desc">Enter content based on the selected type</string>
+  <string name="save_qr_screen_title">Save QR</string>
+  <string name="action_save">Save</string>
 </resources>

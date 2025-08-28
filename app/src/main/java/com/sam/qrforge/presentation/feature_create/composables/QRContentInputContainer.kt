@@ -31,8 +31,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
+import com.sam.qrforge.R
 import com.sam.qrforge.data.contracts.PickContactsContract
 import com.sam.qrforge.data.utils.hasLocationPermission
 import com.sam.qrforge.data.utils.hasReadContactsPermission
@@ -80,12 +82,12 @@ fun QRContentInputContainer(
 		verticalArrangement = Arrangement.spacedBy(4.dp)
 	) {
 		Text(
-			text = "QR Content",
+			text = stringResource(R.string.select_qr_content_title),
 			style = MaterialTheme.typography.titleLarge,
 			color = MaterialTheme.colorScheme.primary
 		)
 		Text(
-			text = "Enter content based on the selected type",
+			text = stringResource(R.string.select_qr_content_desc),
 			style = MaterialTheme.typography.bodyMedium,
 			color = MaterialTheme.colorScheme.onSurface
 		)

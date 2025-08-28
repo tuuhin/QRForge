@@ -10,12 +10,9 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -31,13 +28,13 @@ import com.sam.qrforge.R
 
 @Composable
 fun ExportShareActions(
-	showBottomBar: Boolean,
+	actionEnabled: Boolean,
 	onShare: () -> Unit,
 	onExport: () -> Unit,
 	modifier: Modifier = Modifier
 ) {
 	AnimatedVisibility(
-		visible = showBottomBar,
+		visible = actionEnabled,
 		enter = slideInVertically(
 			animationSpec = tween(durationMillis = 200, easing = EaseIn)
 		) + expandVertically(expandFrom = Alignment.Bottom),
@@ -49,8 +46,7 @@ fun ExportShareActions(
 		Row(
 			modifier = Modifier
 				.fillMaxWidth()
-				.heightIn(80.dp)
-				.windowInsetsPadding(WindowInsets.navigationBars),
+				.heightIn(80.dp),
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.Center
 		) {

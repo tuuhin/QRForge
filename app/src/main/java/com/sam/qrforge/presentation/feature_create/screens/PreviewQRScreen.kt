@@ -9,8 +9,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,8 +31,8 @@ import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
-import com.sam.qrforge.presentation.feature_create.composables.ExportShareActions
 import com.sam.qrforge.presentation.feature_create.composables.PreviewQRScreenContent
+import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @OptIn(
@@ -40,6 +42,7 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 @Composable
 fun PreviewQRScreen(
 	content: QRContentModel,
+	onEvent: (CreateQREvents) -> Unit,
 	modifier: Modifier = Modifier,
 	generated: GeneratedQRUIModel? = null,
 	navigation: @Composable () -> Unit = {},
@@ -65,14 +68,17 @@ fun PreviewQRScreen(
 				},
 			)
 		},
-		bottomBar = {
-			ExportShareActions(
-				showBottomBar = generated != null,
-				onShare = {},
-				onExport = onNavigateToExport,
-			)
+		snackbarHost = {
+			SnackbarHost(snackBarHostState) { data ->
+				Snackbar(
+					snackbarData = data,
+					shape = MaterialTheme.shapes.large,
+					containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+					contentColor = MaterialTheme.colorScheme.onBackground,
+					actionContentColor = MaterialTheme.colorScheme.primary,
+				)
+			}
 		},
-		snackbarHost = { SnackbarHost(snackBarHostState) },
 		modifier = modifier
 			.nestedScroll(scrollBehavior.nestedScrollConnection)
 			.sharedBoundsWrapper(SharedTransitionKeys.CREATE_QR_SCREEN_TO_GENERATE_SCREEN)
@@ -80,6 +86,8 @@ fun PreviewQRScreen(
 		PreviewQRScreenContent(
 			content = content,
 			generated = generated,
+			onExportContent = onNavigateToExport,
+			onShareContent = { bitmap -> onEvent(CreateQREvents.ShareGeneratedQR(bitmap)) },
 			contentPadding = PaddingValues(
 				top = scPadding.calculateTopPadding() + dimensionResource(R.dimen.sc_padding),
 				bottom = scPadding.calculateBottomPadding() + dimensionResource(R.dimen.sc_padding),
@@ -97,6 +105,7 @@ private fun PreviewQRScreenPreview() = QRForgeTheme {
 	PreviewQRScreen(
 		generated = PreviewFakes.FAKE_GENERATED_UI_MODEL_SMALL,
 		content = QRPlainTextModel("Hello"),
+		onEvent = {},
 		navigation = {
 			Icon(
 				imageVector = Icons.AutoMirrored.Filled.ArrowBack,

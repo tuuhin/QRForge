@@ -38,7 +38,19 @@ android {
 	}
 	buildFeatures {
 		compose = true
+		buildConfig = true
 	}
+}
+
+composeCompiler {
+//	featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)
+	val compilerReportDirectory = project.layout.buildDirectory.dir("compose_compiler")
+	reportsDestination.set(compilerReportDirectory)
+	metricsDestination.set(compilerReportDirectory)
+
+	stabilityConfigurationFiles.add(
+		rootProject.layout.projectDirectory.file("stability_config.conf")
+	)
 }
 
 kotlin {

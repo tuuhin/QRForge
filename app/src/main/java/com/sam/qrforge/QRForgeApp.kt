@@ -1,6 +1,10 @@
 package com.sam.qrforge
 
 import android.app.Application
+import androidx.compose.runtime.Composer
+import androidx.compose.runtime.ExperimentalComposeRuntimeApi
+import com.sam.qrforge.di.appModule
+import com.sam.qrforge.di.presentationModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androix.startup.KoinStartup
@@ -8,13 +12,21 @@ import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.KoinConfiguration
 import org.koin.dsl.koinConfiguration
 
-@OptIn(KoinExperimentalAPI::class)
+@OptIn(
+	KoinExperimentalAPI::class,
+	ExperimentalComposeRuntimeApi::class
+)
 class QRForgeApp : Application(), KoinStartup {
 
-	override fun onKoinStartup(): KoinConfiguration {
-		return koinConfiguration {
-			androidContext(this@QRForgeApp)
-			androidLogger()
-		}
+	override fun onCreate() {
+		super.onCreate()
+		Composer.setDiagnosticStackTraceEnabled(enabled = BuildConfig.DEBUG)
 	}
+
+	override fun onKoinStartup(): KoinConfiguration = koinConfiguration {
+		androidContext(this@QRForgeApp)
+		androidLogger()
+		modules(appModule + presentationModule)
+	}
+
 }

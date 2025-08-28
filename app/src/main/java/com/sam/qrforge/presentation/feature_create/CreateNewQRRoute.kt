@@ -13,6 +13,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navigation
 import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
+import com.sam.qrforge.presentation.feature_create.composables.ShareQREventsSideEffect
 import com.sam.qrforge.presentation.feature_create.screens.CreateQRScreen
 import com.sam.qrforge.presentation.feature_create.screens.PreviewQRScreen
 import com.sam.qrforge.presentation.feature_create.screens.SaveQRScreen
@@ -58,11 +59,13 @@ fun NavGraphBuilder.createNewQRRoute(controller: NavController) = navigation<Nav
 		val content by viewModel.qrContent.collectAsStateWithLifecycle()
 
 		UIEventsSideEffect(events = viewModel::uiEvents)
+		ShareQREventsSideEffect(eventFlow = viewModel::shareQREvent)
 
 		CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 			PreviewQRScreen(
 				generated = generated,
 				content = content,
+				onEvent = viewModel::onCreateEvents,
 				onNavigateToSave = dropUnlessResumed {
 					controller.navigate(CreateNewQRNavGraph.SaveGeneratedQRRoute)
 				},

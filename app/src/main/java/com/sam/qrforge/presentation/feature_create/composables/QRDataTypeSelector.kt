@@ -22,9 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.sam.qrforge.R
 import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.presentation.common.composables.painter
 import com.sam.qrforge.presentation.common.composables.string
@@ -41,12 +43,12 @@ fun QRDataTypeSelector(
 		verticalArrangement = Arrangement.spacedBy(4.dp)
 	) {
 		Text(
-			text = "Choose Format",
+			text = stringResource(R.string.select_qr_format_title),
 			style = MaterialTheme.typography.titleLarge,
 			color = MaterialTheme.colorScheme.primary
 		)
 		Text(
-			text = "What kind of QR code do you want to make?",
+			text = stringResource(R.string.select_qr_format_desc),
 			style = MaterialTheme.typography.bodyMedium,
 			color = MaterialTheme.colorScheme.onSurface
 		)

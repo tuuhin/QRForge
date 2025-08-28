@@ -1,7 +1,10 @@
 package com.sam.qrforge.presentation.feature_create
 
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.viewModelScope
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
+import com.sam.qrforge.domain.facade.SaveGeneratedQRFacade
+import com.sam.qrforge.domain.models.CreateNewQRModel
 import com.sam.qrforge.domain.models.GeneratedQRModel
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.domain.models.qr.QRGeoPointModel
@@ -10,16 +13,19 @@ import com.sam.qrforge.domain.models.qr.QRSmsModel
 import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 import com.sam.qrforge.domain.provider.ContactsDataProvider
 import com.sam.qrforge.domain.provider.LocationProvider
+import com.sam.qrforge.domain.repository.SavedQRDataRepository
 import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.UIEvent
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenEvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenState
+import com.sam.qrforge.presentation.feature_create.util.toBytes
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -34,6 +40,8 @@ class CreateNewQRViewModel(
 	private val generator: QRGeneratorFacade,
 	private val contactsProvider: ContactsDataProvider,
 	private val locationProvider: LocationProvider,
+	private val repository: SavedQRDataRepository,
+	private val saveGeneratedQRFacade: SaveGeneratedQRFacade,
 ) : AppViewModel() {
 
 	private val _saveQRState = MutableStateFlow(SaveQRScreenState())
@@ -57,10 +65,12 @@ class CreateNewQRViewModel(
 		)
 
 
-
 	private val _uiEvents = MutableSharedFlow<UIEvent>()
 	override val uiEvents: SharedFlow<UIEvent>
 		get() = _uiEvents
+
+	private val _shareQREvent = MutableSharedFlow<String>()
+	val shareQREvent = _shareQREvent.asSharedFlow()
 
 	fun onCreateEvents(event: CreateQREvents) {
 		when (event) {
@@ -72,6 +82,7 @@ class CreateNewQRViewModel(
 			is CreateQREvents.OnUpdateQRContent -> onQRContentChange(event.content)
 			is CreateQREvents.CheckContactsDetails -> findContactsFromURI(event.uri)
 			CreateQREvents.CheckLastKnownLocation -> checkLastKnownLocation()
+			is CreateQREvents.ShareGeneratedQR -> onShareGeneratedQR(event.bitmap)
 		}
 	}
 
@@ -90,12 +101,45 @@ class CreateNewQRViewModel(
 	}
 
 	private fun onQRContentChange(content: QRContentModel) {
-		val newContent = _contentModel.updateAndGet { content }
+		_contentModel.updateAndGet { content }
 		// update the screen state
 
 	}
 
+	private fun onShareGeneratedQR(bitmap: ImageBitmap) = viewModelScope.launch {
+		val bytes = bitmap.toBytes()
+		val fileResult = saveGeneratedQRFacade.prepareFileToShare(bytes)
+		fileResult.fold(
+			onSuccess = { _shareQREvent.emit(it) },
+			onFailure = {
+				val event = UIEvent.ShowToast("Failed to share")
+				_uiEvents.emit(event)
+			},
+		)
+	}
+
 	private fun onSaveQR() {
+		val screenState = _saveQRState.value
+		val contentState = _contentModel.value
+		val createModel = CreateNewQRModel(
+			title = screenState.title.text,
+			desc = screenState.desc.text.ifBlank { null },
+			content = contentState.toQRString(),
+			format = contentState.type
+		)
+
+		viewModelScope.launch {
+			val result = repository.insertQRData(createModel)
+			result.fold(
+				onSuccess = {
+					_uiEvents.emit(UIEvent.ShowToast("Saved!!"))
+				},
+				onFailure = { err ->
+					val event = UIEvent.ShowSnackBar(err.message ?: "Unable to save")
+					_uiEvents.emit(event)
+				},
+			)
+		}
 	}
 
 	private fun checkLastKnownLocation() = viewModelScope.launch {
