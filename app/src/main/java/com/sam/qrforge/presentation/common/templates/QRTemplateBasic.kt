@@ -23,17 +23,19 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 fun QRTemplateBasic(
 	model: GeneratedQRUIModel,
 	modifier: Modifier = Modifier,
-	graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
 	roundness: Float = 0f,
 	bitsSizeMultiplier: Float = 1f,
 	contentMargin: Dp = 0.dp,
 	showFrame: Boolean = false,
 	isDiamond: Boolean = false,
+	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
 	backgroundColor: Color = MaterialTheme.colorScheme.background,
 	bitsColor: Color = MaterialTheme.colorScheme.onBackground,
 	finderColor: Color = MaterialTheme.colorScheme.onBackground,
 	frameColor: Color = MaterialTheme.colorScheme.primary,
 ) {
+	val layer = graphicsLayer?.invoke() ?: rememberGraphicsLayer()
+
 	Spacer(
 		modifier = modifier
 			.defaultMinSize(
@@ -51,7 +53,8 @@ fun QRTemplateBasic(
 					val bitsMultiplier = bitsSizeMultiplier.coerceIn(.2f..1.5f)
 					val limitMarginWidth = contentMargin.coerceIn(0.dp, 20.dp).toPx()
 
-					graphicsLayer.record {    // draw background
+
+					layer.record {    // draw background
 						drawRect(color = backgroundColor)
 
 						val totalMargin = limitMarginWidth + (model.margin * blockSize)
@@ -81,7 +84,7 @@ fun QRTemplateBasic(
 						)
 					}
 					//draw the layer
-					drawLayer(graphicsLayer)
+					drawLayer(layer)
 				}
 			},
 	)

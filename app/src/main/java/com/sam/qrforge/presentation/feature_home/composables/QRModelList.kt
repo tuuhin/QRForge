@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -19,6 +21,7 @@ fun QRModelList(
 	generatedQR: ImmutableList<SavedAndGeneratedQRModel>,
 	onDeleteItem: (SavedQRModel) -> Unit,
 	modifier: Modifier = Modifier,
+	state: LazyListState = rememberLazyListState(),
 	contentPadding: PaddingValues = PaddingValues(),
 ) {
 
@@ -35,6 +38,7 @@ fun QRModelList(
 	LazyColumn(
 		verticalArrangement = Arrangement.spacedBy(6.dp),
 		contentPadding = contentPadding,
+		state = state,
 		modifier = modifier,
 	) {
 		itemsIndexed(
@@ -43,7 +47,7 @@ fun QRModelList(
 			contentType = itemsContentType
 		) { idx, item ->
 			QRModelCard(
-				selectableModel = item,
+				model = item,
 				onDeleteItem = { onDeleteItem(item.qrModel) },
 				modifier = Modifier
 					.fillMaxWidth()

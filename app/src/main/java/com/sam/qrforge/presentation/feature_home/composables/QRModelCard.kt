@@ -1,8 +1,8 @@
 package com.sam.qrforge.presentation.feature_home.composables
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Arrangement
@@ -31,11 +31,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.presentation.common.composables.painter
 import com.sam.qrforge.presentation.common.composables.string
+import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import com.sam.qrforge.presentation.common.utils.PLAIN_DATE
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
@@ -46,7 +49,7 @@ import kotlinx.datetime.format
 
 @Composable
 fun QRModelCard(
-	selectableModel: SavedAndGeneratedQRModel,
+	model: SavedAndGeneratedQRModel,
 	onDeleteItem: () -> Unit,
 	modifier: Modifier = Modifier,
 	shape: Shape = MaterialTheme.shapes.large,
@@ -90,32 +93,24 @@ fun QRModelCard(
 				horizontalArrangement = Arrangement.spacedBy(12.dp),
 				verticalAlignment = Alignment.CenterVertically,
 			) {
-				selectableModel.uiModel?.let { generatedModel ->
-					QRTemplateBasic(
-						model = generatedModel,
-						backgroundColor = Color.Transparent,
-						contentMargin = 0.dp,
-						roundness = .5f,
-						modifier = Modifier.size(100.dp)
-					)
-				}
+				AnimatedQRContent(uiModel = model.uiModel)
 				Column(
 					modifier = Modifier.weight(1f),
-					verticalArrangement = Arrangement.spacedBy(2.dp)
+					verticalArrangement = Arrangement.spacedBy(12.dp)
 				) {
 					Row(
 						modifier = Modifier.fillMaxWidth(),
 						horizontalArrangement = Arrangement.SpaceBetween,
 						verticalAlignment = Alignment.CenterVertically
 					) {
-						Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+						Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
 							Text(
-								text = selectableModel.qrModel.title,
-								style = MaterialTheme.typography.titleLarge,
+								text = model.qrModel.title,
+								style = MaterialTheme.typography.titleMedium,
 								color = MaterialTheme.colorScheme.primary,
 								fontWeight = FontWeight.SemiBold,
 							)
-							selectableModel.qrModel.desc?.let { desc ->
+							model.qrModel.desc?.let { desc ->
 								Text(
 									text = desc,
 									style = MaterialTheme.typography.bodyMedium,
@@ -124,12 +119,7 @@ fun QRModelCard(
 								)
 							}
 						}
-						AnimatedVisibility(
-							visible = selectableModel.qrModel.isFav,
-							enter = slideInHorizontally() + expandHorizontally(),
-							exit = slideOutHorizontally() + shrinkHorizontally(),
-							modifier = Modifier.align(Alignment.CenterVertically)
-						) {
+						if (model.qrModel.isFav) {
 							Icon(
 								painter = painterResource(R.drawable.ic_heart),
 								contentDescription = "Favourites",
@@ -138,7 +128,7 @@ fun QRModelCard(
 						}
 					}
 					QRDataCardTypeAndDateInfo(
-						qrModel = selectableModel.qrModel,
+						qrModel = model.qrModel,
 						modifier = Modifier.fillMaxWidth()
 					)
 				}
@@ -147,6 +137,31 @@ fun QRModelCard(
 	}
 }
 
+
+@Composable
+private fun AnimatedQRContent(
+	modifier: Modifier = Modifier,
+	uiModel: GeneratedQRUIModel? = null,
+	contentMargin: Dp = 0.dp,
+	size: DpSize = DpSize(100.dp, 100.dp),
+) {
+	AnimatedVisibility(
+		visible = uiModel != null,
+		enter = slideInHorizontally() + expandIn(),
+		exit = slideOutHorizontally() + shrinkOut(),
+		modifier = modifier,
+	) {
+		uiModel?.let { generatedModel ->
+			QRTemplateBasic(
+				model = generatedModel,
+				backgroundColor = Color.Transparent,
+				contentMargin = contentMargin,
+				roundness = .5f,
+				modifier = Modifier.size(size)
+			)
+		}
+	}
+}
 
 @Composable
 private fun QRDataCardTypeAndDateInfo(
@@ -190,7 +205,7 @@ private fun QRDataCardTypeAndDateInfo(
 @Composable
 private fun SelectableQRModelCardPreview() = QRForgeTheme {
 	QRModelCard(
-		selectableModel = SavedAndGeneratedQRModel(
+		model = SavedAndGeneratedQRModel(
 			qrModel = PreviewFakes.FAKE_QR_MODEL,
 			uiModel = PreviewFakes.FAKE_GENERATED_UI_MODEL_SMALL
 		),

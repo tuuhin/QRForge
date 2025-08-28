@@ -7,8 +7,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -18,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
@@ -31,6 +31,7 @@ import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibility
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.feature_home.composables.HomeScreenContent
+import com.sam.qrforge.presentation.feature_home.composables.HomeScreenTopAppBar
 import com.sam.qrforge.presentation.feature_home.state.HomeScreenEvents
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
 import com.sam.qrforge.presentation.navigation.animatedComposable
@@ -43,7 +44,7 @@ fun NavGraphBuilder.homeRoute(controller: NavController) = animatedComposable<Na
 
 	val viewModel = koinViewModel<HomeViewModel>()
 	val qrHistory by viewModel.savedQR.collectAsStateWithLifecycle()
-	val typeFilter by viewModel.typeFilter.collectAsStateWithLifecycle()
+	val selectedQRType by viewModel.typeFilter.collectAsStateWithLifecycle()
 	val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
 	UIEventsSideEffect(events = viewModel::uiEvents)
@@ -51,7 +52,7 @@ fun NavGraphBuilder.homeRoute(controller: NavController) = animatedComposable<Na
 	CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 		HomeScreen(
 			qrHistory = qrHistory,
-			selectedTypeFilter = typeFilter,
+			selectedTypeFilter = selectedQRType,
 			isContentReady = !isLoading,
 			onEvent = viewModel::onEvent,
 			onNavigateToCreateNew = dropUnlessResumed { controller.navigate(NavRoutes.CreateRoute) },
@@ -75,10 +76,7 @@ private fun HomeScreen(
 
 	Scaffold(
 		topBar = {
-			MediumTopAppBar(
-				title = { Text(stringResource(R.string.app_name)) },
-				scrollBehavior = scrollBehavior
-			)
+			HomeScreenTopAppBar(scrollBehavior = scrollBehavior)
 		},
 		floatingActionButton = {
 			ExtendedFloatingActionButton(
@@ -92,7 +90,17 @@ private fun HomeScreen(
 				text = { Text(text = "Create") },
 			)
 		},
-		snackbarHost = { SnackbarHost(snackBarHostState) },
+		snackbarHost = {
+			SnackbarHost(snackBarHostState) { data ->
+				Snackbar(
+					snackbarData = data,
+					shape = MaterialTheme.shapes.large,
+					containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+					contentColor = MaterialTheme.colorScheme.onBackground,
+					actionContentColor = MaterialTheme.colorScheme.primary,
+				)
+			}
+		},
 		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
 	) { scPadding ->
 		HomeScreenContent(

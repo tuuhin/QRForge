@@ -32,7 +32,7 @@ fun SwipeToDeleteContent(
 				val size = Size(size.width * ratio, size.height)
 				val outline = shape.createOutline(size, layoutDirection, this)
 				drawOutline(outline = outline, color = containerColor)
-				if (ratio > .01f) {
+				if (ratio > .09f) {
 					drawContent()
 				}
 			},

@@ -83,7 +83,16 @@ class HomeViewModel(
 			}
 		}.launchIn(viewModelScope)
 
+	private fun onUndoItemDelete(model: SavedQRModel) = viewModelScope.launch {
+		val result = repository.updateQRModel(model)
+		result.onFailure { err ->
+			val event = UIEvent.ShowSnackBar(err.message ?: "Cannot add item")
+			_uiEvents.emit(event)
+		}
+	}
+
 	private fun onDeleteItem(model: SavedQRModel) = viewModelScope.launch {
+		val fallback = model
 		val result = repository.deleteQRModel(model)
 		result.fold(
 			onFailure = { err ->
@@ -91,7 +100,11 @@ class HomeViewModel(
 				_uiEvents.emit(event)
 			},
 			onSuccess = {
-				_uiEvents.emit(UIEvent.ShowToast("Deleted Item "))
+				val event = UIEvent.ShowSnackBarWithAction(
+					message = "QR code removed",
+					actionText = "UNDO",
+					action = { onUndoItemDelete(fallback) })
+				_uiEvents.emit(event)
 			},
 		)
 	}
