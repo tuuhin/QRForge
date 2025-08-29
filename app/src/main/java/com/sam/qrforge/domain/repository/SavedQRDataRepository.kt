@@ -15,4 +15,6 @@ interface SavedQRDataRepository {
 
 	suspend fun updateQRModel(model: SavedQRModel): Result<SavedQRModel>
 
+	fun fetchQRById(id: Long): Flow<Resource<SavedQRModel, Exception>>
+
 }

@@ -1,8 +1,10 @@
 package com.sam.qrforge.presentation.feature_home
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,15 +21,20 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.currentStateAsState
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.enums.QRDataType
+import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
@@ -53,6 +60,9 @@ fun NavGraphBuilder.homeRoute(controller: NavController) = animatedComposable<Na
 
 	UIEventsSideEffect(events = viewModel::uiEvents)
 
+	val lifecycle = LocalLifecycleOwner.current
+	val lifecycleState by lifecycle.lifecycle.currentStateAsState()
+
 	CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 		HomeScreen(
 			qrHistory = qrHistory,
@@ -60,6 +70,11 @@ fun NavGraphBuilder.homeRoute(controller: NavController) = animatedComposable<Na
 			isContentReady = !isLoading,
 			onEvent = viewModel::onEvent,
 			onNavigateToCreateNew = dropUnlessResumed { controller.navigate(NavRoutes.CreateRoute) },
+			onNavigateToItemDetailed = { item ->
+				if (lifecycleState.isAtLeast(Lifecycle.State.STARTED)) {
+					controller.navigate(NavRoutes.QRDetailsScreen(item.id))
+				}
+			}
 		)
 	}
 }
@@ -76,9 +91,11 @@ private fun HomeScreen(
 	selectedTypeFilter: QRDataType? = null,
 	isContentReady: Boolean = true,
 	onNavigateToCreateNew: () -> Unit = {},
+	onNavigateToItemDetailed: (SavedQRModel) -> Unit = {},
 ) {
 
 	val snackBarHostState = LocalSnackBarState.current
+	val layoutDirection = LocalLayoutDirection.current
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
 	Scaffold(
@@ -116,10 +133,14 @@ private fun HomeScreen(
 			selectedQRType = selectedTypeFilter,
 			isContentReady = isContentReady,
 			onEvent = onEvent,
-			contentPadding = scPadding,
-			modifier = Modifier
-				.padding(horizontal = dimensionResource(R.dimen.sc_padding))
-				.fillMaxSize(),
+			onSelectItem = onNavigateToItemDetailed,
+			contentPadding = PaddingValues(
+				top = scPadding.calculateTopPadding() + dimensionResource(R.dimen.sc_padding),
+				bottom = scPadding.calculateBottomPadding() + dimensionResource(R.dimen.sc_padding),
+				start = scPadding.calculateStartPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding),
+				end = scPadding.calculateEndPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding)
+			),
+			modifier = Modifier.fillMaxSize(),
 		)
 	}
 }

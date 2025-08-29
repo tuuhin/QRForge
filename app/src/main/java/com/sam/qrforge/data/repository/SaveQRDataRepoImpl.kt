@@ -65,6 +65,26 @@ class SaveQRDataRepoImpl(private val dao: QRDataDao) : SavedQRDataRepository {
 			}
 	}
 
+	override fun fetchQRById(id: Long): Flow<Resource<SavedQRModel, Exception>> {
+		return dao.fetchQREntityByIdFlow(id)
+			.map { entity ->
+				val model = entity?.toModel()
+					?: return@map Resource.Error(CannotFindMatchingIdException())
+				Resource.Success<SavedQRModel, Exception>(model)
+			}
+			.flowOn(Dispatchers.IO)
+			.onStart { emit(Resource.Loading) }
+			.catch { err ->
+				if (err is SQLException) emit(
+					Resource.Error(
+						UnableToProcessSQLException(),
+						"Issue with db cannot read data"
+					)
+				)
+				else emit(Resource.Error(Exception(err)))
+			}
+	}
+
 	override suspend fun deleteQRModel(model: SavedQRModel): Result<Unit> {
 		return try {
 			dao.deleteQREntity(model.toEntity())

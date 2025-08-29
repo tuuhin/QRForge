@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.enums.QRDataType
+import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.presentation.feature_home.state.HomeScreenEvents
 import com.sam.qrforge.presentation.feature_home.state.ListContentState
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
@@ -36,6 +37,7 @@ fun HomeScreenContent(
 	generatedQR: ImmutableList<SavedAndGeneratedQRModel>,
 	onEvent: (HomeScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
+	onSelectItem: (SavedQRModel) -> Unit = {},
 	selectedQRType: QRDataType? = null,
 	isContentReady: Boolean = true,
 	contentPadding: PaddingValues = PaddingValues(0.dp)
@@ -75,6 +77,7 @@ fun HomeScreenContent(
 				ListContentState.EMPTY -> EmptyContent(isListFullyEmpty = isListFullyEmpty)
 				ListContentState.DATA -> QRModelList(
 					generatedQR = generatedQR,
+					onSelectItem = onSelectItem,
 					onDeleteItem = { onEvent(HomeScreenEvents.OnDeleteItem(it)) },
 					modifier = Modifier.fillMaxSize(),
 				)

@@ -19,8 +19,9 @@ import kotlinx.collections.immutable.ImmutableList
 @Composable
 fun QRModelList(
 	generatedQR: ImmutableList<SavedAndGeneratedQRModel>,
-	onDeleteItem: (SavedQRModel) -> Unit,
 	modifier: Modifier = Modifier,
+	onSelectItem: (SavedQRModel) -> Unit = {},
+	onDeleteItem: (SavedQRModel) -> Unit = {},
 	state: LazyListState = rememberLazyListState(),
 	contentPadding: PaddingValues = PaddingValues(),
 ) {
@@ -49,6 +50,7 @@ fun QRModelList(
 			QRModelCard(
 				model = item,
 				onDeleteItem = { onDeleteItem(item.qrModel) },
+				onSelectItem = { onSelectItem(item.qrModel) },
 				modifier = Modifier
 					.fillMaxWidth()
 					.animateItem(),

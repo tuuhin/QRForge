@@ -25,6 +25,9 @@ interface QRDataDao {
 	@Query("SELECT * FROM SAVED_QR_ENTITY WHERE _ID=:id")
 	suspend fun fetchQREntityById(id: Long): QRDataEntity?
 
+	@Query("SELECT * FROM SAVED_QR_ENTITY WHERE _ID=:id")
+	fun fetchQREntityByIdFlow(id: Long): Flow<QRDataEntity?>
+
 	@Query("SELECT * FROM SAVED_QR_ENTITY WHERE CONTENT_TYPE=:type")
 
 	fun fetchAllQREntityTyped(type: QRDataType): Flow<List<QRDataEntity>>

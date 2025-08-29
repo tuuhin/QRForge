@@ -5,4 +5,7 @@ object SharedTransitionKeys {
 	const val CREATE_QR_SCREEN_TO_GENERATE_SCREEN =
 		"shared-bounds-create-qr-screen-to-generate-screen"
 	const val PREVIEW_SCREEN_TO_SAVE_SCREEN = "shared-bonds-preview-screen-to-save-screen"
+
+	fun sharedBoundsToItemDetail(itemId: Long) =
+		"shared-bounds-home-screen-to-details-screen-$itemId"
 }

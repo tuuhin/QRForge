@@ -1,6 +1,7 @@
 package com.sam.qrforge.presentation.feature_home.composables
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.slideInHorizontally
@@ -42,15 +43,19 @@ import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import com.sam.qrforge.presentation.common.utils.PLAIN_DATE
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
+import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
+import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun QRModelCard(
 	model: SavedAndGeneratedQRModel,
 	onDeleteItem: () -> Unit,
+	onSelectItem: () -> Unit,
 	modifier: Modifier = Modifier,
 	shape: Shape = MaterialTheme.shapes.large,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
@@ -80,9 +85,11 @@ fun QRModelCard(
 				else -> {}
 			}
 		},
-		modifier = modifier,
+		modifier = modifier
+			.sharedBoundsWrapper(SharedTransitionKeys.sharedBoundsToItemDetail(model.qrModel.id))
 	) {
 		Card(
+			onClick = onSelectItem,
 			shape = shape,
 			colors = CardDefaults.cardColors(containerColor, contentColor),
 		) {
@@ -209,6 +216,7 @@ private fun SelectableQRModelCardPreview() = QRForgeTheme {
 			qrModel = PreviewFakes.FAKE_QR_MODEL,
 			uiModel = PreviewFakes.FAKE_GENERATED_UI_MODEL_SMALL
 		),
-		onDeleteItem = {}
+		onDeleteItem = {},
+		onSelectItem = {}
 	)
 }

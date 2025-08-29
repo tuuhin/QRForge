@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionScopeProvider
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.feature_create.createNewQRRoute
+import com.sam.qrforge.presentation.feature_detail.qrDetailsRoute
 import com.sam.qrforge.presentation.feature_home.homeRoute
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 
@@ -45,6 +46,7 @@ fun AppNavigation(
 				startDestination = NavRoutes.HomeRoute
 			) {
 				homeRoute(controller = navController)
+				qrDetailsRoute(controller = navController)
 				createNewQRRoute(controller = navController)
 			}
 		}
