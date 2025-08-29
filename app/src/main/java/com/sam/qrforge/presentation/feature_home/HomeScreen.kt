@@ -1,5 +1,6 @@
 package com.sam.qrforge.presentation.feature_home
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -19,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
@@ -30,6 +32,8 @@ import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
+import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
+import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.feature_home.composables.HomeScreenContent
 import com.sam.qrforge.presentation.feature_home.composables.HomeScreenTopAppBar
 import com.sam.qrforge.presentation.feature_home.state.HomeScreenEvents
@@ -60,7 +64,10 @@ fun NavGraphBuilder.homeRoute(controller: NavController) = animatedComposable<Na
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+	ExperimentalMaterial3Api::class,
+	ExperimentalSharedTransitionApi::class
+)
 @Composable
 private fun HomeScreen(
 	qrHistory: ImmutableList<SavedAndGeneratedQRModel>,
@@ -84,10 +91,11 @@ private fun HomeScreen(
 				icon = {
 					Icon(
 						imageVector = Icons.Default.Add,
-						contentDescription = "Create new"
+						contentDescription = "Create"
 					)
 				},
-				text = { Text(text = "Create") },
+				text = { Text(text = stringResource(R.string.action_create)) },
+				modifier = Modifier.sharedBoundsWrapper(SharedTransitionKeys.HOME_SCREEN_TO_CREATE_QR_SCREEN)
 			)
 		},
 		snackbarHost = {

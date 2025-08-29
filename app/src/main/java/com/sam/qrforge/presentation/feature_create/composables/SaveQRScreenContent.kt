@@ -17,9 +17,11 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.sam.qrforge.R
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenEvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenState
 
@@ -39,6 +41,11 @@ fun SaveQRScreenContent(
 			.padding(contentPadding),
 		verticalArrangement = Arrangement.spacedBy(12.dp)
 	) {
+		Text(
+			text = stringResource(R.string.save_qr_screen_info_text),
+			style = MaterialTheme.typography.bodyMedium,
+			color = MaterialTheme.colorScheme.onSurfaceVariant
+		)
 		OutlinedTextField(
 			value = state.title,
 			onValueChange = { value -> onEvent(SaveQRScreenEvents.OnSaveQRTitleChange(value)) },

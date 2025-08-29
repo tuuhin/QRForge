@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
@@ -62,8 +63,13 @@ fun PreviewQRScreen(
 				navigationIcon = navigation,
 				scrollBehavior = scrollBehavior,
 				actions = {
-					TextButton(onClick = onNavigateToSave) {
-						Text("Save")
+					TextButton(
+						onClick = onNavigateToSave,
+						modifier = Modifier.sharedBoundsWrapper(
+							SharedTransitionKeys.PREVIEW_SCREEN_TO_SAVE_SCREEN
+						)
+					) {
+						Text(text = stringResource(R.string.action_save))
 					}
 				},
 			)

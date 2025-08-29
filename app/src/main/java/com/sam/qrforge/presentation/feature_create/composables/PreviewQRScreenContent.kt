@@ -11,7 +11,9 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -23,12 +25,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.presentation.common.composables.FailedOrMissingQRContent
+import com.sam.qrforge.presentation.common.composables.QRContentStringCard
+import com.sam.qrforge.presentation.common.composables.QRContentTypeChip
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import kotlinx.coroutines.launch
@@ -53,46 +56,44 @@ fun PreviewQRScreenContent(
 	Column(
 		modifier = modifier.padding(contentPadding),
 		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.Center
+		verticalArrangement = Arrangement.spacedBy(16.dp)
 	) {
-		Column(
-			verticalArrangement = Arrangement.spacedBy(12.dp),
-			horizontalAlignment = Alignment.CenterHorizontally
+		Spacer(modifier = Modifier.height(20.dp))
+		QRContentTypeChip(content.type)
+		Surface(
+			shape = MaterialTheme.shapes.extraLarge,
+			color = MaterialTheme.colorScheme.surfaceContainer
 		) {
-			Surface(
-				shape = MaterialTheme.shapes.extraLarge,
-				color = MaterialTheme.colorScheme.surfaceContainerLow
-			) {
-				AnimatedContent(
-					targetState = isQRPresent,
-					transitionSpec = {
-						fadeIn(
-							initialAlpha = .4f,
-							animationSpec = tween(durationMillis = 200, easing = EaseInBounce)
-						) + expandIn() togetherWith fadeOut(
-							targetAlpha = .1f,
-							animationSpec = tween(durationMillis = 90)
-						) + shrinkOut()
-					},
-					modifier = Modifier.size(300.dp)
-				) { isReady ->
-					if (isReady && generated != null)
-						QRTemplateBasic(
-							model = generated,
-							backgroundColor = Color.Transparent,
-							graphicsLayer = { graphicsLayer },
-							roundness = .5f,
-							modifier = Modifier.fillMaxSize()
-						)
-					else FailedOrMissingQRContent(isError = false)
-				}
+			AnimatedContent(
+				targetState = isQRPresent,
+				transitionSpec = {
+					fadeIn(
+						initialAlpha = .4f,
+						animationSpec = tween(durationMillis = 200, easing = EaseInBounce)
+					) + expandIn() togetherWith fadeOut(
+						targetAlpha = .1f,
+						animationSpec = tween(durationMillis = 90)
+					) + shrinkOut()
+				},
+				modifier = Modifier.size(300.dp)
+			) { isReady ->
+				if (isReady && generated != null)
+					QRTemplateBasic(
+						model = generated,
+						backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
+						graphicsLayer = { graphicsLayer },
+						roundness = .5f,
+						contentMargin = 0.dp,
+						modifier = Modifier.fillMaxSize()
+					)
+				else FailedOrMissingQRContent(isError = false)
 			}
-			ExportShareActions(
-				actionEnabled = generated != null,
-				onShare = { scope.launch { onShareContent(graphicsLayer.toImageBitmap()) } },
-				onExport = onExportContent,
-			)
-			ContentStringCard(content = content)
 		}
+		ExportShareActions(
+			actionEnabled = generated != null,
+			onShare = { scope.launch { onShareContent(graphicsLayer.toImageBitmap()) } },
+			onExport = onExportContent,
+		)
+		QRContentStringCard(content = content)
 	}
 }

@@ -1,5 +1,6 @@
 package com.sam.qrforge.presentation.feature_create.screens
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -12,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -25,12 +27,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
+import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
+import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.feature_create.composables.SaveQRScreenContent
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenEvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenState
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+	ExperimentalMaterial3Api::class,
+	ExperimentalSharedTransitionApi::class
+)
 @Composable
 fun SaveQRScreen(
 	state: SaveQRScreenState,
@@ -64,8 +71,20 @@ fun SaveQRScreen(
 				text = { Text(text = stringResource(R.string.action_save)) },
 			)
 		},
-		snackbarHost = { SnackbarHost(snackBarHostState) },
-		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+		snackbarHost = {
+			SnackbarHost(snackBarHostState) { data ->
+				Snackbar(
+					snackbarData = data,
+					shape = MaterialTheme.shapes.large,
+					containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+					contentColor = MaterialTheme.colorScheme.onBackground,
+					actionContentColor = MaterialTheme.colorScheme.primary,
+				)
+			}
+		},
+		modifier = modifier
+			.nestedScroll(scrollBehavior.nestedScrollConnection)
+			.sharedBoundsWrapper(SharedTransitionKeys.PREVIEW_SCREEN_TO_SAVE_SCREEN)
 	) { scPadding ->
 		SaveQRScreenContent(
 			state = state,

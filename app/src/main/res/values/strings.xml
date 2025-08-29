@@ -25,4 +25,6 @@
   <string name="select_qr_content_desc">Enter content based on the selected type</string>
   <string name="save_qr_screen_title">Save QR</string>
   <string name="action_save">Save</string>
+  <string name="action_create">Create</string>
+  <string name="save_qr_screen_info_text">Saving the QR code is a go to if you plan to revisit the content later, as it provides a convenient</string>
 </resources>

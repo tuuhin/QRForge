@@ -41,13 +41,13 @@ inline fun <reified T : Any> NavGraphBuilder.animatedComposable(
 
 val AnimatedContentTransitionScope<NavBackStackEntry>.slideIntoContainerAndFadeIn: EnterTransition
 	get() = slideIntoContainer(
-		AnimatedContentTransitionScope.SlideDirection.Up,
+		AnimatedContentTransitionScope.SlideDirection.Start,
 		animationSpec = tween(durationMillis = 300, easing = EaseInCubic)
 	) + fadeIn(animationSpec = tween(easing = EaseIn, durationMillis = 300))
 
 
 val AnimatedContentTransitionScope<NavBackStackEntry>.slideOutOfContainerAndFadeOut: ExitTransition
 	get() = slideOutOfContainer(
-		AnimatedContentTransitionScope.SlideDirection.Up,
+		AnimatedContentTransitionScope.SlideDirection.Start,
 		animationSpec = tween(durationMillis = 300, easing = EaseOutCubic)
 	) + fadeOut(animationSpec = tween(easing = EaseOut, durationMillis = 300))

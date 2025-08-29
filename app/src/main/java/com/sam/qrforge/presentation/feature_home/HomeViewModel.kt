@@ -70,17 +70,14 @@ class HomeViewModel(
 		.onEach { res ->
 			when (res) {
 				is Resource.Error -> {
-					_isLoading.update { false }
 					val message = res.message ?: res.error.message ?: "Unable to load"
 					_uiEvents.emit(UIEvent.ShowSnackBar(message))
 				}
 
-				Resource.Loading -> _isLoading.update { true }
-				is Resource.Success -> {
-					_isLoading.update { false }
-					onGenerateQR(res.data)
-				}
+				is Resource.Success -> onGenerateQR(res.data)
+				else -> {}
 			}
+			_isLoading.update { res is Resource.Loading }
 		}.launchIn(viewModelScope)
 
 	private fun onUndoItemDelete(model: SavedQRModel) = viewModelScope.launch {

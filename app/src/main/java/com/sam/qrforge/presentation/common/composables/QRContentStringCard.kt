@@ -1,5 +1,6 @@
-package com.sam.qrforge.presentation.feature_create.composables
+package com.sam.qrforge.presentation.common.composables
 
+import android.content.ClipData
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,24 +16,32 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun ContentStringCard(
+fun QRContentStringCard(
 	content: QRContentModel,
 	modifier: Modifier = Modifier,
 	shape: Shape = MaterialTheme.shapes.large,
-	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
-	contentPadding: PaddingValues = PaddingValues(12.dp),
+	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+	contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
 ) {
+
+	val clipboard = LocalClipboard.current
+	val scope = rememberCoroutineScope()
 
 	Surface(
 		shape = shape,
@@ -50,7 +59,7 @@ fun ContentStringCard(
 				verticalArrangement = Arrangement.spacedBy(2.dp)
 			) {
 				Text(
-					text = "Content",
+					text = stringResource(R.string.select_qr_content_title),
 					style = MaterialTheme.typography.titleMedium,
 					color = MaterialTheme.colorScheme.secondary
 				)
@@ -63,7 +72,17 @@ fun ContentStringCard(
 				)
 			}
 			Button(
-				onClick = {},
+				onClick = {
+					scope.launch {
+						val clipEntry = ClipEntry(
+							ClipData.newPlainText(
+								"QR content",
+								content.toQRString()
+							)
+						)
+						clipboard.setClipEntry(clipEntry)
+					}
+				},
 				modifier = Modifier.size(36.dp),
 				contentPadding = PaddingValues(all = 8.dp),
 				shape = MaterialTheme.shapes.medium,
