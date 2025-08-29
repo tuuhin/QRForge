@@ -64,7 +64,6 @@ class CreateNewQRViewModel(
 			initialValue = null
 		)
 
-
 	private val _uiEvents = MutableSharedFlow<UIEvent>()
 	override val uiEvents: SharedFlow<UIEvent>
 		get() = _uiEvents
@@ -74,12 +73,8 @@ class CreateNewQRViewModel(
 
 	fun onCreateEvents(event: CreateQREvents) {
 		when (event) {
-			is CreateQREvents.OnQRDataTypeChange -> {
-				val model = event.type.toNewModel()
-				_contentModel.update { model }
-			}
-
-			is CreateQREvents.OnUpdateQRContent -> onQRContentChange(event.content)
+			is CreateQREvents.OnQRDataTypeChange -> _contentModel.update { event.type.toNewModel() }
+			is CreateQREvents.OnUpdateQRContent -> _contentModel.updateAndGet { event.content }
 			is CreateQREvents.CheckContactsDetails -> findContactsFromURI(event.uri)
 			CreateQREvents.CheckLastKnownLocation -> checkLastKnownLocation()
 			is CreateQREvents.ShareGeneratedQR -> onShareGeneratedQR(event.bitmap)
@@ -88,22 +83,15 @@ class CreateNewQRViewModel(
 
 	fun onSaveEvent(event: SaveQRScreenEvents) {
 		when (event) {
+			SaveQRScreenEvents.OnSave -> onSaveQR()
 			is SaveQRScreenEvents.OnSaveQRDescChange -> _saveQRState.update { state ->
 				state.copy(desc = event.textValue)
 			}
 
 			is SaveQRScreenEvents.OnSaveQRTitleChange -> _saveQRState.update { state ->
-				state.copy(title = event.textValue)
+				state.copy(title = event.textValue, isError = false)
 			}
-
-			SaveQRScreenEvents.OnSave -> onSaveQR()
 		}
-	}
-
-	private fun onQRContentChange(content: QRContentModel) {
-		_contentModel.updateAndGet { content }
-		// update the screen state
-
 	}
 
 	private fun onShareGeneratedQR(bitmap: ImageBitmap) = viewModelScope.launch {
@@ -122,11 +110,16 @@ class CreateNewQRViewModel(
 		val screenState = _saveQRState.value
 		val contentState = _contentModel.value
 		val createModel = CreateNewQRModel(
-			title = screenState.title.text,
-			desc = screenState.desc.text.ifBlank { null },
+			title = screenState.title,
+			desc = screenState.desc.ifBlank { null },
 			content = contentState.toQRString(),
 			format = contentState.type
 		)
+
+		if (createModel.title.isBlank()  || !contentState.isValid) {
+			_saveQRState.update { state -> state.copy(isError = true) }
+			return
+		}
 
 		viewModelScope.launch {
 			val result = repository.insertQRData(createModel)

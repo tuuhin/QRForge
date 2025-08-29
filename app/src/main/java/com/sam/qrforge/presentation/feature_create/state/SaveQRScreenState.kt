@@ -1,8 +1,7 @@
 package com.sam.qrforge.presentation.feature_create.state
 
-import androidx.compose.ui.text.input.TextFieldValue
-
 data class SaveQRScreenState(
-	val title: TextFieldValue = TextFieldValue(),
-	val desc: TextFieldValue = TextFieldValue(),
+	val title: String = "",
+	val isError: Boolean = false,
+	val desc: String = "",
 )

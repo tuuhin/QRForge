@@ -34,8 +34,8 @@ import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
-import com.sam.qrforge.presentation.feature_create.composables.CreateQRBottomBarAction
 import com.sam.qrforge.presentation.feature_create.composables.CreateQRScreenContent
+import com.sam.qrforge.presentation.feature_create.composables.ShowGeneratedQRButton
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
@@ -65,9 +65,9 @@ fun CreateQRScreen(
 			)
 		},
 		bottomBar = {
-			CreateQRBottomBarAction(
-				showBottomBar = content.isValid,
-				onGenerateQR = onPreviewQR
+			ShowGeneratedQRButton(
+				showButton = content.isValid,
+				onGenerateQR = onPreviewQR,
 			)
 		},
 		snackbarHost = {
@@ -84,6 +84,7 @@ fun CreateQRScreen(
 		modifier = modifier
 			.nestedScroll(scrollBehavior.nestedScrollConnection)
 			.sharedBoundsWrapper(SharedTransitionKeys.HOME_SCREEN_TO_CREATE_QR_SCREEN)
+			.imePadding()
 	) { scPadding ->
 		CreateQRScreenContent(
 			content = content,
@@ -97,9 +98,7 @@ fun CreateQRScreen(
 				start = scPadding.calculateStartPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding),
 				end = scPadding.calculateEndPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding)
 			),
-			modifier = Modifier
-				.fillMaxSize()
-				.imePadding(),
+			modifier = Modifier.fillMaxSize(),
 		)
 	}
 }

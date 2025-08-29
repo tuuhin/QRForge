@@ -57,10 +57,18 @@ fun SaveQRScreenContent(
 			keyboardActions = KeyboardActions(
 				onNext = { focusRequester.requestFocus(FocusDirection.Down) },
 			),
+			isError = state.isError,
 			placeholder = { Text(text = "My QR") },
 			shape = MaterialTheme.shapes.medium,
 			modifier = Modifier.fillMaxWidth(),
 		)
+		if (state.isError) {
+			Text(
+				text = "Cannot have empty title",
+				color = MaterialTheme.colorScheme.error,
+				style = MaterialTheme.typography.labelMedium
+			)
+		}
 		OutlinedTextField(
 			value = state.desc,
 			onValueChange = { value -> onEvent(SaveQRScreenEvents.OnSaveQRDescChange(value)) },
