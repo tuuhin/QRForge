@@ -1,27 +1,12 @@
 package com.sam.qrforge.presentation.feature_create.composables
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.EaseInBounce
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandIn
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,11 +14,10 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.domain.models.qr.QRContentModel
-import com.sam.qrforge.presentation.common.composables.FailedOrMissingQRContent
+import com.sam.qrforge.presentation.common.composables.AnimatedBasicQRContent
 import com.sam.qrforge.presentation.common.composables.QRContentStringCard
 import com.sam.qrforge.presentation.common.composables.QRContentTypeChip
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
-import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import kotlinx.coroutines.launch
 
 @Composable
@@ -49,10 +33,6 @@ fun PreviewQRScreenContent(
 	val graphicsLayer = rememberGraphicsLayer()
 	val scope = rememberCoroutineScope()
 
-	val isQRPresent by remember(generated) {
-		derivedStateOf { generated != null }
-	}
-
 	Column(
 		modifier = modifier.padding(contentPadding),
 		horizontalAlignment = Alignment.CenterHorizontally,
@@ -60,35 +40,10 @@ fun PreviewQRScreenContent(
 	) {
 		Spacer(modifier = Modifier.height(20.dp))
 		QRContentTypeChip(content.type)
-		Surface(
-			shape = MaterialTheme.shapes.extraLarge,
-			color = MaterialTheme.colorScheme.surfaceContainer
-		) {
-			AnimatedContent(
-				targetState = isQRPresent,
-				transitionSpec = {
-					fadeIn(
-						initialAlpha = .4f,
-						animationSpec = tween(durationMillis = 200, easing = EaseInBounce)
-					) + expandIn() togetherWith fadeOut(
-						targetAlpha = .1f,
-						animationSpec = tween(durationMillis = 90)
-					) + shrinkOut()
-				},
-				modifier = Modifier.size(300.dp)
-			) { isReady ->
-				if (isReady && generated != null)
-					QRTemplateBasic(
-						model = generated,
-						backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
-						graphicsLayer = { graphicsLayer },
-						roundness = .5f,
-						contentMargin = 0.dp,
-						modifier = Modifier.fillMaxSize()
-					)
-				else FailedOrMissingQRContent(isError = false)
-			}
-		}
+		AnimatedBasicQRContent(
+			generated = generated,
+			graphicsLayer = { graphicsLayer },
+		)
 		ExportShareActions(
 			actionEnabled = generated != null,
 			onShare = { scope.launch { onShareContent(graphicsLayer.toImageBitmap()) } },

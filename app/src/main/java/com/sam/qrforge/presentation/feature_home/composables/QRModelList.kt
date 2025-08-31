@@ -1,5 +1,6 @@
 package com.sam.qrforge.presentation.feature_home.composables
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,9 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.domain.models.SavedQRModel
+import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
+import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
 import kotlinx.collections.immutable.ImmutableList
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun QRModelList(
 	generatedQR: ImmutableList<SavedAndGeneratedQRModel>,
@@ -53,7 +57,8 @@ fun QRModelList(
 				onSelectItem = { onSelectItem(item.qrModel) },
 				modifier = Modifier
 					.fillMaxWidth()
-					.animateItem(),
+					.animateItem()
+					.sharedBoundsWrapper(SharedTransitionKeys.sharedBoundsToItemDetail(item.qrModel.id)),
 			)
 		}
 	}

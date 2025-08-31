@@ -146,6 +146,7 @@ object PreviewFakes {
 		title = "Basic Test",
 		isFav = true,
 		desc = "A basic qr showing some data",
+		content = "This is a large content",
 		createdAt = LocalDateTime(2025, 8, 15, 0, 0, 0),
 	)
 

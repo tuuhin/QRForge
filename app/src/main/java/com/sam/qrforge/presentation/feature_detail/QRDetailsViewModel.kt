@@ -11,6 +11,7 @@ import com.sam.qrforge.domain.util.Resource
 import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.UIEvent
+import com.sam.qrforge.presentation.feature_detail.state.QRDetailsScreenEvents
 import com.sam.qrforge.presentation.feature_detail.state.QRDetailsScreenState
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -60,6 +61,13 @@ class QRDetailsViewModel(
 	private val _uiEvents = MutableSharedFlow<UIEvent>()
 	override val uiEvents: SharedFlow<UIEvent>
 		get() = _uiEvents
+
+	fun onEvent(event: QRDetailsScreenEvents) {
+		when (event) {
+			QRDetailsScreenEvents.OnShareQR -> {}
+			is QRDetailsScreenEvents.ToggleIsFavourite -> {}
+		}
+	}
 
 	private fun loadContent() = repository.fetchQRById(route.qrId)
 		.onEach { res ->

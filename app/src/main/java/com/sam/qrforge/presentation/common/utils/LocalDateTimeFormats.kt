@@ -14,3 +14,16 @@ val LocalDateTime.Formats.PLAIN_DATE: DateTimeFormat<LocalDateTime>
 		char(' ')
 		year()
 	}
+
+val LocalDateTime.Formats.PLAIN_DATE_TIME: DateTimeFormat<LocalDateTime>
+	get() = LocalDateTime.Format {
+		day(padding = Padding.ZERO)
+		char(' ')
+		monthName(MonthNames.ENGLISH_ABBREVIATED)
+		char(' ')
+		year()
+		char(' ')
+		hour()
+		char(':')
+		minute()
+	}

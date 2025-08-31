@@ -1,112 +1,124 @@
 package com.sam.qrforge.presentation.feature_detail.composables
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.EaseInOutBack
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.SavedQRModel
+import com.sam.qrforge.presentation.common.composables.AnimatedBasicQRContent
+import com.sam.qrforge.presentation.common.composables.QRContentStringCard
+import com.sam.qrforge.presentation.common.composables.QRContentTypeChip
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
-import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
-import com.sam.qrforge.presentation.feature_detail.state.ContentLoadState
-import com.sam.qrforge.presentation.feature_detail.state.QRDetailsScreenState
+import com.sam.qrforge.presentation.common.utils.PLAIN_DATE_TIME
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.format
 
 @Composable
 fun QRDetailsScreenContent(
-	state: QRDetailsScreenState,
+	savedContent: SavedQRModel,
+	onShare: () -> Unit,
+	onExport: () -> Unit,
 	modifier: Modifier = Modifier,
-	contentPadding: PaddingValues = PaddingValues(0.dp),
-	onNavigateBackToHome: () -> Unit = {},
+	generatedModel: GeneratedQRUIModel? = null,
 ) {
-	val loadState by remember(state) {
-		derivedStateOf {
-			when {
-				state.isLoading -> ContentLoadState.IS_LOADING
-				!state.isLoading && state.qrModel != null -> ContentLoadState.DATA_READY
-				else -> ContentLoadState.DATA_ABSENT
-			}
-		}
-	}
+	val graphicsLayer = rememberGraphicsLayer()
+	val scrollState = rememberScrollState()
 
-	Crossfade(
-		targetState = loadState,
-		animationSpec = tween(200, easing = FastOutSlowInEasing),
-		modifier = modifier.padding(contentPadding)
-	) { contentState ->
-		when (contentState) {
-			ContentLoadState.IS_LOADING -> LoadingContent()
-			ContentLoadState.DATA_ABSENT -> MissingQRDetailsContent(
-				onBackToHome = onNavigateBackToHome,
-				modifier = Modifier.fillMaxSize()
-			)
-
-			ContentLoadState.DATA_READY -> QRDetailsDataContent(
-				generatedModel = state.generatedModel,
-				savedContent = state.qrModel,
-				modifier = Modifier.fillMaxSize()
-			)
-		}
-	}
-}
-
-@Composable
-private fun LoadingContent(modifier: Modifier = Modifier) {
 	Column(
-		verticalArrangement = Arrangement.Center,
-		horizontalAlignment = Alignment.CenterHorizontally,
-		modifier = modifier.fillMaxSize(),
+		modifier = modifier.verticalScroll(scrollState),
+		verticalArrangement = Arrangement.spacedBy(12.dp),
+		horizontalAlignment = Alignment.CenterHorizontally
 	) {
-		CircularProgressIndicator()
+		QRContentTypeChip(type = savedContent.format)
+		AnimatedBasicQRContent(
+			generated = generatedModel,
+			graphicsLayer = { graphicsLayer },
+		)
+		QRCommonActions(
+			showActions = generatedModel != null,
+			type = savedContent.format,
+			onShare = onShare,
+			onExport = onExport,
+			onAction = {},
+		)
+		Spacer(modifier = Modifier.height(2.dp))
+		savedContent.desc?.let { desc ->
+			QRDescriptionCard(
+				desc,
+				modifier = Modifier.fillMaxWidth()
+			)
+		}
+		QRContentStringCard(
+			contentString = savedContent.content,
+			onContentCopy = {},
+		)
 		Text(
-			text = "Loading",
-			style = MaterialTheme.typography.titleLarge
+			text = buildString {
+				append("Last Updated: ")
+				append(savedContent.modifiedAt.format(LocalDateTime.Formats.PLAIN_DATE_TIME))
+			},
+			style = MaterialTheme.typography.labelMedium,
+			color = MaterialTheme.colorScheme.tertiary,
+			fontWeight = FontWeight.Normal,
 		)
 	}
 }
 
 @Composable
-private fun QRDetailsDataContent(
+private fun QRDescriptionCard(
+	text: String,
 	modifier: Modifier = Modifier,
-	generatedModel: GeneratedQRUIModel? = null,
-	savedContent: SavedQRModel? = null,
+	shape: Shape = MaterialTheme.shapes.large,
 ) {
-	val graphicsLayer = rememberGraphicsLayer()
+	var isExpanded by remember { mutableStateOf(false) }
 
-	Column(
-		modifier = modifier,
-		verticalArrangement = Arrangement.spacedBy(4.dp),
-		horizontalAlignment = Alignment.CenterHorizontally
+	ElevatedCard(
+		shape = shape,
+		onClick = { isExpanded = !isExpanded },
+		modifier = modifier.animateContentSize(
+			animationSpec = tween(durationMillis = 100, easing = EaseInOutBack)
+		),
 	) {
-		Surface(
-			shape = MaterialTheme.shapes.extraLarge,
-			color = MaterialTheme.colorScheme.surfaceContainer,
-			modifier = Modifier.size(300.dp)
+		Column(
+			modifier = Modifier.padding(12.dp),
+			verticalArrangement = Arrangement.spacedBy(2.dp)
 		) {
-			if (generatedModel != null)
-				QRTemplateBasic(
-					model = generatedModel,
-					backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
-					graphicsLayer = { graphicsLayer },
-					roundness = .5f,
-					contentMargin = 0.dp,
-					modifier = Modifier.fillMaxSize()
-				)
+			Text(
+				text = stringResource(R.string.qr_description_text),
+				style = MaterialTheme.typography.bodyLarge,
+				color = MaterialTheme.colorScheme.secondary
+			)
+			Text(
+				text = text,
+				maxLines = if (isExpanded) Int.MAX_VALUE else 2,
+				overflow = TextOverflow.Ellipsis,
+				style = MaterialTheme.typography.bodyMedium,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
+			)
 		}
 	}
 }

@@ -1,15 +1,30 @@
 package com.sam.qrforge.presentation.feature_detail.composables
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.SavedQRModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -18,29 +33,49 @@ fun QRDetailsTopAppBar(
 	modifier: Modifier = Modifier,
 	qrModel: SavedQRModel? = null,
 	navigation: @Composable () -> Unit = {},
+	onToggleFavourite: (SavedQRModel) -> Unit = {},
 	scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
 	MediumTopAppBar(
 		title = {
 			AnimatedVisibility(
 				visible = qrModel != null,
-				enter = slideInVertically(),
-				exit = slideOutVertically()
+				enter = slideInHorizontally(
+					animationSpec = tween(durationMillis = 200, easing = EaseInOut)
+				) + fadeIn(),
+				exit = slideOutVertically(
+					animationSpec = tween(durationMillis = 200, easing = EaseInOut)
+				) + fadeOut()
 			) {
-				qrModel?.let { model ->
-					Text(model.title)
-				}
+				Text(text = qrModel?.title ?: "")
 			}
 		},
 		actions = {
-			AnimatedVisibility(
-				visible = qrModel != null,
-				enter = slideInVertically(),
-				exit = slideOutVertically()
-			) {
-				TextButton(onClick = {}) {
-					Text("Edit")
+			qrModel?.let { model ->
+				Button(
+					onClick = { onToggleFavourite(model) },
+					shape = MaterialTheme.shapes.extraLarge,
+					colors = ButtonDefaults.buttonColors(
+						containerColor = MaterialTheme.colorScheme.primaryContainer,
+						contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+					),
+					contentPadding = PaddingValues(),
+				) {
+					Crossfade(
+						targetState = model.isFav,
+						animationSpec = tween(durationMillis = 200, easing = LinearOutSlowInEasing)
+					) { isFav ->
+						if (isFav) Icon(
+							painter = painterResource(R.drawable.ic_heart),
+							contentDescription = "Favourite"
+						)
+						else Icon(
+							painter = painterResource(R.drawable.ic_heart_outlined),
+							contentDescription = "Not favourite"
+						)
+					}
 				}
+				Spacer(modifier = Modifier.width(6.dp))
 			}
 		},
 		navigationIcon = navigation,

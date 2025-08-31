@@ -1,7 +1,6 @@
 package com.sam.qrforge.presentation.feature_home.composables
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.slideInHorizontally
@@ -43,14 +42,11 @@ import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import com.sam.qrforge.presentation.common.utils.PLAIN_DATE
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
-import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
-import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun QRModelCard(
 	model: SavedAndGeneratedQRModel,
@@ -86,7 +82,6 @@ fun QRModelCard(
 			}
 		},
 		modifier = modifier
-			.sharedBoundsWrapper(SharedTransitionKeys.sharedBoundsToItemDetail(model.qrModel.id))
 	) {
 		Card(
 			onClick = onSelectItem,

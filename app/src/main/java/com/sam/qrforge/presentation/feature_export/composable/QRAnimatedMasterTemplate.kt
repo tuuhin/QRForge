@@ -28,7 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import com.sam.qrforge.presentation.common.composables.FailedOrMissingQRContent
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.models.QRDecorationOption.QRDecorationOptionBasic
@@ -39,7 +38,6 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 fun QRAnimatedMasterTemplate(
 	modifier: Modifier = Modifier,
 	generated: GeneratedQRUIModel? = null,
-	isQRGenerationError: Boolean = false,
 	templateDecoration: QRDecorationOption = QRDecorationOptionBasic(),
 	backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 	backgroundShape: Shape = MaterialTheme.shapes.extraLarge,
@@ -79,7 +77,6 @@ fun QRAnimatedMasterTemplate(
 						decoration = templateDecoration,
 						graphicsLayer = graphicsLayer
 					)
-				else FailedOrMissingQRContent(isError = isQRGenerationError)
 			}
 		}
 	}

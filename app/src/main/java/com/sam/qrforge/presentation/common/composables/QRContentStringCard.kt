@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -25,6 +27,7 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
@@ -55,8 +58,7 @@ fun QRContentStringCard(
 			verticalAlignment = Alignment.CenterVertically
 		) {
 			Column(
-				modifier = Modifier.weight(1f),
-				verticalArrangement = Arrangement.spacedBy(2.dp)
+				modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)
 			) {
 				Text(
 					text = stringResource(R.string.select_qr_content_title),
@@ -65,7 +67,7 @@ fun QRContentStringCard(
 				)
 				Text(
 					text = content.toQRString(),
-					style = MaterialTheme.typography.bodyMedium,
+					style = MaterialTheme.typography.labelLarge,
 					color = MaterialTheme.colorScheme.onSurfaceVariant,
 					maxLines = 2,
 					overflow = TextOverflow.Ellipsis
@@ -76,8 +78,7 @@ fun QRContentStringCard(
 					scope.launch {
 						val clipEntry = ClipEntry(
 							ClipData.newPlainText(
-								"QR content",
-								content.toQRString()
+								"QR content", content.toQRString()
 							)
 						)
 						clipboard.setClipEntry(clipEntry)
@@ -94,6 +95,65 @@ fun QRContentStringCard(
 				Icon(
 					painter = painterResource(R.drawable.ic_copy),
 					contentDescription = "Action Copy",
+				)
+			}
+		}
+	}
+}
+
+
+@Composable
+fun QRContentStringCard(
+	contentString: String,
+	onContentCopy: () -> Unit,
+	modifier: Modifier = Modifier,
+	shape: Shape = MaterialTheme.shapes.large,
+	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
+	contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+) {
+	Surface(
+		shape = shape,
+		color = containerColor,
+		modifier = modifier.fillMaxWidth(),
+	) {
+		Row(
+			modifier = Modifier
+				.heightIn(min = 80.dp)
+				.padding(contentPadding),
+			verticalAlignment = Alignment.CenterVertically
+		) {
+			Column(
+				verticalArrangement = Arrangement.spacedBy(8.dp),
+			) {
+				Row(
+					horizontalArrangement = Arrangement.SpaceBetween,
+					verticalAlignment = Alignment.CenterVertically,
+					modifier = Modifier.fillMaxWidth()
+				) {
+					Text(
+						text = stringResource(R.string.select_qr_content_title),
+						style = MaterialTheme.typography.titleMedium,
+						color = MaterialTheme.colorScheme.secondary,
+						fontWeight = FontWeight.SemiBold
+					)
+					IconButton(
+						onClick = onContentCopy,
+						colors = IconButtonDefaults.iconButtonColors(
+							containerColor = MaterialTheme.colorScheme.tertiary,
+							contentColor = MaterialTheme.colorScheme.onTertiary,
+						),
+					) {
+						Icon(
+							painter = painterResource(R.drawable.ic_copy),
+							contentDescription = "Copy button",
+						)
+					}
+				}
+				Text(
+					text = contentString,
+					style = MaterialTheme.typography.bodyMedium,
+					color = MaterialTheme.colorScheme.onSurfaceVariant,
+					overflow = TextOverflow.Ellipsis
 				)
 			}
 		}
