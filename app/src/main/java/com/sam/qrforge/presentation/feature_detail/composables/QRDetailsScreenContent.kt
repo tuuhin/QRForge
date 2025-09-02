@@ -18,9 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.res.stringResource
@@ -34,18 +36,20 @@ import com.sam.qrforge.presentation.common.composables.QRContentStringCard
 import com.sam.qrforge.presentation.common.composables.QRContentTypeChip
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.utils.PLAIN_DATE_TIME
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 
 @Composable
 fun QRDetailsScreenContent(
 	savedContent: SavedQRModel,
-	onShare: () -> Unit,
+	onShare: (ImageBitmap) -> Unit,
 	onExport: () -> Unit,
 	modifier: Modifier = Modifier,
 	generatedModel: GeneratedQRUIModel? = null,
 ) {
 	val graphicsLayer = rememberGraphicsLayer()
+	val scope = rememberCoroutineScope()
 	val scrollState = rememberScrollState()
 
 	Column(
@@ -61,7 +65,12 @@ fun QRDetailsScreenContent(
 		QRCommonActions(
 			showActions = generatedModel != null,
 			type = savedContent.format,
-			onShare = onShare,
+			onShare = {
+				scope.launch {
+					val bitmap = graphicsLayer.toImageBitmap()
+					onShare(bitmap)
+				}
+			},
 			onExport = onExport,
 			onAction = {},
 		)

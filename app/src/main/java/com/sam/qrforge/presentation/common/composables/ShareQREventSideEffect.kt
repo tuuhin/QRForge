@@ -1,4 +1,4 @@
-package com.sam.qrforge.presentation.feature_create.composables
+package com.sam.qrforge.presentation.common.composables
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable

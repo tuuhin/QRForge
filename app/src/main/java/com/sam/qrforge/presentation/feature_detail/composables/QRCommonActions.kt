@@ -8,14 +8,18 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -63,7 +67,7 @@ fun QRCommonActions(
 				},
 				state = rememberTooltipState()
 			) {
-				FloatingActionButton(
+				SmallFloatingActionButton(
 					onClick = onShare,
 					elevation = FloatingActionButtonDefaults.loweredElevation(defaultElevation = 0.dp),
 					shape = MaterialTheme.shapes.extraLarge,
@@ -76,22 +80,23 @@ fun QRCommonActions(
 					)
 				}
 			}
-			ExtendedFloatingActionButton(
+			Button(
 				onClick = onAction,
-				elevation = FloatingActionButtonDefaults.loweredElevation(defaultElevation = 0.dp),
 				shape = MaterialTheme.shapes.extraLarge,
-				containerColor = MaterialTheme.colorScheme.primaryContainer,
-				contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-				icon = {
-					Icon(painter = type.painter, contentDescription = "Action")
-				},
-				text = {
-					Text(
-						text = type.toActionText,
-						style = MaterialTheme.typography.titleMedium
-					)
-				},
-			)
+				colors = ButtonDefaults.buttonColors(
+					containerColor = MaterialTheme.colorScheme.primaryContainer,
+					contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+				),
+				contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+			) {
+				Icon(painter = type.painter, contentDescription = "Action")
+				Spacer(modifier = Modifier.width(6.dp))
+				Text(
+					text = type.toActionText,
+					style = MaterialTheme.typography.bodyMedium
+				)
+
+			}
 			TooltipBox(
 				positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
 				tooltip = {
@@ -101,7 +106,7 @@ fun QRCommonActions(
 				},
 				state = rememberTooltipState()
 			) {
-				FloatingActionButton(
+				SmallFloatingActionButton(
 					onClick = onExport,
 					elevation = FloatingActionButtonDefaults.loweredElevation(defaultElevation = 0.dp),
 					shape = MaterialTheme.shapes.extraLarge,
@@ -121,11 +126,11 @@ fun QRCommonActions(
 private val QRDataType.toActionText: String
 	@Composable
 	get() = when (this) {
-		QRDataType.TYPE_EMAIL -> "Send Mail"
-		QRDataType.TYPE_PHONE -> "Call"
-		QRDataType.TYPE_GEO -> "Open Map"
-		QRDataType.TYPE_URL -> "Open"
-		QRDataType.TYPE_WIFI -> "Connect"
-		QRDataType.TYPE_TEXT -> "Copy"
-		QRDataType.TYPE_SMS -> "Send"
+		QRDataType.TYPE_EMAIL -> stringResource(R.string.qr_action_text_mail)
+		QRDataType.TYPE_PHONE -> stringResource(R.string.qr_action_text_phone)
+		QRDataType.TYPE_GEO -> stringResource(R.string.qr_action_text_geo)
+		QRDataType.TYPE_URL -> stringResource(R.string.qr_action_text_url)
+		QRDataType.TYPE_WIFI ->  stringResource(R.string.qr_action_text_wifi)
+		QRDataType.TYPE_TEXT -> stringResource(R.string.qr_action_text_text)
+		QRDataType.TYPE_SMS -> stringResource(R.string.qr_action_text_sms)
 	}

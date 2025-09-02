@@ -16,7 +16,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -35,9 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
-import com.sam.qrforge.domain.models.SavedQRModel
-import com.sam.qrforge.presentation.common.composables.painter
-import com.sam.qrforge.presentation.common.composables.string
+import com.sam.qrforge.presentation.common.composables.QRContentTypeChip
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import com.sam.qrforge.presentation.common.utils.PLAIN_DATE
@@ -129,10 +126,18 @@ fun QRModelCard(
 							)
 						}
 					}
-					QRDataCardTypeAndDateInfo(
-						qrModel = model.qrModel,
-						modifier = Modifier.fillMaxWidth()
-					)
+					Row(
+						modifier = Modifier.fillMaxWidth(),
+						horizontalArrangement = Arrangement.SpaceBetween,
+						verticalAlignment = Alignment.CenterVertically
+					) {
+						QRContentTypeChip(type = model.qrModel.format)
+						Text(
+							text = model.qrModel.modifiedAt.format(LocalDateTime.Formats.PLAIN_DATE),
+							style = MaterialTheme.typography.labelMedium,
+							color = MaterialTheme.colorScheme.onSurfaceVariant,
+						)
+					}
 				}
 			}
 		}
@@ -162,44 +167,6 @@ private fun AnimatedQRContent(
 				modifier = Modifier.size(size)
 			)
 		}
-	}
-}
-
-@Composable
-private fun QRDataCardTypeAndDateInfo(
-	qrModel: SavedQRModel,
-	modifier: Modifier = Modifier
-) {
-	Row(
-		modifier = modifier,
-		horizontalArrangement = Arrangement.SpaceBetween,
-		verticalAlignment = Alignment.CenterVertically
-	) {
-		Surface(
-			shape = MaterialTheme.shapes.medium,
-			color = MaterialTheme.colorScheme.tertiaryContainer
-		) {
-			Row(
-				modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.spacedBy(8.dp)
-			) {
-				Icon(
-					painter = qrModel.format.painter,
-					contentDescription = "Icon ${qrModel.format.name}",
-					modifier = Modifier.size(20.dp)
-				)
-				Text(
-					text = qrModel.format.string,
-					style = MaterialTheme.typography.labelMedium
-				)
-			}
-		}
-		Text(
-			text = qrModel.modifiedAt.format(LocalDateTime.Formats.PLAIN_DATE),
-			style = MaterialTheme.typography.labelMedium,
-			color = MaterialTheme.colorScheme.onSurfaceVariant,
-		)
 	}
 }
 

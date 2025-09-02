@@ -27,4 +27,19 @@
   <string name="action_save">Save</string>
   <string name="action_create">Create</string>
   <string name="save_qr_screen_info_text">Saving the QR code is a go to if you plan to revisit the content later, as it provides a convenient</string>
+  <string name="content_loading_text">Loading</string>
+  <string name="action_share">Share</string>
+  <string name="action_export">Export</string>
+  <string name="qr_description_text">Description</string>
+  <string name="qr_content_missing">Cannot create QR Code</string>
+  <string name="action_copy">Copy</string>
+  <string name="edit_qr_screen_title">Edit</string>
+  <string name="qr_action_text_url">Visit</string>
+  <string name="qr_action_text_wifi">Connect</string>
+  <string name="qr_action_text_text">Copy</string>
+  <string name="qr_action_text_sms">Send</string>
+  <string name="qr_action_text_phone">Call</string>
+  <string name="qr_action_text_mail">Send Mail</string>
+  <string name="qr_action_text_geo">Open Map</string>
+  <string name="share_qr_chooser_title">Share QR</string>
 </resources>

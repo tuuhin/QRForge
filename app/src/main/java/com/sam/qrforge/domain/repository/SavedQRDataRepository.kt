@@ -17,4 +17,6 @@ interface SavedQRDataRepository {
 
 	fun fetchQRById(id: Long): Flow<Resource<SavedQRModel, Exception>>
 
+	suspend fun toggleFavourite(model: SavedQRModel): Result<SavedQRModel>
+
 }

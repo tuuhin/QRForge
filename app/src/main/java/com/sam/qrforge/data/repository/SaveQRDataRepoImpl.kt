@@ -85,6 +85,19 @@ class SaveQRDataRepoImpl(private val dao: QRDataDao) : SavedQRDataRepository {
 			}
 	}
 
+	override suspend fun toggleFavourite(model: SavedQRModel): Result<SavedQRModel> {
+		return try {
+			dao.updateIsFavWithMatchingId(!model.isFav, model.id)
+			val new = dao.fetchQREntityById(model.id)
+				?: return Result.failure(CannotFindMatchingIdException())
+			Result.success(new.toModel())
+		} catch (_: SQLException) {
+			Result.failure(UnableToProcessSQLException())
+		} catch (e: Exception) {
+			Result.failure(e)
+		}
+	}
+
 	override suspend fun deleteQRModel(model: SavedQRModel): Result<Unit> {
 		return try {
 			dao.deleteQREntity(model.toEntity())

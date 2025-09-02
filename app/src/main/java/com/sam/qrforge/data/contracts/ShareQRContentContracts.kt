@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.net.toUri
+import com.sam.qrforge.R
 
 class ShareQRContentContracts : ActivityResultContract<String, Boolean>() {
 
@@ -15,7 +16,7 @@ class ShareQRContentContracts : ActivityResultContract<String, Boolean>() {
 			putExtra(Intent.EXTRA_STREAM, input.toUri())
 			flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
 		}
-		return Intent.createChooser(intent, "Share QR")
+		return Intent.createChooser(intent, context.getString(R.string.share_qr_chooser_title))
 	}
 
 	override fun parseResult(resultCode: Int, intent: Intent?): Boolean {

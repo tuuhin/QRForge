@@ -49,6 +49,9 @@ fun PreviewQRScreenContent(
 			onShare = { scope.launch { onShareContent(graphicsLayer.toImageBitmap()) } },
 			onExport = onExportContent,
 		)
-		QRContentStringCard(content = content)
+		QRContentStringCard(
+			contentString = content.toQRString(),
+			onContentCopy = {},
+		)
 	}
 }

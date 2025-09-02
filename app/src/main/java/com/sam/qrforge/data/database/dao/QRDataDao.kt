@@ -29,8 +29,10 @@ interface QRDataDao {
 	fun fetchQREntityByIdFlow(id: Long): Flow<QRDataEntity?>
 
 	@Query("SELECT * FROM SAVED_QR_ENTITY WHERE CONTENT_TYPE=:type")
-
 	fun fetchAllQREntityTyped(type: QRDataType): Flow<List<QRDataEntity>>
+
+	@Query("UPDATE SAVED_QR_ENTITY SET IS_FAV=:isFavourite WHERE _ID=:id")
+	suspend fun updateIsFavWithMatchingId(isFavourite: Boolean, id: Long)
 
 	@Delete
 	suspend fun deleteQREntity(entity: QRDataEntity)

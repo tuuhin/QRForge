@@ -11,9 +11,9 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navigation
+import com.sam.qrforge.presentation.common.composables.ShareQREventsSideEffect
 import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
-import com.sam.qrforge.presentation.feature_create.composables.ShareQREventsSideEffect
 import com.sam.qrforge.presentation.feature_create.screens.CreateQRScreen
 import com.sam.qrforge.presentation.feature_create.screens.PreviewQRScreen
 import com.sam.qrforge.presentation.feature_create.screens.SaveQRScreen
