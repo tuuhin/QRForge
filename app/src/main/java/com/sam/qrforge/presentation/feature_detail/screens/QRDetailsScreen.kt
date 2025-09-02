@@ -1,4 +1,4 @@
-package com.sam.qrforge.presentation.feature_detail
+package com.sam.qrforge.presentation.feature_detail.screens
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -58,6 +58,7 @@ fun QRDetailsScreen(
 	modifier: Modifier = Modifier,
 	navigation: @Composable () -> Unit = {},
 	onNavigateToHome: () -> Unit = {},
+	onNavigateToEdit: () -> Unit = {},
 ) {
 	val snackBarHostState = LocalSnackBarState.current
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -84,7 +85,8 @@ fun QRDetailsScreen(
 		floatingActionButton = {
 			QREditActionButton(
 				showButton = state.qrModel != null,
-				onEdit = {},
+				onEdit = onNavigateToEdit,
+				modifier = Modifier.sharedBoundsWrapper(SharedTransitionKeys.QR_DETAILS_SCREEN_TO_EDIT_SCREEN)
 			)
 		},
 		snackbarHost = {
@@ -121,7 +123,7 @@ fun QRDetailsScreen(
 					QRDetailsScreenContent(
 						savedContent = qrModel,
 						generatedModel = state.generatedModel,
-						onShare = { onEvent(QRDetailsScreenEvents.OnShareQR) },
+						onShare = { bitmap -> onEvent(QRDetailsScreenEvents.OnShareQR(bitmap)) },
 						onExport = {},
 						modifier = Modifier.fillMaxSize()
 					)
@@ -154,8 +156,8 @@ private fun QRDetailsScreenPreview() = QRForgeTheme {
 	QRDetailsScreen(
 		qrId = -1L,
 		state = QRDetailsScreenState(
-			qrModel = PreviewFakes.FAKE_QR_MODEL,
-			generatedModel = PreviewFakes.FAKE_GENERATED_UI_MODEL,
+			qrModel = PreviewFakes.FAKE_QR_MODEL_2,
+			generatedModel = PreviewFakes.FAKE_GENERATED_UI_MODEL_4,
 			isLoading = false
 		),
 		onEvent = {},

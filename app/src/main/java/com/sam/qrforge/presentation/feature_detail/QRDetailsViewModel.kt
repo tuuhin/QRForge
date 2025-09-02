@@ -1,9 +1,11 @@
 package com.sam.qrforge.presentation.feature_detail
 
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
+import com.sam.qrforge.domain.facade.SaveGeneratedQRFacade
 import com.sam.qrforge.domain.models.GeneratedQRModel
 import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.domain.repository.SavedQRDataRepository
@@ -11,6 +13,9 @@ import com.sam.qrforge.domain.util.Resource
 import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.UIEvent
+import com.sam.qrforge.presentation.feature_create.util.toBytes
+import com.sam.qrforge.presentation.feature_detail.state.EditQRScreenEvent
+import com.sam.qrforge.presentation.feature_detail.state.EditQRScreenState
 import com.sam.qrforge.presentation.feature_detail.state.QRDetailsScreenEvents
 import com.sam.qrforge.presentation.feature_detail.state.QRDetailsScreenState
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
@@ -18,6 +23,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -27,11 +34,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.coroutines.launch
 
 class QRDetailsViewModel(
 	private val generator: QRGeneratorFacade,
 	private val repository: SavedQRDataRepository,
 	private val savedStateHandle: SavedStateHandle,
+	private val fileFacade: SaveGeneratedQRFacade,
 ) : AppViewModel() {
 
 	private val route: NavRoutes.QRDetailsScreen
@@ -58,15 +68,96 @@ class QRDetailsViewModel(
 		initialValue = QRDetailsScreenState()
 	)
 
+	private val _editState = MutableStateFlow(EditQRScreenState())
+	val editState = _editState.asStateFlow()
+
 	private val _uiEvents = MutableSharedFlow<UIEvent>()
 	override val uiEvents: SharedFlow<UIEvent>
 		get() = _uiEvents
 
+	private val _shareQREvent = MutableSharedFlow<String>()
+	val shareQREvent = _shareQREvent.asSharedFlow()
+
 	fun onEvent(event: QRDetailsScreenEvents) {
 		when (event) {
-			QRDetailsScreenEvents.OnShareQR -> {}
-			is QRDetailsScreenEvents.ToggleIsFavourite -> {}
+			is QRDetailsScreenEvents.OnShareQR -> onShareGeneratedQR(event.bitmap)
+			is QRDetailsScreenEvents.ToggleIsFavourite -> toggleIsFavourite(event.model)
 		}
+	}
+
+	fun onEditEvent(event: EditQRScreenEvent) {
+		when (event) {
+			is EditQRScreenEvent.OnSaveQRDescChange -> _editState.update { state ->
+				state.copy(desc = event.textValue)
+			}
+
+			is EditQRScreenEvent.OnSaveQRTitleChange -> _editState.update { state ->
+				state.copy(title = event.textValue)
+			}
+
+			EditQRScreenEvent.OnEdit -> onUpdateContent()
+		}
+	}
+
+	private fun onShareGeneratedQR(bitmap: ImageBitmap) = viewModelScope.launch {
+		val bytes = bitmap.toBytes()
+		val fileResult = fileFacade.prepareFileToShare(bytes)
+		fileResult.fold(
+			onSuccess = { _shareQREvent.emit(it) },
+			onFailure = {
+				val event = UIEvent.ShowToast("Failed to share")
+				_uiEvents.emit(event)
+			},
+		)
+	}
+
+	private fun onUpdateContent() {
+		val currentQRModel = _savedModel.value ?: return
+		val fieldsState = _editState.value
+		// check if title is not blank
+		if (fieldsState.title.isBlank()) {
+			_editState.update { state -> state.copy(isError = true) }
+			return
+		}
+		// check if the content is same
+		if (fieldsState.title == currentQRModel.title && fieldsState.desc == currentQRModel.desc) {
+			viewModelScope.launch { _uiEvents.emit(UIEvent.ShowToast("Content same")) }
+			return
+		}
+		// update the model
+		viewModelScope.launch {
+			val qRModel = currentQRModel.copy(
+				title = fieldsState.title,
+				desc = fieldsState.desc.ifBlank { null },
+			)
+
+			val result = repository.updateQRModel(qRModel)
+			result.fold(
+				onSuccess = {
+					_uiEvents.emit(UIEvent.ShowToast("Content Updated"))
+					_uiEvents.emit(UIEvent.NavigateBack)
+				},
+				onFailure = { err ->
+					val event = UIEvent.ShowSnackBar(err.message ?: "Unable to save")
+					_uiEvents.emit(event)
+				},
+			)
+		}
+	}
+
+	private fun toggleIsFavourite(model: SavedQRModel) = viewModelScope.launch {
+		val result = repository.toggleFavourite(model)
+		result.fold(
+			onSuccess = { model ->
+				val message = if (model.isFav) "Marked as favourite" else "Removed from favourites"
+				val event = UIEvent.ShowSnackBar(message)
+				_uiEvents.emit(event)
+			},
+			onFailure = {
+				val event = UIEvent.ShowSnackBar(it.message ?: "Error")
+				_uiEvents.emit(event)
+			},
+		)
 	}
 
 	private fun loadContent() = repository.fetchQRById(route.qrId)
@@ -77,7 +168,13 @@ class QRDetailsViewModel(
 					_uiEvents.emit(UIEvent.ShowSnackBar(message))
 				}
 
-				is Resource.Success -> _savedModel.update { res.data }
+				is Resource.Success -> {
+					val model = _savedModel.updateAndGet { res.data }
+					_editState.update { state ->
+						state.copy(title = model?.title ?: "", desc = model?.desc ?: "")
+					}
+				}
+
 				else -> {}
 			}
 			_isLoading.update { res is Resource.Loading }

@@ -2,7 +2,10 @@
 
 package com.sam.qrforge.presentation.common.utils
 
+import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.domain.models.SavedQRModel
+import com.sam.qrforge.domain.models.qr.QREmailModel
+import com.sam.qrforge.domain.models.qr.QRPlainTextModel
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
 import kotlinx.collections.immutable.toImmutableList
@@ -146,7 +149,22 @@ object PreviewFakes {
 		title = "Basic Test",
 		isFav = true,
 		desc = "A basic qr showing some data",
-		content = "This is a large content",
+		content = QRPlainTextModel("This is a large content").toQRString(),
+		format = QRDataType.TYPE_TEXT,
+		createdAt = LocalDateTime(2025, 8, 15, 0, 0, 0),
+	)
+
+	val FAKE_QR_MODEL_2 = SavedQRModel(
+		id = 0L,
+		title = "My mail",
+		isFav = false,
+		desc = "Sending all the queries to this mail",
+		content = QREmailModel(
+			address = "bhowmicktuhhin34@gmail.com",
+			subject = "Query",
+			body = "I am having issue with"
+		).toQRString(),
+		format = QRDataType.TYPE_EMAIL,
 		createdAt = LocalDateTime(2025, 8, 15, 0, 0, 0),
 	)
 
