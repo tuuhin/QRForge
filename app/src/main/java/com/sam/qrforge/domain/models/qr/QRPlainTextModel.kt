@@ -9,4 +9,8 @@ data class QRPlainTextModel(
 	override val isValid: Boolean = text.isNotEmpty()
 
 	override fun toQRString(): String = text
+
+	companion object {
+		fun toQRModel(content: String) = QRPlainTextModel(content)
+	}
 }

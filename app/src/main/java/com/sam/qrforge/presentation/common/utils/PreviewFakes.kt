@@ -149,7 +149,7 @@ object PreviewFakes {
 		title = "Basic Test",
 		isFav = true,
 		desc = "A basic qr showing some data",
-		content = QRPlainTextModel("This is a large content").toQRString(),
+		content = QRPlainTextModel("This is a large content"),
 		format = QRDataType.TYPE_TEXT,
 		createdAt = LocalDateTime(2025, 8, 15, 0, 0, 0),
 	)
@@ -163,7 +163,7 @@ object PreviewFakes {
 			address = "bhowmicktuhhin34@gmail.com",
 			subject = "Query",
 			body = "I am having issue with"
-		).toQRString(),
+		),
 		format = QRDataType.TYPE_EMAIL,
 		createdAt = LocalDateTime(2025, 8, 15, 0, 0, 0),
 	)
