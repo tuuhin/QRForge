@@ -7,4 +7,7 @@ sealed interface QRDetailsScreenEvents {
 
 	data class ToggleIsFavourite(val model: SavedQRModel) : QRDetailsScreenEvents
 	data class OnShareQR(val bitmap: ImageBitmap) : QRDetailsScreenEvents
+	data object ToggleDeleteDialog : QRDetailsScreenEvents
+	data object DeleteCurrentQR : QRDetailsScreenEvents
+	data object ActionConnectToWifi : QRDetailsScreenEvents
 }

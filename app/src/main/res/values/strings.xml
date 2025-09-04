@@ -42,4 +42,13 @@
   <string name="qr_action_text_mail">Send Mail</string>
   <string name="qr_action_text_geo">Open Map</string>
   <string name="share_qr_chooser_title">Share QR</string>
+  <string name="action_edit">Edit</string>
+  <string name="no_qr_saved">No QR Saved</string>
+  <string name="no_qr_saved_typed">No QR Saved of the given type</string>
+  <string name="action_delete">Delete</string>
+  <string name="dialog_action_confirm">Confirm</string>
+  <string name="dialog_action_cancel">Cancel</string>
+  <string name="delete_qr_dialog_text">Are you sure you want to delete this qr. Content will be lost if deleted</string>
+  <string name="delete_qr_dialog_title">Delete QR</string>
+  <string name="last_updated_text">Last Updated:</string>
 </resources>

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,6 +38,7 @@ import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
+import com.sam.qrforge.presentation.feature_detail.composables.ConfirmDeleteDialog
 import com.sam.qrforge.presentation.feature_detail.composables.MissingQRDetailsContent
 import com.sam.qrforge.presentation.feature_detail.composables.QRDetailsScreenContent
 import com.sam.qrforge.presentation.feature_detail.composables.QRDetailsTopAppBar
@@ -59,9 +61,15 @@ fun QRDetailsScreen(
 	navigation: @Composable () -> Unit = {},
 	onNavigateToHome: () -> Unit = {},
 	onNavigateToEdit: () -> Unit = {},
+	onNavigateToExport: () -> Unit = {},
 ) {
 	val snackBarHostState = LocalSnackBarState.current
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+	val scrollState = rememberScrollState()
+
+	val hasScrolled by remember(scrollState) {
+		derivedStateOf { scrollState.value > 0 }
+	}
 
 	val loadState by remember(state) {
 		derivedStateOf {
@@ -73,20 +81,29 @@ fun QRDetailsScreen(
 		}
 	}
 
+	ConfirmDeleteDialog(
+		showDialog = state.showDeleteDialog,
+		canDelete = state.deleteEnabled,
+		onDismiss = { onEvent(QRDetailsScreenEvents.ToggleDeleteDialog) },
+		onConfirmDelete = { onEvent(QRDetailsScreenEvents.DeleteCurrentQR) },
+	)
+
 	Scaffold(
 		topBar = {
 			QRDetailsTopAppBar(
 				qrModel = state.qrModel,
-				scrollBehavior = scrollBehavior,
 				onToggleFavourite = { onEvent(QRDetailsScreenEvents.ToggleIsFavourite(it)) },
+				onDeleteItem = { onEvent(QRDetailsScreenEvents.ToggleDeleteDialog) },
 				navigation = navigation,
+				scrollBehavior = scrollBehavior,
 			)
 		},
 		floatingActionButton = {
 			QREditActionButton(
 				showButton = state.qrModel != null,
 				onEdit = onNavigateToEdit,
-				modifier = Modifier.sharedBoundsWrapper(SharedTransitionKeys.QR_DETAILS_SCREEN_TO_EDIT_SCREEN)
+				isExpanded = !hasScrolled,
+				modifier = Modifier.sharedBoundsWrapper(key = SharedTransitionKeys.QR_DETAILS_SCREEN_TO_EDIT_SCREEN)
 			)
 		},
 		snackbarHost = {
@@ -123,8 +140,10 @@ fun QRDetailsScreen(
 					QRDetailsScreenContent(
 						savedContent = qrModel,
 						generatedModel = state.generatedModel,
+						onConnectToWifi = { onEvent(QRDetailsScreenEvents.ActionConnectToWifi) },
 						onShare = { bitmap -> onEvent(QRDetailsScreenEvents.OnShareQR(bitmap)) },
-						onExport = {},
+						onExport = onNavigateToExport,
+						scrollState = scrollState,
 						modifier = Modifier.fillMaxSize()
 					)
 				}

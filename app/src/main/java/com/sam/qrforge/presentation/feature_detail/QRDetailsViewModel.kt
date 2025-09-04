@@ -8,12 +8,15 @@ import com.sam.qrforge.domain.facade.QRGeneratorFacade
 import com.sam.qrforge.domain.facade.SaveGeneratedQRFacade
 import com.sam.qrforge.domain.models.GeneratedQRModel
 import com.sam.qrforge.domain.models.SavedQRModel
+import com.sam.qrforge.domain.models.qr.QRWiFiModel
+import com.sam.qrforge.domain.provider.WIFIConnector
 import com.sam.qrforge.domain.repository.SavedQRDataRepository
 import com.sam.qrforge.domain.util.Resource
 import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.UIEvent
 import com.sam.qrforge.presentation.feature_create.util.toBytes
+import com.sam.qrforge.presentation.feature_detail.state.DeleteQRDialogState
 import com.sam.qrforge.presentation.feature_detail.state.EditQRScreenEvent
 import com.sam.qrforge.presentation.feature_detail.state.EditQRScreenState
 import com.sam.qrforge.presentation.feature_detail.state.QRDetailsScreenEvents
@@ -39,25 +42,32 @@ import kotlinx.coroutines.launch
 
 class QRDetailsViewModel(
 	private val generator: QRGeneratorFacade,
+	private val wifiConnector: WIFIConnector,
 	private val repository: SavedQRDataRepository,
 	private val savedStateHandle: SavedStateHandle,
 	private val fileFacade: SaveGeneratedQRFacade,
 ) : AppViewModel() {
 
-	private val route: NavRoutes.QRDetailsScreen
+	private val route: NavRoutes.QRDetailsRoute
 		get() = savedStateHandle.toRoute()
 
 	private val _savedModel = MutableStateFlow<SavedQRModel?>(null)
 	private val _generatedQR = MutableStateFlow<GeneratedQRModel?>(null)
 	private val _isLoading = MutableStateFlow(true)
+	private val _deleteDialogState = MutableStateFlow(DeleteQRDialogState())
 
 	val screenState = combine(
-		_savedModel, _isLoading, _generatedQR
-	) { qrModel, isLoading, generated ->
+		_savedModel,
+		_isLoading,
+		_generatedQR,
+		_deleteDialogState
+	) { qrModel, isLoading, generated, dialogState ->
 		QRDetailsScreenState(
 			qrModel = qrModel,
 			isLoading = isLoading,
-			generatedModel = generated?.toUIModel()
+			generatedModel = generated?.toUIModel(),
+			showDeleteDialog = dialogState.showDialog,
+			deleteEnabled = dialogState.canDeleteItem
 		)
 	}.onStart {
 		loadContent()
@@ -82,6 +92,12 @@ class QRDetailsViewModel(
 		when (event) {
 			is QRDetailsScreenEvents.OnShareQR -> onShareGeneratedQR(event.bitmap)
 			is QRDetailsScreenEvents.ToggleIsFavourite -> toggleIsFavourite(event.model)
+			QRDetailsScreenEvents.ToggleDeleteDialog -> _deleteDialogState.update { state ->
+				state.copy(showDialog = !state.showDialog)
+			}
+
+			QRDetailsScreenEvents.DeleteCurrentQR -> onDeleteQR()
+			QRDetailsScreenEvents.ActionConnectToWifi -> connectToWifiNetwork()
 		}
 	}
 
@@ -99,6 +115,32 @@ class QRDetailsViewModel(
 		}
 	}
 
+	private fun connectToWifiNetwork() {
+		val model = (_savedModel.value?.content as? QRWiFiModel) ?: return
+		val ssid = model.ssid ?: return
+
+		val connectionFlow = wifiConnector.connectToWifi(
+			ssid = ssid,
+			passphrase = model.password,
+			isHidden = model.isHidden
+		)
+
+		connectionFlow.onEach { res ->
+			when (res) {
+				Resource.Loading -> _uiEvents.emit(UIEvent.ShowToast("Connecting"))
+				is Resource.Error -> {
+					val message = res.message ?: res.error.message ?: "Cannot connect "
+					_uiEvents.emit(UIEvent.ShowSnackBar(message))
+				}
+
+				is Resource.Success -> {
+					val message = if (res.data) "Connected" else "Denied"
+					_uiEvents.emit(UIEvent.ShowToast(message))
+				}
+			}
+		}.launchIn(viewModelScope)
+	}
+
 	private fun onShareGeneratedQR(bitmap: ImageBitmap) = viewModelScope.launch {
 		val bytes = bitmap.toBytes()
 		val fileResult = fileFacade.prepareFileToShare(bytes)
@@ -109,6 +151,30 @@ class QRDetailsViewModel(
 				_uiEvents.emit(event)
 			},
 		)
+	}
+
+	private fun onDeleteQR() {
+		val model = _savedModel.value ?: return
+		_deleteDialogState.update { state -> state.copy(canDeleteItem = false) }
+
+		viewModelScope.launch {
+			val result = repository.deleteQRModel(model)
+			result.fold(
+				onSuccess = {
+					_uiEvents.emit(UIEvent.ShowToast("Item Deleted"))
+					_uiEvents.emit(UIEvent.NavigateBack)
+				},
+				onFailure = {
+					val event = UIEvent.ShowToast(it.message ?: "Error")
+					_uiEvents.emit(event)
+				},
+			)
+		}.invokeOnCompletion {
+			// on completion
+			_deleteDialogState.update { state ->
+				state.copy(canDeleteItem = true, showDialog = false)
+			}
+		}
 	}
 
 	private fun onUpdateContent() {

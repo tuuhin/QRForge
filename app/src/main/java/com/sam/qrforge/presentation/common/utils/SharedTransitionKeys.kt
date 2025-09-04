@@ -10,4 +10,13 @@ object SharedTransitionKeys {
 
 	fun sharedBoundsToItemDetail(itemId: Long) =
 		"shared-bounds-home-screen-to-details-screen-$itemId"
+
+	fun sharedElementQRCodeItemToDetail(itemId: Long) =
+		"shared-element-home-screen-to-details-screen-$itemId-qr-code"
+
+	fun sharedBoundsTitleToDetails(itemId: Long) =
+		"shared-bounds-home-screen-to-details-screen-$itemId-title"
+
+	fun sharedElementContentTypeCard(itemId: Long) =
+		"shared-element-home-screen-to-details-screen-$itemId-content-card"
 }

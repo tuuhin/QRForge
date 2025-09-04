@@ -13,14 +13,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import com.sam.qrforge.R
 
 @Composable
 fun QREditActionButton(
 	showButton: Boolean,
 	onEdit: () -> Unit,
-	modifier: Modifier = Modifier
+	modifier: Modifier = Modifier,
+	isExpanded: Boolean = true,
+	shape: Shape = MaterialTheme.shapes.large,
+	containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
+	contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
 ) {
 	AnimatedVisibility(
 		visible = showButton,
@@ -37,13 +44,14 @@ fun QREditActionButton(
 			icon = {
 				Icon(
 					painter = painterResource(R.drawable.ic_edit),
-					contentDescription = "Edit "
+					contentDescription = "Edit"
 				)
 			},
-			shape = MaterialTheme.shapes.large,
-			containerColor = MaterialTheme.colorScheme.primaryContainer,
-			contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-			text = { Text("Edit") },
+			shape = shape,
+			expanded = isExpanded,
+			containerColor = containerColor,
+			contentColor = contentColor,
+			text = { Text(text = stringResource(R.string.action_edit)) },
 		)
 	}
 }

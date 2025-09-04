@@ -12,5 +12,5 @@ sealed interface NavRoutes {
 	data object CreateRoute : NavRoutes
 
 	@Serializable
-	data class QRDetailsScreen(val qrId: Long) : NavRoutes
+	data class QRDetailsRoute(val qrId: Long) : NavRoutes
 }

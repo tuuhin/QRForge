@@ -7,4 +7,6 @@ data class QRDetailsScreenState(
 	val qrModel: SavedQRModel? = null,
 	val isLoading: Boolean = true,
 	val generatedModel: GeneratedQRUIModel? = null,
+	val showDeleteDialog: Boolean = false,
+	val deleteEnabled: Boolean = true,
 )

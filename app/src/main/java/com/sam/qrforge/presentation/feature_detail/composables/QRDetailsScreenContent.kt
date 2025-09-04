@@ -1,8 +1,13 @@
 package com.sam.qrforge.presentation.feature_detail.composables
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseInOutBack
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,46 +30,71 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
+import com.sam.qrforge.data.contracts.QRIntentActionContracts
+import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.presentation.common.composables.AnimatedBasicQRContent
 import com.sam.qrforge.presentation.common.composables.QRContentStringCard
 import com.sam.qrforge.presentation.common.composables.QRContentTypeChip
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.utils.PLAIN_DATE_TIME
+import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
+import com.sam.qrforge.presentation.common.utils.sharedElementWrapper
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun QRDetailsScreenContent(
 	savedContent: SavedQRModel,
 	onShare: (ImageBitmap) -> Unit,
 	onExport: () -> Unit,
 	modifier: Modifier = Modifier,
+	onConnectToWifi: () -> Unit = {},
 	generatedModel: GeneratedQRUIModel? = null,
+	scrollState: ScrollState = rememberScrollState()
 ) {
 	val graphicsLayer = rememberGraphicsLayer()
 	val scope = rememberCoroutineScope()
-	val scrollState = rememberScrollState()
+
+	val context = LocalContext.current
+
+	val launcher = rememberLauncherForActivityResult(
+		contract = QRIntentActionContracts(),
+		onResult = {},
+	)
 
 	Column(
 		modifier = modifier.verticalScroll(scrollState),
 		verticalArrangement = Arrangement.spacedBy(12.dp),
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
-		QRContentTypeChip(type = savedContent.format)
+		QRContentTypeChip(
+			type = savedContent.format,
+			modifier = Modifier.sharedElementWrapper(
+				key = SharedTransitionKeys.sharedElementContentTypeCard(savedContent.id)
+			)
+		)
 		AnimatedBasicQRContent(
 			generated = generatedModel,
 			graphicsLayer = { graphicsLayer },
+			modifier = Modifier.sharedElementWrapper(
+				key = SharedTransitionKeys.sharedElementQRCodeItemToDetail(savedContent.id),
+				placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+				renderInOverlayDuringTransition = false,
+			)
 		)
 		QRCommonActions(
-			showActions = generatedModel != null,
+			isQRReady = generatedModel != null,
 			type = savedContent.format,
+			hasAssociatedAction = savedContent.format != QRDataType.TYPE_TEXT,
 			onShare = {
 				scope.launch {
 					val bitmap = graphicsLayer.toImageBitmap()
@@ -72,22 +102,28 @@ fun QRDetailsScreenContent(
 				}
 			},
 			onExport = onExport,
-			onAction = {},
+			onAction = {
+				if (savedContent.format == QRDataType.TYPE_WIFI) onConnectToWifi()
+				else if (savedContent.format != QRDataType.TYPE_TEXT) try {
+					launcher.launch(savedContent.content)
+				} catch (_: Exception) {
+					val message = "Cannot complete Action"
+					Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+				}
+			},
 		)
 		Spacer(modifier = Modifier.height(2.dp))
 		savedContent.desc?.let { desc ->
 			QRDescriptionCard(
-				desc,
+				text = desc,
 				modifier = Modifier.fillMaxWidth()
 			)
 		}
-		QRContentStringCard(
-			contentString = savedContent.content,
-			onContentCopy = {},
-		)
+		QRContentStringCard(contentString = savedContent.content.toQRString())
 		Text(
 			text = buildString {
-				append("Last Updated: ")
+				append(stringResource(R.string.last_updated_text))
+				append(" ")
 				append(savedContent.modifiedAt.format(LocalDateTime.Formats.PLAIN_DATE_TIME))
 			},
 			style = MaterialTheme.typography.labelMedium,

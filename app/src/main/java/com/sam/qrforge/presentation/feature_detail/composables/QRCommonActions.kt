@@ -2,6 +2,8 @@ package com.sam.qrforge.presentation.feature_detail.composables
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -37,21 +39,33 @@ import com.sam.qrforge.presentation.common.composables.painter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QRCommonActions(
-	showActions: Boolean,
+	isQRReady: Boolean,
 	onShare: () -> Unit,
 	onExport: () -> Unit,
-	onAction: () -> Unit,
 	modifier: Modifier = Modifier,
+	hasAssociatedAction: Boolean = true,
+	onAction: () -> Unit = {},
 	type: QRDataType = QRDataType.TYPE_TEXT,
 ) {
 	AnimatedVisibility(
-		visible = showActions,
+		visible = isQRReady,
 		enter = slideInVertically(
 			animationSpec = tween(durationMillis = 200, easing = EaseIn)
-		) + expandVertically(expandFrom = Alignment.Bottom),
+		) + expandVertically(
+			expandFrom = Alignment.Bottom,
+			animationSpec = spring(
+				dampingRatio = Spring.DampingRatioLowBouncy,
+				stiffness = Spring.StiffnessMedium
+			)
+		),
 		exit = slideOutVertically(
 			animationSpec = tween(durationMillis = 200, easing = EaseIn)
-		) + shrinkVertically(shrinkTowards = Alignment.Bottom),
+		) + shrinkVertically(
+			shrinkTowards = Alignment.Bottom, animationSpec = spring(
+				dampingRatio = Spring.DampingRatioLowBouncy,
+				stiffness = Spring.StiffnessMedium
+			)
+		),
 		modifier = modifier,
 	) {
 		Row(
@@ -80,22 +94,23 @@ fun QRCommonActions(
 					)
 				}
 			}
-			Button(
-				onClick = onAction,
-				shape = MaterialTheme.shapes.extraLarge,
-				colors = ButtonDefaults.buttonColors(
-					containerColor = MaterialTheme.colorScheme.primaryContainer,
-					contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-				),
-				contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-			) {
-				Icon(painter = type.painter, contentDescription = "Action")
-				Spacer(modifier = Modifier.width(6.dp))
-				Text(
-					text = type.toActionText,
-					style = MaterialTheme.typography.bodyMedium
-				)
-
+			if (hasAssociatedAction) {
+				Button(
+					onClick = onAction,
+					shape = MaterialTheme.shapes.extraLarge,
+					colors = ButtonDefaults.buttonColors(
+						containerColor = MaterialTheme.colorScheme.primaryContainer,
+						contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+					),
+					contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+				) {
+					Icon(painter = type.painter, contentDescription = "Action")
+					Spacer(modifier = Modifier.width(6.dp))
+					Text(
+						text = type.toActionText ?: "",
+						style = MaterialTheme.typography.bodyMedium
+					)
+				}
 			}
 			TooltipBox(
 				positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
@@ -123,14 +138,14 @@ fun QRCommonActions(
 	}
 }
 
-private val QRDataType.toActionText: String
+private val QRDataType.toActionText: String?
 	@Composable
 	get() = when (this) {
 		QRDataType.TYPE_EMAIL -> stringResource(R.string.qr_action_text_mail)
 		QRDataType.TYPE_PHONE -> stringResource(R.string.qr_action_text_phone)
 		QRDataType.TYPE_GEO -> stringResource(R.string.qr_action_text_geo)
 		QRDataType.TYPE_URL -> stringResource(R.string.qr_action_text_url)
-		QRDataType.TYPE_WIFI ->  stringResource(R.string.qr_action_text_wifi)
-		QRDataType.TYPE_TEXT -> stringResource(R.string.qr_action_text_text)
+		QRDataType.TYPE_WIFI -> stringResource(R.string.qr_action_text_wifi)
 		QRDataType.TYPE_SMS -> stringResource(R.string.qr_action_text_sms)
+		else -> null
 	}

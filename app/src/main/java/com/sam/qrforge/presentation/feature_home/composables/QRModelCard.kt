@@ -1,6 +1,7 @@
 package com.sam.qrforge.presentation.feature_home.composables
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.slideInHorizontally
@@ -39,11 +40,15 @@ import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import com.sam.qrforge.presentation.common.utils.PLAIN_DATE
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
+import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
+import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
+import com.sam.qrforge.presentation.common.utils.sharedElementWrapper
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun QRModelCard(
 	model: SavedAndGeneratedQRModel,
@@ -92,7 +97,12 @@ fun QRModelCard(
 				horizontalArrangement = Arrangement.spacedBy(12.dp),
 				verticalAlignment = Alignment.CenterVertically,
 			) {
-				AnimatedQRContent(uiModel = model.uiModel)
+				AnimatedQRContent(
+					uiModel = model.uiModel,
+					modifier = Modifier.sharedElementWrapper(
+						SharedTransitionKeys.sharedElementQRCodeItemToDetail(model.qrModel.id)
+					)
+				)
 				Column(
 					modifier = Modifier.weight(1f),
 					verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -108,6 +118,9 @@ fun QRModelCard(
 								style = MaterialTheme.typography.titleMedium,
 								color = MaterialTheme.colorScheme.primary,
 								fontWeight = FontWeight.SemiBold,
+								modifier = Modifier.sharedBoundsWrapper(
+									SharedTransitionKeys.sharedBoundsTitleToDetails(model.qrModel.id)
+								)
 							)
 							model.qrModel.desc?.let { desc ->
 								Text(
@@ -131,7 +144,12 @@ fun QRModelCard(
 						horizontalArrangement = Arrangement.SpaceBetween,
 						verticalAlignment = Alignment.CenterVertically
 					) {
-						QRContentTypeChip(type = model.qrModel.format)
+						QRContentTypeChip(
+							type = model.qrModel.format,
+							modifier = Modifier.sharedElementWrapper(
+								SharedTransitionKeys.sharedElementContentTypeCard(model.qrModel.id)
+							)
+						)
 						Text(
 							text = model.qrModel.modifiedAt.format(LocalDateTime.Formats.PLAIN_DATE),
 							style = MaterialTheme.typography.labelMedium,
@@ -154,9 +172,9 @@ private fun AnimatedQRContent(
 ) {
 	AnimatedVisibility(
 		visible = uiModel != null,
-		enter = slideInHorizontally() + expandIn(),
-		exit = slideOutHorizontally() + shrinkOut(),
-		modifier = modifier,
+		enter = slideInHorizontally() + expandIn(expandFrom = Alignment.CenterStart),
+		exit = slideOutHorizontally() + shrinkOut(shrinkTowards = Alignment.CenterStart),
+		modifier = modifier.size(size),
 	) {
 		uiModel?.let { generatedModel ->
 			QRTemplateBasic(
@@ -164,7 +182,7 @@ private fun AnimatedQRContent(
 				backgroundColor = Color.Transparent,
 				contentMargin = contentMargin,
 				roundness = .5f,
-				modifier = Modifier.size(size)
+				modifier = Modifier.fillMaxSize()
 			)
 		}
 	}
