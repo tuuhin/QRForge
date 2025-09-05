@@ -1,12 +1,12 @@
 package com.sam.qrforge.presentation.feature_home.composables
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.expandIn
-import androidx.compose.animation.shrinkOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.onFirstVisible
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.composables.QRContentTypeChip
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
+import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import com.sam.qrforge.presentation.common.utils.PLAIN_DATE
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
@@ -55,6 +57,7 @@ fun QRModelCard(
 	onDeleteItem: () -> Unit,
 	onSelectItem: () -> Unit,
 	modifier: Modifier = Modifier,
+	onGenerateQR: () -> Unit = {},
 	shape: Shape = MaterialTheme.shapes.large,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 	contentColor: Color = MaterialTheme.colorScheme.onSurface,
@@ -68,9 +71,7 @@ fun QRModelCard(
 	)
 
 	SwipeToDismissBox(
-		state = state,
-		enableDismissFromEndToStart = false,
-		backgroundContent = {
+		state = state, enableDismissFromEndToStart = false, backgroundContent = {
 			when (state.dismissDirection) {
 				SwipeToDismissBoxValue.StartToEnd -> {
 					SwipeToDeleteContent(
@@ -82,13 +83,13 @@ fun QRModelCard(
 
 				else -> {}
 			}
-		},
-		modifier = modifier
+		}, modifier = modifier
 	) {
 		Card(
 			onClick = onSelectItem,
 			shape = shape,
 			colors = CardDefaults.cardColors(containerColor, contentColor),
+			modifier = Modifier.onFirstVisible(minDurationMs = 10, callback = onGenerateQR)
 		) {
 			Row(
 				modifier = Modifier
@@ -98,8 +99,7 @@ fun QRModelCard(
 				verticalAlignment = Alignment.CenterVertically,
 			) {
 				AnimatedQRContent(
-					uiModel = model.uiModel,
-					modifier = Modifier.sharedElementWrapper(
+					uiModel = model.uiModel, modifier = Modifier.sharedElementWrapper(
 						SharedTransitionKeys.sharedElementQRCodeItemToDetail(model.qrModel.id)
 					)
 				)
@@ -168,21 +168,33 @@ private fun AnimatedQRContent(
 	modifier: Modifier = Modifier,
 	uiModel: GeneratedQRUIModel? = null,
 	contentMargin: Dp = 0.dp,
+	contentBackground: Color = MaterialTheme.colorScheme.surfaceContainer,
 	size: DpSize = DpSize(100.dp, 100.dp),
 ) {
-	AnimatedVisibility(
-		visible = uiModel != null,
-		enter = slideInHorizontally() + expandIn(expandFrom = Alignment.CenterStart),
-		exit = slideOutHorizontally() + shrinkOut(shrinkTowards = Alignment.CenterStart),
+	Box(
 		modifier = modifier.size(size),
+		contentAlignment = Alignment.Center
 	) {
-		uiModel?.let { generatedModel ->
-			QRTemplateBasic(
-				model = generatedModel,
-				backgroundColor = Color.Transparent,
-				contentMargin = contentMargin,
-				roundness = .5f,
-				modifier = Modifier.fillMaxSize()
+		Crossfade(
+			targetState = uiModel != null,
+			animationSpec = tween(easing = EaseInOut, durationMillis = 200),
+		) { isReady ->
+			if (isReady && uiModel != null) QRTemplateBasic(
+				model = uiModel,
+				decoration = QRDecorationOption.QRDecorationOptionBasic(
+					roundness = .5f,
+					contentMargin = contentMargin,
+					backGroundColor = contentBackground
+				),
+				modifier = Modifier.fillMaxSize(),
+			)
+			else Box(
+				modifier = Modifier
+					.matchParentSize()
+					.background(
+						color = MaterialTheme.colorScheme.surfaceContainerHigh,
+						shape = MaterialTheme.shapes.large
+					),
 			)
 		}
 	}
@@ -197,6 +209,6 @@ private fun SelectableQRModelCardPreview() = QRForgeTheme {
 			uiModel = PreviewFakes.FAKE_GENERATED_UI_MODEL_SMALL
 		),
 		onDeleteItem = {},
-		onSelectItem = {}
+		onSelectItem = {},
 	)
 }

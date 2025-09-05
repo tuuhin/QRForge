@@ -13,8 +13,6 @@ import com.sam.qrforge.presentation.feature_home.state.HomeScreenEvents
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -63,6 +61,7 @@ class HomeViewModel(
 		when (event) {
 			is HomeScreenEvents.OnFilterQRDataType -> _selectedTypeFilter.update { event.type }
 			is HomeScreenEvents.OnDeleteItem -> onDeleteItem(event.model)
+			is HomeScreenEvents.OnGenerateQR -> onGenerateQR(event.model)
 		}
 	}
 
@@ -74,7 +73,7 @@ class HomeViewModel(
 					_uiEvents.emit(UIEvent.ShowSnackBar(message))
 				}
 
-				is Resource.Success -> onGenerateQR(res.data)
+				is Resource.Success -> onUpdateModels(res.data)
 				else -> {}
 			}
 			_isLoading.update { res is Resource.Loading }
@@ -106,17 +105,48 @@ class HomeViewModel(
 		)
 	}
 
-	private fun onGenerateQR(models: List<SavedQRModel>) = viewModelScope.launch {
-		// filter the new ones
-		val models = models.map {
-			async {
-				val generator = generator.generate(it.content)
-				val uiModel = if (generator.isSuccess) generator.getOrThrow().toUIModel()
-				else null
-				SavedAndGeneratedQRModel(qrModel = it, uiModel)
+	private fun onUpdateModels(models: List<SavedQRModel>) {
+		// previous is acting like a cache
+		val savedAndGeneratedQr = _savedQR.value
+		val previousSavedQR = _savedQR.value.map { it.qrModel }
+
+		val updated = models.map { newModel ->
+			// if the new model is not in previous no create an empty instance
+			if (newModel !in previousSavedQR) return@map SavedAndGeneratedQRModel(newModel)
+			// if new model is present use the earlier one
+			savedAndGeneratedQr.find { it.qrModel.id == newModel.id }
+				?: SavedAndGeneratedQRModel(newModel)
+		}
+		// normal update
+		_savedQR.update { updated }
+	}
+
+	private fun onGenerateQR(model: SavedQRModel) {
+		// if id and content is same
+		val savedAndGeneratedModel = _savedQR.value
+			.find { it.qrModel.id == model.id && it.qrModel.content == model.content }
+
+		// ui model is already set and the content not changed so need to build the model once again
+		if (savedAndGeneratedModel?.uiModel != null) return
+
+		viewModelScope.launch {
+			val generator = generator.generate(model.content)
+
+			// it's a failure so no need to update the model
+			if (generator.isFailure) return@launch
+
+			val newResult = SavedAndGeneratedQRModel(
+				qrModel = model,
+				uiModel = generator.getOrNull()?.toUIModel()
+			)
+
+			// find the one asked for and update it
+			_savedQR.update { models ->
+				models.map { oldModel ->
+					if (oldModel.qrModel.id == model.id) newResult
+					else oldModel
+				}
 			}
 		}
-		val results = models.awaitAll()
-		_savedQR.update { results }
 	}
 }

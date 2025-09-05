@@ -1,7 +1,7 @@
 package com.sam.qrforge.presentation.feature_home.composables
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.enums.QRDataType
@@ -69,7 +70,7 @@ fun HomeScreenContent(
 		HorizontalDivider()
 		Crossfade(
 			targetState = contentState,
-			animationSpec = tween(200, easing = FastOutSlowInEasing),
+			animationSpec = tween(durationMillis = 200, easing = EaseOut),
 			modifier = Modifier.weight(1f)
 		) { state ->
 			when (state) {
@@ -78,6 +79,7 @@ fun HomeScreenContent(
 				ListContentState.DATA -> QRModelList(
 					generatedQR = generatedQR,
 					onSelectItem = onSelectItem,
+					onGenerateQR = { onEvent(HomeScreenEvents.OnGenerateQR(it)) },
 					onDeleteItem = { onEvent(HomeScreenEvents.OnDeleteItem(it)) },
 					modifier = Modifier.fillMaxSize(),
 				)
@@ -95,7 +97,7 @@ private fun LoadingContent(modifier: Modifier = Modifier) {
 	) {
 		CircularProgressIndicator()
 		Text(
-			text = "Loading",
+			text = stringResource(R.string.content_loading_text),
 			style = MaterialTheme.typography.titleLarge
 		)
 	}
@@ -118,7 +120,8 @@ private fun EmptyContent(
 			colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
 		)
 		Text(
-			text = if (isListFullyEmpty) "No QR Saved" else "No QR Saved of the given type",
+			text = if (isListFullyEmpty) stringResource(R.string.no_qr_saved)
+			else stringResource(R.string.no_qr_saved_typed),
 			style = MaterialTheme.typography.titleLarge,
 			color = MaterialTheme.colorScheme.secondary,
 		)

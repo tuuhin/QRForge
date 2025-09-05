@@ -26,6 +26,7 @@ fun QRModelList(
 	modifier: Modifier = Modifier,
 	onSelectItem: (SavedQRModel) -> Unit = {},
 	onDeleteItem: (SavedQRModel) -> Unit = {},
+	onGenerateQR: (SavedQRModel) -> Unit = {},
 	state: LazyListState = rememberLazyListState(),
 	contentPadding: PaddingValues = PaddingValues(),
 ) {
@@ -55,6 +56,7 @@ fun QRModelList(
 				model = item,
 				onDeleteItem = { onDeleteItem(item.qrModel) },
 				onSelectItem = { onSelectItem(item.qrModel) },
+				onGenerateQR = { onGenerateQR(item.qrModel) },
 				modifier = Modifier
 					.fillMaxWidth()
 					.animateItem()

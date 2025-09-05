@@ -18,11 +18,12 @@ import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRColorLayer
+import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @Composable
-fun QRTemplateLayered(
+private fun QRTemplateLayered(
 	model: GeneratedQRUIModel,
 	modifier: Modifier = Modifier,
 	coloredLayers: () -> QRColorLayer = { QRColorLayer() },
@@ -30,11 +31,14 @@ fun QRTemplateLayered(
 	roundness: Float = 0f,
 	bitsSizeMultiplier: Float = 1f,
 	isDiamond: Boolean = false,
-	graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
+	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
 	backgroundColor: Color = MaterialTheme.colorScheme.background,
 	fallbackContentColor: Color = MaterialTheme.colorScheme.onBackground,
 	fallbackBlendMode: BlendMode = BlendMode.Difference,
 ) {
+
+	val layer = graphicsLayer?.invoke() ?: rememberGraphicsLayer()
+
 	Spacer(
 		modifier = modifier
 			.defaultMinSize(
@@ -58,7 +62,7 @@ fun QRTemplateLayered(
 					val limitedRoundness = roundness.coerceIn(0f..1f)
 					val bitsMultiplier = bitsSizeMultiplier.coerceIn(.2f..1.5f)
 
-					graphicsLayer.record {// draw background
+					layer.record {// draw background
 						drawRect(color = backgroundColor)
 
 						val scaleFactor = 1 - (2 * limitMarginWidth / size.width)
@@ -89,9 +93,29 @@ fun QRTemplateLayered(
 						}
 					}
 					// draw the layer
-					drawLayer(graphicsLayer)
+					drawLayer(layer)
 				}
 			},
+	)
+}
+
+@Composable
+fun QRTemplateLayered(
+	model: GeneratedQRUIModel,
+	modifier: Modifier = Modifier,
+	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
+	decoration: QRDecorationOption.QRDecorationOptionColorLayer = QRDecorationOption.QRDecorationOptionColorLayer()
+) {
+	QRTemplateLayered(
+		model = model,
+		coloredLayers = decoration.coloredLayers,
+		roundness = decoration.roundness,
+		bitsSizeMultiplier = decoration.bitsSizeMultiplier,
+		isDiamond = decoration.isDiamond,
+		contentMargin = decoration.contentMargin,
+		backgroundColor = decoration.backGroundColor ?: Color.Transparent,
+		graphicsLayer = graphicsLayer,
+		modifier = modifier,
 	)
 }
 
@@ -100,7 +124,8 @@ fun QRTemplateLayered(
 private fun QRTemplateLayeredPreview() = QRForgeTheme {
 	QRTemplateLayered(
 		model = PreviewFakes.FAKE_GENERATED_UI_MODEL,
-		backgroundColor = MaterialTheme.colorScheme.background,
-		coloredLayers = { QRColorLayer.COLOR_BLOCKS }
+		decoration = QRDecorationOption.QRDecorationOptionColorLayer(
+			backGroundColor = MaterialTheme.colorScheme.background,
+			coloredLayers = { QRColorLayer.COLOR_BLOCKS })
 	)
 }

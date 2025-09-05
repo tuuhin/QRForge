@@ -72,7 +72,7 @@ fun NavGraphBuilder.homeRoute(controller: NavController) = animatedComposable<Na
 			onNavigateToCreateNew = dropUnlessResumed { controller.navigate(NavRoutes.CreateRoute) },
 			onNavigateToItemDetailed = { item ->
 				if (lifecycleState.isAtLeast(Lifecycle.State.STARTED)) {
-					controller.navigate(NavRoutes.QRDetailsScreen(item.id))
+					controller.navigate(NavRoutes.QRDetailsRoute(item.id))
 				}
 			}
 		)

@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
+import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 
 @Composable
@@ -68,10 +69,11 @@ fun AnimatedBasicQRContent(
 			if (isReady && generated != null)
 				QRTemplateBasic(
 					model = generated,
-					backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
 					graphicsLayer = graphicsLayer,
-					roundness = .5f,
-					contentMargin = 0.dp,
+					decoration = QRDecorationOption.QRDecorationOptionBasic(
+						roundness = .5f,
+						contentMargin = 0.dp
+					),
 					modifier = Modifier.fillMaxSize()
 				)
 			else FailedOrMissingQRContent(

@@ -2,7 +2,9 @@ package com.sam.qrforge.presentation.common.templates
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -16,11 +18,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
+import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @Composable
-fun QRTemplateMinimalistic(
+private fun QRTemplateMinimalistic(
 	model: GeneratedQRUIModel,
 	modifier: Modifier = Modifier,
 	roundness: Float = 0f,
@@ -28,11 +31,14 @@ fun QRTemplateMinimalistic(
 	contentMargin: Dp = 0.dp,
 	isDiamond: Boolean = false,
 	showBackground: Boolean = true,
-	graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
+	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
 	backgroundColor: Color = MaterialTheme.colorScheme.background,
 	bitsColor: Color = MaterialTheme.colorScheme.onBackground,
 	finderColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
+
+	val layer = graphicsLayer?.invoke() ?: rememberGraphicsLayer()
+
 	Spacer(
 		modifier = modifier
 			.defaultMinSize(
@@ -51,7 +57,7 @@ fun QRTemplateMinimalistic(
 					val limitMarginWidth = contentMargin.coerceIn(0.dp, 20.dp).toPx()
 					val scaleFactor = 1 - (2 * limitMarginWidth / size.width)
 					// draw background
-					graphicsLayer.record {
+					layer.record {
 						if (showBackground) drawRect(color = backgroundColor)
 
 						// blocks
@@ -75,16 +81,40 @@ fun QRTemplateMinimalistic(
 							scaleFactor = scaleFactor
 						)
 					}
-					drawLayer(graphicsLayer)
+					drawLayer(layer)
 				}
 			},
+	)
+}
+
+@Composable
+fun QRTemplateMinimalistic(
+	model: GeneratedQRUIModel,
+	modifier: Modifier = Modifier,
+	decoration: QRDecorationOption.QRDecorationOptionMinimal = QRDecorationOption.QRDecorationOptionMinimal(),
+	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
+) {
+	QRTemplateMinimalistic(
+		model = model,
+		roundness = decoration.roundness,
+		bitsSizeMultiplier = decoration.bitsSizeMultiplier,
+		isDiamond = decoration.isDiamond,
+		contentMargin = decoration.contentMargin,
+		bitsColor = decoration.bitsColor ?: MaterialTheme.colorScheme.onBackground,
+		finderColor = decoration.findersColor ?: MaterialTheme.colorScheme.onBackground,
+		showBackground = decoration.showBackground,
+		graphicsLayer = graphicsLayer,
+		modifier = modifier,
 	)
 }
 
 @PreviewLightDark
 @Composable
 private fun QRTemplateMinimalisticPreview() = QRForgeTheme {
-	QRTemplateMinimalistic(
-		model = PreviewFakes.FAKE_GENERATED_UI_MODEL,
-	)
+	Surface {
+		QRTemplateMinimalistic(
+			model = PreviewFakes.FAKE_GENERATED_UI_MODEL,
+			modifier = Modifier.size(200.dp)
+		)
+	}
 }
