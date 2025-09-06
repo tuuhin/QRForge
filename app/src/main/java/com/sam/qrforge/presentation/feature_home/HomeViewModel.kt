@@ -1,7 +1,6 @@
 package com.sam.qrforge.presentation.feature_home
 
 import androidx.lifecycle.viewModelScope
-import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
 import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.domain.repository.SavedQRDataRepository
@@ -9,8 +8,10 @@ import com.sam.qrforge.domain.util.Resource
 import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.UIEvent
+import com.sam.qrforge.presentation.feature_home.state.FilterQRListState
 import com.sam.qrforge.presentation.feature_home.state.HomeScreenEvents
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
+import com.sam.qrforge.presentation.feature_home.state.filteredResults
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,17 +33,16 @@ class HomeViewModel(
 	private val generator: QRGeneratorFacade
 ) : AppViewModel() {
 
-	private val _selectedTypeFilter = MutableStateFlow<QRDataType?>(null)
-	val typeFilter = _selectedTypeFilter.asStateFlow()
+	private val _filterState = MutableStateFlow(FilterQRListState())
+	val filterState = _filterState.asStateFlow()
 
 	private val _savedQR = MutableStateFlow<List<SavedAndGeneratedQRModel>>(emptyList())
 
 	private val _isLoading = MutableStateFlow(true)
 	val isLoading = _isLoading.asStateFlow()
 
-	val savedQR = combine(_savedQR, _selectedTypeFilter) { savedQR, filter ->
-		if (filter == null) savedQR
-		else savedQR.filter { it.qrModel.format == filter }
+	val savedQR = combine(_savedQR, _filterState) { savedQR, filter ->
+		savedQR.filteredResults(filter)
 	}
 		.onStart { loadQR() }
 		.map { models -> models.toImmutableList() }
@@ -59,9 +59,9 @@ class HomeViewModel(
 
 	fun onEvent(event: HomeScreenEvents) {
 		when (event) {
-			is HomeScreenEvents.OnFilterQRDataType -> _selectedTypeFilter.update { event.type }
 			is HomeScreenEvents.OnDeleteItem -> onDeleteItem(event.model)
 			is HomeScreenEvents.OnGenerateQR -> onGenerateQR(event.model)
+			is HomeScreenEvents.OnListFilterChange -> _filterState.update { state -> event.filter }
 		}
 	}
 

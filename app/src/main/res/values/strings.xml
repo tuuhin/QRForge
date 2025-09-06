@@ -51,4 +51,19 @@
   <string name="delete_qr_dialog_text">Are you sure you want to delete this qr. Content will be lost if deleted</string>
   <string name="delete_qr_dialog_title">Delete QR</string>
   <string name="last_updated_text">Last Updated:</string>
+  <string name="select_template_title">Select Template</string>
+  <string name="template_option_basic">Basic</string>
+  <string name="template_option_minimalistic">Minimalistic</string>
+  <string name="template_option_color_layered">Layered</string>
+  <string name="generate_qr">Generate</string>
+  <string name="scan_qr">Scan</string>
+  <string name="sort_order_asc">Ascending</string>
+  <string name="sort_order_desc">Descending</string>
+  <string name="sort_option_name">Name</string>
+  <string name="sort_option_date_created">Date Created</string>
+  <string name="filter_options">Filter Options</string>
+  <string name="settings_options">Settings</string>
+  <string name="filter_options_title_only_fav">Only Favourite</string>
+  <string name="filter_options_title_sort_order">Sort Order</string>
+  <string name="filter_options_title_sort_options">Sort Options</string>
 </resources>

@@ -26,8 +26,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
-import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.domain.models.SavedQRModel
+import com.sam.qrforge.presentation.feature_home.state.FilterQRListState
 import com.sam.qrforge.presentation.feature_home.state.HomeScreenEvents
 import com.sam.qrforge.presentation.feature_home.state.ListContentState
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
@@ -39,13 +39,13 @@ fun HomeScreenContent(
 	onEvent: (HomeScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
 	onSelectItem: (SavedQRModel) -> Unit = {},
-	selectedQRType: QRDataType? = null,
+	filterState: FilterQRListState = FilterQRListState(),
 	isContentReady: Boolean = true,
 	contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
 
-	val isListFullyEmpty by remember(selectedQRType, generatedQR) {
-		derivedStateOf { selectedQRType == null && generatedQR.isEmpty() }
+	val isListFullyEmpty by remember(filterState, generatedQR) {
+		derivedStateOf { filterState.selectedType == null && generatedQR.isEmpty() }
 	}
 
 	val contentState by remember(isContentReady, generatedQR) {
@@ -63,8 +63,11 @@ fun HomeScreenContent(
 		verticalArrangement = Arrangement.spacedBy(6.dp)
 	) {
 		QRDataTypePickerRow(
-			selectedType = selectedQRType,
-			onSelectType = { type -> onEvent(HomeScreenEvents.OnFilterQRDataType(type)) },
+			selectedType = filterState.selectedType,
+			onSelectType = { type ->
+				val newState = filterState.copy(selectedType = type)
+				onEvent(HomeScreenEvents.OnListFilterChange(newState))
+			},
 			modifier = Modifier.fillMaxWidth()
 		)
 		HorizontalDivider()
