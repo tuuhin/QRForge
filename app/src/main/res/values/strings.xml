@@ -66,4 +66,11 @@
   <string name="filter_options_title_only_fav">Only Favourite</string>
   <string name="filter_options_title_sort_order">Sort Order</string>
   <string name="filter_options_title_sort_options">Sort Options</string>
+  <string name="dimension_option_small">Small</string>
+  <string name="dimension_option_medium">Medium</string>
+  <string name="dimension_option_large">Large</string>
+  <string name="dimension_option_extra_large">E Large</string>
+  <string name="dimension_option_title">Select Dimension</string>
+  <string name="action_exporting">Exporting</string>
+  <string name="qr_editor_title">QR Editor</string>
 </resources>

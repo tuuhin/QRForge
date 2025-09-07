@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -108,7 +109,7 @@ fun QRTemplateBasic(
 		showFrame = decoration.showFrame,
 		finderColor = decoration.findersColor ?: MaterialTheme.colorScheme.onBackground,
 		bitsColor = decoration.bitsColor ?: MaterialTheme.colorScheme.onBackground,
-		backgroundColor = decoration.backGroundColor ?: MaterialTheme.colorScheme.background,
+		backgroundColor = decoration.backGroundColor ?: Color.Transparent,
 		frameColor = decoration.frameColor ?: MaterialTheme.colorScheme.onBackground,
 		graphicsLayer = graphicsLayer,
 		modifier = modifier,
@@ -119,8 +120,10 @@ fun QRTemplateBasic(
 @PreviewLightDark
 @Composable
 private fun QRTemplateBasicPreview() = QRForgeTheme {
-	QRTemplateBasic(
-		model = PreviewFakes.FAKE_GENERATED_UI_MODEL_4,
-		modifier = Modifier.size(200.dp)
-	)
+	Surface {
+		QRTemplateBasic(
+			model = PreviewFakes.FAKE_GENERATED_UI_MODEL_4,
+			modifier = Modifier.size(200.dp)
+		)
+	}
 }

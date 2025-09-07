@@ -145,7 +145,10 @@ class QRDetailsViewModel(
 		val bytes = bitmap.toBytes()
 		val fileResult = fileFacade.prepareFileToShare(bytes)
 		fileResult.fold(
-			onSuccess = { _shareQREvent.emit(it) },
+			onSuccess = {
+				_uiEvents.emit(UIEvent.ShowToast("Sharing QR"))
+				_shareQREvent.emit(it)
+			},
 			onFailure = {
 				val event = UIEvent.ShowToast("Failed to share")
 				_uiEvents.emit(event)

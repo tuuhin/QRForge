@@ -2,6 +2,7 @@ package com.sam.qrforge.presentation.feature_export.composable
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,23 +13,22 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
-import com.sam.qrforge.presentation.common.models.QRColorLayer
 import com.sam.qrforge.presentation.common.models.QRTemplateOption
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import com.sam.qrforge.presentation.common.templates.QRTemplateLayered
@@ -44,30 +44,29 @@ fun QRTemplatePicker(
 	selectedTemplate: QRTemplateOption = QRTemplateOption.BASIC,
 	shape: Shape = MaterialTheme.shapes.large,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
-	contentPadding: PaddingValues = PaddingValues(12.dp),
+	contentPadding: PaddingValues = PaddingValues(16.dp),
 ) {
 	Surface(
 		shape = shape,
 		color = containerColor,
-		contentColor = contentColorFor(containerColor),
 		modifier = modifier,
 	) {
 		Column(
 			modifier = Modifier.padding(contentPadding),
-			verticalArrangement = Arrangement.spacedBy(4.dp)
 		) {
 			Text(
-				text = "Select template",
+				text = stringResource(R.string.select_template_title),
 				style = MaterialTheme.typography.titleMedium,
-				color = MaterialTheme.colorScheme.secondary
+				color = MaterialTheme.colorScheme.onSecondaryContainer,
 			)
 			LazyRow(
-				horizontalArrangement = Arrangement.spacedBy(6.dp)
+				horizontalArrangement = Arrangement.spacedBy(10.dp),
+				contentPadding = PaddingValues(top = 8.dp),
+				modifier = Modifier.fillMaxWidth(),
 			) {
 				itemsIndexed(
 					items = QRTemplateOption.entries,
 					key = { _, item -> item.name },
-					contentType = { _, item -> item.javaClass.simpleName },
 				) { _, template ->
 					QRTemplateOption(
 						renderModel = model,
@@ -89,11 +88,14 @@ private fun QRTemplateOption(
 	template: QRTemplateOption = QRTemplateOption.MINIMALISTIC,
 	isSelected: Boolean = false,
 	templateSize: Dp = 80.dp,
-	selectedBorder: BorderStroke = BorderStroke(2.dp, MaterialTheme.colorScheme.onPrimaryContainer),
+	borderStroke: BorderStroke = BorderStroke(2.5.dp, MaterialTheme.colorScheme.onPrimaryContainer),
 	selectedContainerColor: Color = MaterialTheme.colorScheme.primaryContainer,
+	templateTextStyle: TextStyle = MaterialTheme.typography.labelLarge,
+	templateTextColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+	shape: Shape = MaterialTheme.shapes.medium,
 ) {
 	Surface(
-		shape = MaterialTheme.shapes.medium,
+		shape = shape,
 		color = MaterialTheme.colorScheme.surfaceContainerHigh,
 		onClick = onTemplateChange,
 		modifier = modifier,
@@ -101,23 +103,17 @@ private fun QRTemplateOption(
 		Column(
 			horizontalAlignment = Alignment.CenterHorizontally,
 			modifier = Modifier.drawWithContent {
-
-				val borderWidth = selectedBorder.width.toPx()
-
 				if (isSelected) {
-					drawRoundRect(
+					// overlay
+					drawOutline(
+						outline = shape.createOutline(size, layoutDirection, this),
 						color = selectedContainerColor,
-						cornerRadius = CornerRadius(10.dp.toPx())
 					)
-					drawRoundRect(
-						topLeft = Offset(borderWidth * .5f, borderWidth * .5f),
-						size = Size(
-							width = size.width - borderWidth,
-							height = size.height - borderWidth
-						),
-						brush = selectedBorder.brush,
-						cornerRadius = CornerRadius(10.dp.toPx()),
-						style = Stroke(width = selectedBorder.width.toPx())
+					// border
+					drawOutline(
+						outline = shape.createOutline(size, layoutDirection, this),
+						brush = borderStroke.brush,
+						style = Stroke(width = borderStroke.width.toPx())
 					)
 				}
 				scale(.9f) {
@@ -125,47 +121,33 @@ private fun QRTemplateOption(
 				}
 			},
 		) {
-			when (template) {
-				QRTemplateOption.BASIC -> {
-					QRTemplateBasic(
+			Box(
+				modifier = Modifier
+					.size(templateSize)
+					.padding(4.dp),
+			) {
+				when (template) {
+					QRTemplateOption.BASIC -> QRTemplateBasic(
 						model = renderModel,
-						backgroundColor = Color.Transparent,
-						modifier = Modifier.size(templateSize),
+						modifier = Modifier.matchParentSize(),
 					)
-					Text(
-						text = "Basic",
-						style = MaterialTheme.typography.bodyMedium,
-						color = MaterialTheme.colorScheme.onSurfaceVariant,
-					)
-				}
 
-				QRTemplateOption.MINIMALISTIC -> {
-					QRTemplateMinimalistic(
+					QRTemplateOption.MINIMALISTIC -> QRTemplateMinimalistic(
 						model = renderModel,
-						backgroundColor = Color.Transparent,
-						modifier = Modifier.size(templateSize)
+						modifier = Modifier.matchParentSize()
 					)
-					Text(
-						text = "Minimal",
-						style = MaterialTheme.typography.bodyMedium,
-						color = MaterialTheme.colorScheme.onSurfaceVariant,
-					)
-				}
 
-				QRTemplateOption.COLOR_LAYERED -> {
-					QRTemplateLayered(
+					QRTemplateOption.COLOR_LAYERED -> QRTemplateLayered(
 						model = renderModel,
-						coloredLayers = { QRColorLayer.COLOR_BLOCKS },
-						backgroundColor = Color.Transparent,
-						modifier = Modifier.size(templateSize)
-					)
-					Text(
-						text = "Layered",
-						style = MaterialTheme.typography.bodyMedium,
-						color = MaterialTheme.colorScheme.onSurfaceVariant,
+						modifier = Modifier.matchParentSize()
 					)
 				}
 			}
+			Text(
+				text = template.localeString,
+				style = templateTextStyle,
+				color = templateTextColor
+			)
 		}
 	}
 }

@@ -1,4 +1,4 @@
-package com.sam.qrforge.presentation.feature_home.composables
+package com.sam.qrforge.presentation.feature_export.composable
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

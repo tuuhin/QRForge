@@ -19,9 +19,8 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -47,7 +46,7 @@ fun QRTemplateHalfTone(
 	showTimingPatterns: Boolean = false,
 	showAlignmentPatterns: Boolean = false,
 	painter: Painter? = null,
-	graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
+	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
 	backgroundColor: Color = MaterialTheme.colorScheme.background,
 	bitsColor: Color = MaterialTheme.colorScheme.onBackground,
 	finderPatternColor: Color = MaterialTheme.colorScheme.primary,
@@ -56,8 +55,7 @@ fun QRTemplateHalfTone(
 	imageColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
 
-	val density = LocalDensity.current
-	val layoutDirection = LocalLayoutDirection.current
+	val layer = graphicsLayer?.invoke() ?: rememberGraphicsLayer()
 
 	Spacer(
 		modifier = modifier
@@ -97,7 +95,7 @@ fun QRTemplateHalfTone(
 					(size.height - imageSize.height) * .5f
 				)
 
-				val image = painterToBitmap(painter, density, layoutDirection)
+				val image = painterToBitmap(painter, this, layoutDirection)
 
 				val diffusedImage = image?.let {
 					FloydSteinBergAlgo.runAlgo(
@@ -115,7 +113,7 @@ fun QRTemplateHalfTone(
 
 				onDrawBehind {
 					// draw background
-					graphicsLayer.record {
+					layer.record {
 						drawRect(color = backgroundColor)
 
 						// draw full sized qr background
@@ -174,7 +172,7 @@ fun QRTemplateHalfTone(
 						)
 					}
 					// draw layer
-					drawLayer(graphicsLayer)
+					drawLayer(layer)
 				}
 			},
 	)
@@ -205,7 +203,8 @@ private fun painterToBitmap(
 @Composable
 private fun QRTemplateHalfTonePreview() = QRForgeTheme {
 	QRTemplateHalfTone(
-		model = PreviewFakes.FAKE_GENERATED_UI_MODEL,
-		modifier = Modifier.size(400.dp)
+		model = PreviewFakes.FAKE_GENERATED_UI_MODEL_4,
+		painter = painterResource(R.drawable.android_bot),
+		modifier = Modifier.size(200.dp)
 	)
 }
