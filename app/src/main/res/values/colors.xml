@@ -5,4 +5,40 @@
   <color name="on_primary_container">#FF394379</color>
   <color name="primary">#FF515B92</color>
   <color name="on_primary">#FFFFFFFF</color>
+
+  <!--  Light colors-->
+  <color name="tailwind_color_red_light">#F87171</color>
+  <color name="tailwind_color_orange_light">#FB923C</color>
+  <color name="tailwind_color_amber_light">#FBBF24</color>
+  <color name="tailwind_color_yellow_light">#FACC15</color>
+  <color name="tailwind_color_lime_light">#A3E635</color>
+  <color name="tailwind_color_green_light">#4ADE80</color>
+  <color name="tailwind_color_emerald_light">#34D399</color>
+  <color name="tailwind_color_teal_light">#2DDB4F</color>
+  <color name="tailwind_color_cyan_light">#22D3EE</color>
+  <color name="tailwind_color_sky_light">#38BDF8</color>
+  <color name="tailwind_color_blue_light">#60A5FA</color>
+  <color name="tailwind_color_indigo_light">#818CF8</color>
+  <color name="tailwind_color_violet_light">#A78BFA</color>
+  <color name="tailwind_color_purple_light">#C084FC</color>
+  <color name="tailwind_color_pink_light">#F472B6</color>
+  <color name="tailwind_color_rose_light">#FB7185</color>
+
+  <!--  Dark Colors-->
+  <color name="tailwind_color_red_dark">#991B1B</color>
+  <color name="tailwind_color_orange_dark">#9A3412</color>
+  <color name="tailwind_color_amber_dark">#92400E</color>
+  <color name="tailwind_color_yellow_dark">#854D0E</color>
+  <color name="tailwind_color_lime_dark">#3F6212</color>
+  <color name="tailwind_color_green_dark">#166534</color>
+  <color name="tailwind_color_emerald_dark">#047857</color>
+  <color name="tailwind_color_teal_dark">#0F766E</color>
+  <color name="tailwind_color_cyan_dark">#0E7490</color>
+  <color name="tailwind_color_sky_dark">#075985</color>
+  <color name="tailwind_color_blue_dark">#1E40AF</color>
+  <color name="tailwind_color_indigo_dark">#3730A3</color>
+  <color name="tailwind_color_violet_dark">#5B21B6</color>
+  <color name="tailwind_color_purple_dark">#6B21A8</color>
+  <color name="tailwind_color_pink_dark">#86198F</color>
+  <color name="tailwind_color_rose_dark">#9F1239</color>
 </resources>

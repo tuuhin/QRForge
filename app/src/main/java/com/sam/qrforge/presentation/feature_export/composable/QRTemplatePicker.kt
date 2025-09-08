@@ -57,7 +57,7 @@ fun QRTemplatePicker(
 			Text(
 				text = stringResource(R.string.select_template_title),
 				style = MaterialTheme.typography.titleMedium,
-				color = MaterialTheme.colorScheme.onSecondaryContainer,
+				color = MaterialTheme.colorScheme.secondary,
 			)
 			LazyRow(
 				horizontalArrangement = Arrangement.spacedBy(10.dp),

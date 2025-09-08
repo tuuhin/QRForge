@@ -5,17 +5,22 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -26,6 +31,7 @@ import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditQRDecoration(
 	onDecorationChange: (QRDecorationOption) -> Unit,
@@ -34,9 +40,24 @@ fun EditQRDecoration(
 	shape: Shape = MaterialTheme.shapes.large,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 	contentPadding: PaddingValues = PaddingValues(16.dp),
-	enterTransition: EnterTransition = fadeIn() + slideInHorizontally(),
-	exitTransition: ExitTransition = fadeOut() + slideOutHorizontally(),
+	enterTransition: EnterTransition = fadeIn() + slideInVertically(),
+	exitTransition: ExitTransition = fadeOut() + slideOutVertically(),
 ) {
+
+	val showBackgroundColorPicker by remember(decoration) {
+		derivedStateOf {
+			when (decoration) {
+				is QRDecorationOption.QRDecorationOptionBasic -> true
+				is QRDecorationOption.QRDecorationOptionColorLayer -> false
+				is QRDecorationOption.QRDecorationOptionMinimal -> decoration.showBackground
+			}
+		}
+	}
+
+	val showFrameOption by remember(decoration) {
+		derivedStateOf { decoration is QRDecorationOption.QRDecorationOptionBasic }
+	}
+
 	Surface(
 		shape = shape,
 		color = containerColor,
@@ -51,67 +72,71 @@ fun EditQRDecoration(
 			Text(
 				text = stringResource(R.string.action_edit),
 				style = MaterialTheme.typography.titleMedium,
-				color = MaterialTheme.colorScheme.secondary
+				color = MaterialTheme.colorScheme.secondary,
 			)
 			// list of options
 			QREditBlockRoundness(
 				roundness = decoration.roundness,
 				onRoundnessChange = { round ->
-					val modified = when (decoration) {
-						is QRDecorationOption.QRDecorationOptionBasic -> decoration.copy(roundness = round)
-						is QRDecorationOption.QRDecorationOptionMinimal -> decoration.copy(roundness = round)
-						is QRDecorationOption.QRDecorationOptionColorLayer ->
-							decoration.copy(roundness = round)
-					}
+					val modified = decoration.copyProperties(roundness = round)
 					onDecorationChange(modified)
 				},
 			)
 			QREditBlockBitsSize(
 				bitsSizeMultiplier = decoration.bitsSizeMultiplier,
 				onBitsMultiplierChange = { bitsSize ->
-					val modified = when (decoration) {
-						is QRDecorationOption.QRDecorationOptionBasic ->
-							decoration.copy(bitsSizeMultiplier = bitsSize)
-
-						is QRDecorationOption.QRDecorationOptionMinimal ->
-							decoration.copy(bitsSizeMultiplier = bitsSize)
-
-						is QRDecorationOption.QRDecorationOptionColorLayer ->
-							decoration.copy(bitsSizeMultiplier = bitsSize)
-					}
+					val modified = decoration.copyProperties(bitsSizeMultiplier = bitsSize)
 					onDecorationChange(modified)
 				}
 			)
 			QREditBlockContentMargin(
 				contentMargin = decoration.contentMargin,
 				onMarginChange = { margin ->
-					val modified = when (decoration) {
-						is QRDecorationOption.QRDecorationOptionBasic ->
-							decoration.copy(contentMargin = margin)
-
-						is QRDecorationOption.QRDecorationOptionMinimal ->
-							decoration.copy(contentMargin = margin)
-
-						is QRDecorationOption.QRDecorationOptionColorLayer ->
-							decoration.copy(contentMargin = margin)
-					}
+					val modified = decoration.copyProperties(contentMargin = margin)
 					onDecorationChange(modified)
 				}
 			)
+			HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
+			AnimatedVisibility(
+				visible = showBackgroundColorPicker,
+				enter = enterTransition,
+				exit = exitTransition
+			) {
+				QREditBlockSelectColor(
+					title = stringResource(R.string.qr_edit_property_background_color_title),
+					selectedColor = decoration.backGroundColor ?: Color.Transparent,
+					onSelectColor = {
+						val modified = decoration.copyBackgroundColor(it)
+						onDecorationChange(modified)
+					},
+				)
+			}
+			QREditBlockSelectColor(
+				title = stringResource(R.string.qr_edit_property_bits_color_title),
+				selectedColor = decoration.bitsColor ?: MaterialTheme.colorScheme.onBackground,
+				onSelectColor = {
+					val modified = decoration.copyBitsColor(it)
+					onDecorationChange(modified)
+				},
+			)
+			QREditBlockSelectColor(
+				title = stringResource(R.string.qr_edit_property_finders_color_title),
+				selectedColor = decoration.findersColor ?: MaterialTheme.colorScheme.onBackground,
+				onSelectColor = {
+					val modified = decoration.copyFinderColor(it)
+					onDecorationChange(modified)
+				},
+			)
+			HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
 			QREditBlockFinderShape(
 				isShapeDiamond = decoration.isDiamond,
 				onChangeShape = { isDiamond ->
-					val modified = when (decoration) {
-						is QRDecorationOption.QRDecorationOptionBasic -> decoration.copy(isDiamond = isDiamond)
-						is QRDecorationOption.QRDecorationOptionMinimal -> decoration.copy(isDiamond = isDiamond)
-						is QRDecorationOption.QRDecorationOptionColorLayer ->
-							decoration.copy(isDiamond = isDiamond)
-					}
+					val modified = decoration.copyProperties(isDiamond = isDiamond)
 					onDecorationChange(modified)
 				},
 			)
 			AnimatedVisibility(
-				visible = decoration is QRDecorationOption.QRDecorationOptionBasic,
+				visible = showFrameOption,
 				enter = enterTransition,
 				exit = exitTransition
 			) {
