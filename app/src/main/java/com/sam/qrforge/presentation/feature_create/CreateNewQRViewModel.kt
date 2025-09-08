@@ -2,8 +2,8 @@ package com.sam.qrforge.presentation.feature_create
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.viewModelScope
+import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
-import com.sam.qrforge.domain.facade.SaveGeneratedQRFacade
 import com.sam.qrforge.domain.models.CreateNewQRModel
 import com.sam.qrforge.domain.models.GeneratedQRModel
 import com.sam.qrforge.domain.models.qr.QRContentModel
@@ -41,7 +41,7 @@ class CreateNewQRViewModel(
 	private val contactsProvider: ContactsDataProvider,
 	private val locationProvider: LocationProvider,
 	private val repository: SavedQRDataRepository,
-	private val saveGeneratedQRFacade: SaveGeneratedQRFacade,
+	private val saveGeneratedQRFacade: FileStorageFacade,
 ) : AppViewModel() {
 
 	private val _saveQRState = MutableStateFlow(SaveQRScreenState())
@@ -96,7 +96,7 @@ class CreateNewQRViewModel(
 
 	private fun onShareGeneratedQR(bitmap: ImageBitmap) = viewModelScope.launch {
 		val bytes = bitmap.toBytes()
-		val fileResult = saveGeneratedQRFacade.prepareFileToShare(bytes)
+		val fileResult = saveGeneratedQRFacade.saveContentToShare(bytes)
 		fileResult.fold(
 			onSuccess = { _shareQREvent.emit(it) },
 			onFailure = {

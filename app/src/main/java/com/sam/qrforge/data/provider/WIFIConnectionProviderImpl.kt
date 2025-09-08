@@ -14,7 +14,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.content.getSystemService
-import com.sam.qrforge.domain.provider.WIFIConnector
+import com.sam.qrforge.domain.provider.WIFIConnectionProvider
 import com.sam.qrforge.domain.provider.exception.NetworkUnAvailableException
 import com.sam.qrforge.domain.provider.exception.WIFINotEnabledException
 import com.sam.qrforge.domain.util.Resource
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.flow
 
 private const val TAG = "WIFI_CONNECTIVITY_PROVIDER"
 
-class WIFIConnectorImpl(private val context: Context) : WIFIConnector {
+class WIFIConnectionProviderImpl(private val context: Context) : WIFIConnectionProvider {
 
 	private val _connectivityManager by lazy { context.getSystemService<ConnectivityManager>() }
 	private val _wifiManager by lazy { context.getSystemService<WifiManager>() }

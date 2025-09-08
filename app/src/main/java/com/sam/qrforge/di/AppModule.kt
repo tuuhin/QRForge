@@ -2,17 +2,17 @@ package com.sam.qrforge.di
 
 import com.sam.qrforge.data.database.QRForgeAppDatabase
 import com.sam.qrforge.data.database.dao.QRDataDao
+import com.sam.qrforge.data.facade.FileStorageFacadeImpl
 import com.sam.qrforge.data.facade.QRGeneratorFacadeImpl
-import com.sam.qrforge.data.facade.SaveGeneratedQRFacadeImpl
 import com.sam.qrforge.data.provider.ContactsDataProviderImpl
 import com.sam.qrforge.data.provider.LocationProviderImpl
-import com.sam.qrforge.data.provider.WIFIConnectorImpl
+import com.sam.qrforge.data.provider.WIFIConnectionProviderImpl
 import com.sam.qrforge.data.repository.SaveQRDataRepoImpl
+import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
-import com.sam.qrforge.domain.facade.SaveGeneratedQRFacade
 import com.sam.qrforge.domain.provider.ContactsDataProvider
 import com.sam.qrforge.domain.provider.LocationProvider
-import com.sam.qrforge.domain.provider.WIFIConnector
+import com.sam.qrforge.domain.provider.WIFIConnectionProvider
 import com.sam.qrforge.domain.repository.SavedQRDataRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.factoryOf
@@ -34,6 +34,6 @@ val appModule = module {
 	factoryOf(::LocationProviderImpl).bind<LocationProvider>()
 	factoryOf(::ContactsDataProviderImpl).bind<ContactsDataProvider>()
 	factoryOf(::SaveQRDataRepoImpl).bind<SavedQRDataRepository>()
-	factoryOf(::SaveGeneratedQRFacadeImpl).bind<SaveGeneratedQRFacade>()
-	factoryOf(::WIFIConnectorImpl).bind<WIFIConnector>()
+	factoryOf(::FileStorageFacadeImpl).bind<FileStorageFacade>()
+	factoryOf(::WIFIConnectionProviderImpl).bind<WIFIConnectionProvider>()
 }
