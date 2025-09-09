@@ -74,7 +74,10 @@
   <string name="dimension_option_large">Large</string>
   <string name="dimension_option_extra_large">E Large</string>
   <string name="dimension_option_title">Select Dimension</string>
-  <string name="action_exporting">Exporting</string>
   <string name="qr_editor_title">QR Editor</string>
   <string name="action_done">Done</string>
+  <string name="faulty_qr_warning_text">Editing this QR too much, may become useless for scanner to scan</string>
+  <string name="dialog_action_allow">Allow</string>
+  <string name="allow_permission_title">Allow permission</string>
+  <string name="allow_permission_external_storage">Allow permission to export the QR to external storage</string>
 </resources>

@@ -16,6 +16,7 @@ import com.sam.qrforge.domain.provider.LocationProvider
 import com.sam.qrforge.domain.repository.SavedQRDataRepository
 import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
+import com.sam.qrforge.presentation.common.utils.LaunchActivityEvent
 import com.sam.qrforge.presentation.common.utils.UIEvent
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenEvents
@@ -68,8 +69,8 @@ class CreateNewQRViewModel(
 	override val uiEvents: SharedFlow<UIEvent>
 		get() = _uiEvents
 
-	private val _shareQREvent = MutableSharedFlow<String>()
-	val shareQREvent = _shareQREvent.asSharedFlow()
+	private val _shareQREvent = MutableSharedFlow<LaunchActivityEvent>()
+	val activityEvent = _shareQREvent.asSharedFlow()
 
 	fun onCreateEvents(event: CreateQREvents) {
 		when (event) {
@@ -98,7 +99,9 @@ class CreateNewQRViewModel(
 		val bytes = bitmap.toBytes()
 		val fileResult = saveGeneratedQRFacade.saveContentToShare(bytes)
 		fileResult.fold(
-			onSuccess = { _shareQREvent.emit(it) },
+			onSuccess = { uriToShare ->
+				_shareQREvent.emit(LaunchActivityEvent.ShareImageURI(uriToShare))
+			},
 			onFailure = {
 				val event = UIEvent.ShowToast("Failed to share")
 				_uiEvents.emit(event)
@@ -116,7 +119,7 @@ class CreateNewQRViewModel(
 			format = contentState.type
 		)
 
-		if (createModel.title.isBlank()  || !contentState.isValid) {
+		if (createModel.title.isBlank() || !contentState.isValid) {
 			_saveQRState.update { state -> state.copy(isError = true) }
 			return
 		}

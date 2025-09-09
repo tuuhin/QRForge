@@ -2,19 +2,33 @@ package com.sam.qrforge.data.facade
 
 import android.content.ContentValues
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.content.FileProvider
+import androidx.core.graphics.scale
+import com.sam.qrforge.domain.enums.ExportDimensions
+import com.sam.qrforge.domain.enums.ImageMimeTypes
 import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.exception.CannotCreateFileException
+import com.sam.qrforge.domain.util.Resource
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.IOException
+import kotlin.math.abs
 import kotlin.random.Random
+
+private const val TAG = "FILE_STORAGE"
 
 class FileStorageFacadeImpl(private val context: Context) : FileStorageFacade {
 
@@ -44,48 +58,79 @@ class FileStorageFacadeImpl(private val context: Context) : FileStorageFacade {
 		}
 	}
 
-	override suspend fun saveImageContentToStorage(bytes: ByteArray): Result<String> {
+	override suspend fun saveImageContentToStorage(
+		bytes: ByteArray,
+		dimensions: ExportDimensions,
+		mimeType: ImageMimeTypes,
+	): Flow<Resource<String, Exception>> = flow {
+
+		val extension = when (mimeType) {
+			ImageMimeTypes.JPEG -> "jpg"
+			ImageMimeTypes.PNG -> "png"
+		}
+
+		val displayName = "exported_${abs(Random.nextInt() / 100)}.$extension"
+
 		val contentValues = ContentValues().apply {
 			put(
-				MediaStore.Audio.AudioColumns.RELATIVE_PATH,
+				MediaStore.Images.ImageColumns.RELATIVE_PATH,
 				Environment.DIRECTORY_PICTURES + File.separator + "QRForge"
 			)
-			put(MediaStore.Audio.AudioColumns.DISPLAY_NAME, "exported_${Random.nextInt() / 100}")
-			put(MediaStore.Audio.AudioColumns.MIME_TYPE, "images/png")
-			put(MediaStore.Audio.AudioColumns.DATE_ADDED, System.currentTimeMillis())
-			put(MediaStore.Audio.AudioColumns.IS_PENDING, 1)
+			put(MediaStore.Images.ImageColumns.DISPLAY_NAME, displayName)
+			put(MediaStore.Images.ImageColumns.MIME_TYPE, mimeType.mimeType)
+			put(MediaStore.Images.ImageColumns.IS_PENDING, 1)
 		}
 
 		val updatedMetaData = ContentValues().apply {
-			put(MediaStore.Audio.AudioColumns.IS_PENDING, 0)
-			put(MediaStore.Audio.AudioColumns.DATE_MODIFIED, System.currentTimeMillis())
+			put(MediaStore.Images.ImageColumns.IS_PENDING, 0)
+		}
+
+		emit(Resource.Loading)
+
+		val scaledBitmap = withContext(Dispatchers.IO) {
+			val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+			bitmap.scale(dimensions.sizeInPx, dimensions.sizeInPx)
 		}
 
 		// creates the new uri if failed return null
 		val newURI = withContext(Dispatchers.IO) {
 			context.contentResolver.insert(imagesParentURI, contentValues)
-		} ?: return Result.failure(CannotCreateFileException())
+		} ?: run {
+			emit(Resource.Error(CannotCreateFileException()))
+			return@flow
+		}
 
-		return try {
+		try {
+			// TODO: Check for effective uri delete if anything goes incorrect
+			// ensure the coroutine is active
+			currentCoroutineContext().ensureActive()
+			// then start updating the flow
 			withContext(Dispatchers.IO) {
 				// update the contents
 				context.contentResolver.openOutputStream(newURI, "w")
-					?.use { stream -> stream.write(bytes) }
-
+					?.use { stream ->
+						val format = when (mimeType) {
+							ImageMimeTypes.JPEG -> Bitmap.CompressFormat.JPEG
+							ImageMimeTypes.PNG -> Bitmap.CompressFormat.PNG
+						}
+						scaledBitmap.compress(format, 100, stream)
+					}
 				// update the file meta data
 				context.contentResolver.update(newURI, updatedMetaData, null, null)
 			}
-			Result.success(newURI.toString())
-		} catch (e: IOException) {
+			emit(Resource.Success(newURI.toString()))
+		} catch (_: CancellationException) {
+			Log.d(TAG, "Cancellation exception")
 			// delete the uri if we are unable to save the content
 			withContext(NonCancellable) {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
 					context.contentResolver.delete(newURI, null)
 				else context.contentResolver.delete(newURI, null, null)
 			}
-			Result.failure(e)
 		} catch (e: Exception) {
-			Result.failure(e)
+			emit(Resource.Error(e))
+		} finally {
+			scaledBitmap.recycle()
 		}
 	}
 }

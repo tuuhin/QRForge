@@ -16,3 +16,9 @@ val Context.hasReadContactsPermission: Boolean
 		this,
 		Manifest.permission.READ_CONTACTS
 	) == PermissionChecker.PERMISSION_GRANTED
+
+val Context.hasWriteStoragePermission: Boolean
+	get() = ContextCompat.checkSelfPermission(
+		this,
+		Manifest.permission.WRITE_EXTERNAL_STORAGE
+	) == PermissionChecker.PERMISSION_GRANTED

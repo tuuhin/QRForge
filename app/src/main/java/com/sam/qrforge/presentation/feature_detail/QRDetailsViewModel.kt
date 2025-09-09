@@ -4,16 +4,17 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
-import com.sam.qrforge.domain.facade.SaveGeneratedQRFacade
 import com.sam.qrforge.domain.models.GeneratedQRModel
 import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.domain.models.qr.QRWiFiModel
-import com.sam.qrforge.domain.provider.WIFIConnector
+import com.sam.qrforge.domain.provider.WIFIConnectionProvider
 import com.sam.qrforge.domain.repository.SavedQRDataRepository
 import com.sam.qrforge.domain.util.Resource
 import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
+import com.sam.qrforge.presentation.common.utils.LaunchActivityEvent
 import com.sam.qrforge.presentation.common.utils.UIEvent
 import com.sam.qrforge.presentation.feature_create.util.toBytes
 import com.sam.qrforge.presentation.feature_detail.state.DeleteQRDialogState
@@ -42,10 +43,10 @@ import kotlinx.coroutines.launch
 
 class QRDetailsViewModel(
 	private val generator: QRGeneratorFacade,
-	private val wifiConnector: WIFIConnector,
+	private val wifiConnector: WIFIConnectionProvider,
 	private val repository: SavedQRDataRepository,
 	private val savedStateHandle: SavedStateHandle,
-	private val fileFacade: SaveGeneratedQRFacade,
+	private val fileFacade: FileStorageFacade,
 ) : AppViewModel() {
 
 	private val route: NavRoutes.QRDetailsRoute
@@ -85,8 +86,8 @@ class QRDetailsViewModel(
 	override val uiEvents: SharedFlow<UIEvent>
 		get() = _uiEvents
 
-	private val _shareQREvent = MutableSharedFlow<String>()
-	val shareQREvent = _shareQREvent.asSharedFlow()
+	private val _activityEvents = MutableSharedFlow<LaunchActivityEvent>()
+	val activityEvents = _activityEvents.asSharedFlow()
 
 	fun onEvent(event: QRDetailsScreenEvents) {
 		when (event) {
@@ -143,11 +144,11 @@ class QRDetailsViewModel(
 
 	private fun onShareGeneratedQR(bitmap: ImageBitmap) = viewModelScope.launch {
 		val bytes = bitmap.toBytes()
-		val fileResult = fileFacade.prepareFileToShare(bytes)
+		val fileResult = fileFacade.saveContentToShare(bytes)
 		fileResult.fold(
-			onSuccess = {
+			onSuccess = { uriToShare ->
 				_uiEvents.emit(UIEvent.ShowToast("Sharing QR"))
-				_shareQREvent.emit(it)
+				_activityEvents.emit(LaunchActivityEvent.ShareImageURI(uriToShare))
 			},
 			onFailure = {
 				val event = UIEvent.ShowToast("Failed to share")

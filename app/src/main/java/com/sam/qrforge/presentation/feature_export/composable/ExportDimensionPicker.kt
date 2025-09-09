@@ -21,7 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
-import com.sam.qrforge.presentation.feature_export.state.ExportDimensions
+import com.sam.qrforge.domain.enums.ExportDimensions
+import com.sam.qrforge.presentation.common.mappers.localeString
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @Composable
@@ -54,7 +55,7 @@ fun ExportDimensionPicker(
 				)
 				Surface(
 					color = MaterialTheme.colorScheme.secondaryContainer,
-					shape = MaterialTheme.shapes.extraLarge
+					shape = MaterialTheme.shapes.extraLarge,
 				) {
 					Text(
 						text = "${selected.sizeInPx} x ${selected.sizeInPx}",

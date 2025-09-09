@@ -9,12 +9,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -22,16 +19,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
+import com.sam.qrforge.domain.enums.ExportDimensions
+import com.sam.qrforge.domain.enums.ImageMimeTypes
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.feature_export.composable.ExportQRScreenContent
-import com.sam.qrforge.presentation.feature_export.state.ExportDimensions
+import com.sam.qrforge.presentation.feature_export.composable.ExportScreenTopAppBar
 import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenEvents
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.coroutines.launch
@@ -45,6 +42,7 @@ fun ExportQRScreen(
 	generatedQR: GeneratedQRUIModel? = null,
 	isExportRunning: Boolean = false,
 	dimensions: ExportDimensions = ExportDimensions.Medium,
+	exportType: ImageMimeTypes = ImageMimeTypes.PNG,
 	navigation: @Composable () -> Unit = {}
 ) {
 	val snackBarHostState = LocalSnackBarState.current
@@ -55,29 +53,15 @@ fun ExportQRScreen(
 
 	Scaffold(
 		topBar = {
-			MediumTopAppBar(
-				title = { Text(text = stringResource(R.string.qr_editor_title)) },
-				navigationIcon = navigation,
-				scrollBehavior = scrollBehavior,
-				actions = {
-					OutlinedButton(
-						onClick = {
-							scope.launch {
-								val bitmap = graphicsLayer.toImageBitmap()
-								// export bitmap
-								onEvent(ExportQRScreenEvents.OnExportBitmap(bitmap))
-							}
-						},
-						shape = MaterialTheme.shapes.extraLarge,
-						enabled = !isExportRunning,
-						contentPadding = PaddingValues(vertical = 12.dp, horizontal = 24.dp)
-					) {
-						Crossfade(targetState = isExportRunning) { isExport ->
-							if (!isExport) Text(text = stringResource(R.string.action_export))
-							else Text(text = stringResource(R.string.action_exporting))
-						}
+			ExportScreenTopAppBar(
+				onBeginExport = {
+					scope.launch {
+						val bitmap = graphicsLayer.toImageBitmap()
+						onEvent(ExportQRScreenEvents.OnExportBitmap(bitmap))
 					}
-				}
+				},
+				navigation = navigation,
+				scrollBehavior = scrollBehavior
 			)
 		},
 		snackbarHost = {
@@ -102,7 +86,8 @@ fun ExportQRScreen(
 					generatedQR = generatedQR,
 					isExportRunning = isExportRunning,
 					dimensions = dimensions,
-					onDecorationEvent = onEvent,
+					exportType = exportType,
+					onEvent = onEvent,
 					graphicsLayer = { graphicsLayer },
 					contentPadding = PaddingValues(dimensionResource(R.dimen.sc_padding)),
 					decoration = decoration,
