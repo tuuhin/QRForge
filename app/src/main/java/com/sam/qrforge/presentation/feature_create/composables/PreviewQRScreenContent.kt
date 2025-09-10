@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -45,10 +46,14 @@ fun PreviewQRScreenContent(
 			graphicsLayer = { graphicsLayer },
 		)
 		ExportShareActions(
-			actionEnabled = generated != null,
+			enabled = generated != null,
 			onShare = { scope.launch { onShareContent(graphicsLayer.toImageBitmap()) } },
 			onExport = onExportContent,
 		)
-		QRContentStringCard(contentString = content.toQRString())
+		Spacer(modifier = Modifier.height(6.dp))
+		QRContentStringCard(
+			contentString = content.toQRString(),
+			containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+		)
 	}
 }

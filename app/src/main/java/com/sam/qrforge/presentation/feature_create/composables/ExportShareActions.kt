@@ -1,6 +1,7 @@
 package com.sam.qrforge.presentation.feature_create.composables
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -21,18 +22,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
+import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
+import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ExportShareActions(
-	actionEnabled: Boolean,
 	onShare: () -> Unit,
 	onExport: () -> Unit,
-	modifier: Modifier = Modifier
+	modifier: Modifier = Modifier,
+	enabled: Boolean = true,
 ) {
 	AnimatedVisibility(
-		visible = actionEnabled,
+		visible = enabled,
 		enter = slideInVertically(
 			animationSpec = tween(durationMillis = 200, easing = EaseIn)
 		) + expandVertically(expandFrom = Alignment.Bottom),
@@ -63,14 +68,18 @@ fun ExportShareActions(
 				elevation = FloatingActionButtonDefaults.loweredElevation(defaultElevation = 0.dp),
 				shape = MaterialTheme.shapes.extraLarge,
 				containerColor = MaterialTheme.colorScheme.primaryContainer,
-				contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+				contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+				modifier = Modifier.sharedBoundsWrapper(SharedTransitionKeys.EXPORT_BUTTON_TO_EXPORT_SCREEN)
 			) {
 				Icon(
 					painter = painterResource(R.drawable.ic_export),
 					contentDescription = "Export",
 				)
 				Spacer(modifier = Modifier.width(4.dp))
-				Text(text = "Export", style = MaterialTheme.typography.titleMedium)
+				Text(
+					text = stringResource(R.string.action_export),
+					style = MaterialTheme.typography.titleMedium
+				)
 			}
 		}
 	}

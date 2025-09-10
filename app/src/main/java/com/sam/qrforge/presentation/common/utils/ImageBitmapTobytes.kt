@@ -1,4 +1,4 @@
-package com.sam.qrforge.presentation.feature_create.util
+package com.sam.qrforge.presentation.common.utils
 
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.ImageBitmap

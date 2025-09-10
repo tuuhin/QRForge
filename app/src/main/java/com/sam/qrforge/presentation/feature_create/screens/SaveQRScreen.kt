@@ -65,7 +65,7 @@ fun SaveQRScreen(
 				icon = {
 					Icon(
 						painter = painterResource(R.drawable.ic_save),
-						contentDescription = "Save"
+						contentDescription = stringResource(R.string.action_save)
 					)
 				},
 				text = { Text(text = stringResource(R.string.action_save)) },

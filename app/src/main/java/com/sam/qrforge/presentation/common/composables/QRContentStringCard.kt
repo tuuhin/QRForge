@@ -30,9 +30,16 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
+import com.sam.qrforge.domain.models.qr.QRContentModel
+import com.sam.qrforge.domain.models.qr.QRPlainTextModel
+import com.sam.qrforge.domain.models.qr.QRTelephoneModel
+import com.sam.qrforge.domain.models.qr.QRWiFiModel
+import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,7 +69,7 @@ fun QRContentStringCard(
 			verticalAlignment = Alignment.CenterVertically
 		) {
 			Row(
-				horizontalArrangement = Arrangement.spacedBy(8.dp),
+				horizontalArrangement = Arrangement.spacedBy(10.dp),
 				verticalAlignment = Alignment.Top,
 			) {
 				Column(
@@ -78,7 +85,6 @@ fun QRContentStringCard(
 						text = contentString,
 						style = MaterialTheme.typography.bodyMedium,
 						color = MaterialTheme.colorScheme.onSurfaceVariant,
-						overflow = TextOverflow.Ellipsis
 					)
 				}
 				TooltipBox(
@@ -103,15 +109,33 @@ fun QRContentStringCard(
 							containerColor = MaterialTheme.colorScheme.secondary,
 							contentColor = MaterialTheme.colorScheme.onSecondary,
 						),
-						shape = MaterialTheme.shapes.large,
+						shape = MaterialTheme.shapes.medium,
 					) {
 						Icon(
 							painter = painterResource(R.drawable.ic_copy),
-							contentDescription = "Copy button",
+							contentDescription = stringResource(R.string.action_copy),
 						)
 					}
 				}
 			}
 		}
 	}
+}
+
+private class QRContentModelPreviewParams : CollectionPreviewParameterProvider<QRContentModel>(
+	listOf(
+		QRPlainTextModel("Hello world"),
+		QRTelephoneModel("0000000000"),
+		QRWiFiModel("Some Name Too Long", "Something", isHidden = true)
+	)
+)
+
+
+@PreviewLightDark
+@Composable
+private fun QRContentStringCardPreview(
+	@PreviewParameter(QRContentModelPreviewParams::class)
+	content: QRContentModel
+) = QRForgeTheme {
+	QRContentStringCard(contentString = content.toQRString())
 }

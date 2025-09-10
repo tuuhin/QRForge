@@ -64,7 +64,7 @@ fun SaveQRScreenContent(
 		)
 		if (state.isError) {
 			Text(
-				text = "Cannot have empty title",
+				text = stringResource(R.string.save_qr_screen_title_error),
 				color = MaterialTheme.colorScheme.error,
 				style = MaterialTheme.typography.labelMedium
 			)

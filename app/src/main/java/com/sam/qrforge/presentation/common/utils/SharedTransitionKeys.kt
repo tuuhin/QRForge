@@ -12,6 +12,8 @@ object SharedTransitionKeys {
 
 	const val QR_DETAILS_SCREEN_TO_EDIT_SCREEN = "shared-bounds-details-to-edit-screen"
 
+	const val EXPORT_BUTTON_TO_EXPORT_SCREEN = "shared-bounds-export-button-to-export-screen"
+
 
 	fun sharedBoundsToItemDetail(itemId: Long) =
 		"shared-bounds-home-screen-to-details-screen-$itemId"

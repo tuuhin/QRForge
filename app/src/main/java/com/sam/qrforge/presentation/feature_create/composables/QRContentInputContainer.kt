@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.dropUnlessResumed
 import com.sam.qrforge.R
 import com.sam.qrforge.data.contracts.PickContactsContract
 import com.sam.qrforge.data.utils.hasLocationPermission
@@ -83,7 +82,7 @@ fun QRContentInputContainer(
 	) {
 		Text(
 			text = stringResource(R.string.select_qr_content_title),
-			style = MaterialTheme.typography.titleLarge,
+			style = MaterialTheme.typography.bodyLarge,
 			color = MaterialTheme.colorScheme.primary
 		)
 		Text(
@@ -117,7 +116,7 @@ fun QRContentInputContainer(
 				QRDataType.TYPE_GEO -> QRFormatGeoInput(
 					initialState = (content as? QRGeoPointModel) ?: QRGeoPointModel(),
 					onStateChange = onContentChange,
-					onUseLastKnownLocation = dropUnlessResumed {
+					onUseLastKnownLocation = {
 						if (hasLocationPermission) onUseCurrentLocation()
 						else permissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
 					},
@@ -135,7 +134,7 @@ fun QRContentInputContainer(
 				QRDataType.TYPE_SMS -> QRFormatSMSInput(
 					initialState = (content as? QRSmsModel) ?: QRSmsModel(),
 					onStateChange = onContentChange,
-					onOpenContacts = dropUnlessResumed {
+					onOpenContacts = {
 						if (hasContactsPermission) readContactsLauncher.launch(Unit)
 						else permissionsLauncher.launch(arrayOf(Manifest.permission.READ_CONTACTS))
 					},

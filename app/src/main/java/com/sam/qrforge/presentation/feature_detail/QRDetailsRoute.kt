@@ -10,29 +10,32 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.sam.qrforge.presentation.common.composables.ShareQREventsSideEffect
+import com.sam.qrforge.presentation.common.composables.LaunchActivityEventsSideEffect
 import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
 import com.sam.qrforge.presentation.feature_detail.screens.QRDetailsScreen
 import com.sam.qrforge.presentation.feature_detail.screens.QREditScreen
+import com.sam.qrforge.presentation.feature_export.ExportQRScreen
+import com.sam.qrforge.presentation.feature_export.ExportQRViewModel
+import com.sam.qrforge.presentation.navigation.animatedComposable
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
-import com.sam.qrforge.presentation.navigation.nav_graph.QRDetailsNavGraph
+import kotlinx.coroutines.flow.merge
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.viewmodel.sharedKoinViewModel
 
 fun NavGraphBuilder.qrDetailsRoute(controller: NavController) =
-	navigation<NavRoutes.QRDetailsScreen>(startDestination = QRDetailsNavGraph.QRDetailsRoute) {
+	navigation<NavRoutes.QRDetailsRoute>(startDestination = QRDetailsNavGraph.DetailsRoute) {
 
-		composable<QRDetailsNavGraph.QRDetailsRoute> { entry ->
-			val route = entry.savedStateHandle.toRoute<NavRoutes.QRDetailsScreen>()
+		animatedComposable<QRDetailsNavGraph.DetailsRoute> { entry ->
+			val route = entry.savedStateHandle.toRoute<NavRoutes.QRDetailsRoute>()
 
 			val viewModel = entry.sharedKoinViewModel<QRDetailsViewModel>(controller)
 			val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
 			UIEventsSideEffect(viewModel::uiEvents)
-			ShareQREventsSideEffect(viewModel::shareQREvent)
+			LaunchActivityEventsSideEffect(viewModel::activityEvents)
 
 			CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 				QRDetailsScreen(
@@ -45,7 +48,10 @@ fun NavGraphBuilder.qrDetailsRoute(controller: NavController) =
 						}
 					},
 					onNavigateToEdit = dropUnlessResumed {
-						controller.navigate(QRDetailsNavGraph.EditQRDetailsRoute)
+						controller.navigate(QRDetailsNavGraph.EditDetailsRoute)
+					},
+					onNavigateToExport = dropUnlessResumed {
+						controller.navigate(QRDetailsNavGraph.ExportRoute)
 					},
 					navigation = {
 						if (controller.previousBackStackEntry != null)
@@ -60,23 +66,60 @@ fun NavGraphBuilder.qrDetailsRoute(controller: NavController) =
 			}
 		}
 
-		composable<QRDetailsNavGraph.EditQRDetailsRoute> { entry ->
+		animatedComposable<QRDetailsNavGraph.EditDetailsRoute> { entry ->
 
 			val viewModel = entry.sharedKoinViewModel<QRDetailsViewModel>(controller)
+			val screenState by viewModel.editState.collectAsStateWithLifecycle()
 
 			UIEventsSideEffect(
 				events = viewModel::uiEvents,
 				onNavigateBack = dropUnlessResumed { controller.popBackStack() },
 			)
 
-			ShareQREventsSideEffect(viewModel::shareQREvent)
-
-			val screenState by viewModel.editState.collectAsStateWithLifecycle()
-
 			CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 				QREditScreen(
 					state = screenState,
 					onEvent = viewModel::onEditEvent,
+					navigation = {
+						if (controller.previousBackStackEntry != null)
+							IconButton(onClick = dropUnlessResumed { controller.popBackStack() }) {
+								Icon(
+									imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+									contentDescription = "Back Arrow"
+								)
+							}
+					},
+				)
+			}
+		}
+
+		animatedComposable<QRDetailsNavGraph.ExportRoute> { entry ->
+
+			val detailsViewModel = entry.sharedKoinViewModel<QRDetailsViewModel>(controller)
+			val screenState by detailsViewModel.screenState.collectAsStateWithLifecycle()
+
+			val viewModel = koinViewModel<ExportQRViewModel>()
+
+			val decoration by viewModel.selectedDecoration.collectAsStateWithLifecycle()
+			val dimensions by viewModel.dimension.collectAsStateWithLifecycle()
+			val isExportRunning by viewModel.isExportRunning.collectAsStateWithLifecycle()
+			val mimetype by viewModel.mimeType.collectAsStateWithLifecycle()
+
+			UIEventsSideEffect(
+				events = { merge(detailsViewModel.uiEvents, viewModel.uiEvents) },
+				onNavigateBack = dropUnlessResumed { controller.popBackStack() },
+			)
+
+			LaunchActivityEventsSideEffect(viewModel::activityEvents)
+
+			CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
+				ExportQRScreen(
+					decoration = decoration,
+					generatedQR = screenState.generatedModel,
+					dimensions = dimensions,
+					isExportRunning = isExportRunning,
+					exportType = mimetype,
+					onEvent = viewModel::onEvent,
 					navigation = {
 						if (controller.previousBackStackEntry != null)
 							IconButton(onClick = dropUnlessResumed { controller.popBackStack() }) {

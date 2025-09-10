@@ -16,7 +16,7 @@ import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.LaunchActivityEvent
 import com.sam.qrforge.presentation.common.utils.UIEvent
-import com.sam.qrforge.presentation.feature_create.util.toBytes
+import com.sam.qrforge.presentation.common.utils.toBytes
 import com.sam.qrforge.presentation.feature_detail.state.DeleteQRDialogState
 import com.sam.qrforge.presentation.feature_detail.state.EditQRScreenEvent
 import com.sam.qrforge.presentation.feature_detail.state.EditQRScreenState

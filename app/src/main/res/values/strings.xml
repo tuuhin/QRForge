@@ -80,4 +80,7 @@
   <string name="dialog_action_allow">Allow</string>
   <string name="allow_permission_title">Allow permission</string>
   <string name="allow_permission_external_storage">Allow permission to export the QR to external storage</string>
+  <string name="camera_permission_text">Camera permission required in order to scan codes</string>
+  <string name="preview_qr_screen">Preview QR Code</string>
+  <string name="save_qr_screen_title_error">Cannot have an empty title</string>
 </resources>

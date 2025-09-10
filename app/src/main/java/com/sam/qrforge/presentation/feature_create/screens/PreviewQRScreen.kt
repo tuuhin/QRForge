@@ -2,11 +2,14 @@ package com.sam.qrforge.presentation.feature_create.screens
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -15,7 +18,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,6 +26,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.domain.models.qr.QRPlainTextModel
@@ -59,18 +62,20 @@ fun PreviewQRScreen(
 	Scaffold(
 		topBar = {
 			MediumTopAppBar(
-				title = { Text(text = "Preview QR Code") },
+				title = { Text(text = stringResource(R.string.preview_qr_screen)) },
 				navigationIcon = navigation,
 				scrollBehavior = scrollBehavior,
 				actions = {
-					TextButton(
+					Button(
 						onClick = onNavigateToSave,
+						shape = MaterialTheme.shapes.extraLarge,
 						modifier = Modifier.sharedBoundsWrapper(
 							SharedTransitionKeys.PREVIEW_SCREEN_TO_SAVE_SCREEN
-						)
+						),
 					) {
 						Text(text = stringResource(R.string.action_save))
 					}
+					Spacer(modifier = Modifier.width(4.dp))
 				},
 			)
 		},

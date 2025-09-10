@@ -18,10 +18,10 @@ import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.LaunchActivityEvent
 import com.sam.qrforge.presentation.common.utils.UIEvent
+import com.sam.qrforge.presentation.common.utils.toBytes
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenEvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenState
-import com.sam.qrforge.presentation.feature_create.util.toBytes
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -127,8 +127,9 @@ class CreateNewQRViewModel(
 		viewModelScope.launch {
 			val result = repository.insertQRData(createModel)
 			result.fold(
-				onSuccess = {
+				onSuccess = { model ->
 					_uiEvents.emit(UIEvent.ShowToast("Saved!!"))
+					_uiEvents.emit(UIEvent.NavigateBack)
 				},
 				onFailure = { err ->
 					val event = UIEvent.ShowSnackBar(err.message ?: "Unable to save")
@@ -158,12 +159,30 @@ class CreateNewQRViewModel(
 		val result = contactsProvider.invoke(uri)
 		result.fold(
 			onSuccess = { contacts ->
-				_contentModel.update { content ->
+				val updatedContent = _contentModel.updateAndGet { content ->
+					// update the content
 					when (content) {
 						is QRTelephoneModel -> content.copy(number = contacts.phoneNumber)
 						is QRSmsModel -> content.copy(phoneNumber = contacts.phoneNumber)
 						else -> content
 					}
+				}
+				when (updatedContent) {
+					is QRSmsModel -> _saveQRState.update { state ->
+						state.copy(
+							title = "SMS TO :${contacts.displayName} (${contacts.phoneNumber})",
+							desc = "Message :${updatedContent.message}"
+						)
+					}
+
+					is QRTelephoneModel -> _saveQRState.update { state ->
+						state.copy(
+							title = "Telephone Number (${contacts.displayName})",
+							desc = "telephone number :${contacts.phoneNumber}"
+						)
+					}
+
+					else -> {}
 				}
 			},
 			onFailure = {

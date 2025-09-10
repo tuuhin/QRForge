@@ -39,12 +39,12 @@ fun QRDataTypeSelector(
 	modifier: Modifier = Modifier
 ) {
 	Column(
-		modifier = modifier.fillMaxWidth(),
+		modifier = modifier,
 		verticalArrangement = Arrangement.spacedBy(4.dp)
 	) {
 		Text(
 			text = stringResource(R.string.select_qr_format_title),
-			style = MaterialTheme.typography.titleLarge,
+			style = MaterialTheme.typography.bodyLarge,
 			color = MaterialTheme.colorScheme.primary
 		)
 		Text(
@@ -56,6 +56,7 @@ fun QRDataTypeSelector(
 		FlowRow(
 			horizontalArrangement = Arrangement.Center,
 			verticalArrangement = Arrangement.spacedBy(6.dp),
+			maxItemsInEachRow = 4,
 			modifier = Modifier.fillMaxWidth(),
 		) {
 			QRDataType.entries.forEach { type ->
@@ -63,7 +64,7 @@ fun QRDataTypeSelector(
 					type = type,
 					onClick = { onSelectType(type) },
 					isSelected = type == selectedType,
-					modifier = Modifier.padding(horizontal = 4.dp)
+					modifier = Modifier.padding(horizontal = 6.dp)
 				)
 			}
 		}
@@ -77,7 +78,7 @@ private fun QRDataTypeCard(
 	modifier: Modifier = Modifier,
 	isSelected: Boolean = false,
 	shape: Shape = MaterialTheme.shapes.extraLarge,
-	unselectedContainerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+	unselectedContainerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 	onUnSelectedContainer: Color = MaterialTheme.colorScheme.secondary,
 	selectedContainerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
 	onSelectedContainer: Color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -96,7 +97,7 @@ private fun QRDataTypeCard(
 		Box(
 			modifier = Modifier
 				.padding(vertical = 10.dp)
-				.defaultMinSize(minWidth = 80.dp, minHeight = 80.dp),
+				.defaultMinSize(minWidth = 72.dp, minHeight = 72.dp),
 			contentAlignment = Alignment.Center,
 		) {
 			Column(
@@ -106,7 +107,7 @@ private fun QRDataTypeCard(
 				Icon(
 					painter = type.painter,
 					contentDescription = type.string,
-					modifier = Modifier.size(24.dp),
+					modifier = Modifier.size(20.dp),
 				)
 				Text(
 					text = type.string,
@@ -125,6 +126,7 @@ private fun QRDataTypeSelectorPreview() = QRForgeTheme {
 		QRDataTypeSelector(
 			selectedType = QRDataType.TYPE_TEXT,
 			onSelectType = {},
+			modifier = Modifier.padding(10.dp)
 		)
 	}
 }

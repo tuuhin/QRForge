@@ -10,7 +10,7 @@ import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.LaunchActivityEvent
 import com.sam.qrforge.presentation.common.utils.UIEvent
-import com.sam.qrforge.presentation.feature_create.util.toBytes
+import com.sam.qrforge.presentation.common.utils.toBytes
 import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenEvents
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
