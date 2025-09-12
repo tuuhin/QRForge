@@ -22,3 +22,9 @@ val Context.hasWriteStoragePermission: Boolean
 		this,
 		Manifest.permission.WRITE_EXTERNAL_STORAGE
 	) == PermissionChecker.PERMISSION_GRANTED
+
+val Context.hasCameraPermission: Boolean
+	get() = ContextCompat.checkSelfPermission(
+		this,
+		Manifest.permission.CAMERA
+	) == PermissionChecker.PERMISSION_GRANTED

@@ -1,8 +1,9 @@
 [versions]
 agp = "8.13.0"
+concurrentFuturesKtx = "1.3.0"
 core = "3.5.3"
 coreSplashscreen = "1.0.1"
-kotlin = "2.2.10"
+kotlin = "2.2.20"
 coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -11,19 +12,20 @@ kotlinxCollectionsImmutable = "0.4.0"
 playServicesLocationVersion = "21.3.0"
 kotlinxDatetime = "0.7.1"
 lifecycleRuntimeKtx = "2.9.3"
-activityCompose = "1.10.1"
-composeBom = "2025.08.01"
+activityCompose = "1.11.0"
+composeBom = "2025.09.00"
 koinBom = "4.1.0"
 materialIconsExtended = "1.7.8"
-navigationCompose = "2.9.3"
-roomCompiler = "2.7.2"
-uiTextGoogleFonts = "1.9.0"
-ksp = "2.2.10-2.0.2"
-cameraX = "1.4.2"
+navigationCompose = "2.9.4"
+roomCompiler = "2.8.0"
+uiTextGoogleFonts = "1.9.1"
+ksp = "2.2.20-2.0.2"
+cameraX = "1.5.0"
 
 
 [libraries]
 #core
+androidx-concurrent-futures-ktx = { module = "androidx.concurrent:concurrent-futures-ktx", version.ref = "concurrentFuturesKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -66,9 +68,11 @@ androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 #camerax
+androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraX" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraX" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-mlkit-vision = { module = "androidx.camera:camera-mlkit-vision", version.ref = "cameraX" }
+androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "cameraX" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

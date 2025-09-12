@@ -95,10 +95,13 @@ dependencies {
 	implementation(libs.androidx.core.splashscreen)
 	implementation(libs.kotlinx.datetime)
 	implementation(libs.kotlinx.collections.immutable)
+	implementation(libs.androidx.concurrent.futures.ktx)
 	// camerax
+	implementation(libs.androidx.camera.core)
 	implementation(libs.androidx.camera.camera2)
 	implementation(libs.androidx.camera.lifecycle)
 	implementation(libs.androidx.camera.mlkit.vision)
+	implementation(libs.androidx.camera.compose)
 	//tests
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)

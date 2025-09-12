@@ -83,4 +83,6 @@
   <string name="camera_permission_text">Camera permission required in order to scan codes</string>
   <string name="preview_qr_screen">Preview QR Code</string>
   <string name="save_qr_screen_title_error">Cannot have an empty title</string>
+  <string name="zoom_formated_2_decimal_place">%.2f x</string>
+  <string name="zoom_formated_1_decimal_place">%.1f x</string>
 </resources>

@@ -89,7 +89,7 @@ fun GenerateORScanActions(
 				contentPadding = PaddingValues(vertical = 16.dp),
 				modifier = Modifier
 					.weight(1f)
-					.sharedBoundsWrapper(SharedTransitionKeys.HOME_SCREEN_TO_SCAN_QR_SCREEN)
+					.sharedBoundsWrapper(SharedTransitionKeys.SCAN_BUTTON_TO_SCAN_SCREEN)
 			) {
 				Icon(
 					painter = painterResource(R.drawable.ic_scan),

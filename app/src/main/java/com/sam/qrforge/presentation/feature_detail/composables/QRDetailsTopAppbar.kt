@@ -13,9 +13,9 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
@@ -70,10 +70,10 @@ fun QRDetailsTopAppBar(
 		},
 		actions = {
 			qrModel?.let { model ->
-				Button(
+				FilledTonalButton(
 					onClick = { onToggleFavourite(model) },
 					shape = MaterialTheme.shapes.extraLarge,
-					colors = ButtonDefaults.buttonColors(
+					colors = ButtonDefaults.filledTonalButtonColors(
 						containerColor = MaterialTheme.colorScheme.primaryContainer,
 						contentColor = MaterialTheme.colorScheme.onPrimaryContainer
 					),

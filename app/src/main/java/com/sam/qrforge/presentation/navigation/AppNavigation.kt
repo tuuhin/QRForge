@@ -18,6 +18,7 @@ import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.feature_create.createNewQRRoute
 import com.sam.qrforge.presentation.feature_detail.qrDetailsRoute
 import com.sam.qrforge.presentation.feature_home.homeRoute
+import com.sam.qrforge.presentation.feature_scan.scanRoute
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -48,6 +49,7 @@ fun AppNavigation(
 				homeRoute(controller = navController)
 				qrDetailsRoute(controller = navController)
 				createNewQRRoute(controller = navController)
+				scanRoute(controller = navController)
 			}
 		}
 	}

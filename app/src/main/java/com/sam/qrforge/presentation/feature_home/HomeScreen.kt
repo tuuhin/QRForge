@@ -70,11 +70,12 @@ fun NavGraphBuilder.homeRoute(controller: NavController) = animatedComposable<Na
 			isContentReady = !isLoading,
 			onEvent = viewModel::onEvent,
 			onNavigateToCreateNew = dropUnlessResumed { controller.navigate(NavRoutes.CreateRoute) },
+			onNavigateToScanner = dropUnlessResumed { controller.navigate(NavRoutes.ScanRoute) },
 			onNavigateToItemDetailed = { item ->
 				if (lifecycleState.isAtLeast(Lifecycle.State.STARTED)) {
 					controller.navigate(NavRoutes.QRDetailsRoute(item.id))
 				}
-			}
+			},
 		)
 	}
 }
@@ -92,6 +93,7 @@ private fun HomeScreen(
 	isContentReady: Boolean = true,
 	onNavigateToCreateNew: () -> Unit = {},
 	onNavigateToItemDetailed: (SavedQRModel) -> Unit = {},
+	onNavigateToScanner: () -> Unit = {},
 ) {
 
 	val snackBarHostState = LocalSnackBarState.current
@@ -124,7 +126,7 @@ private fun HomeScreen(
 		bottomBar = {
 			GenerateORScanActions(
 				onGenerate = onNavigateToCreateNew,
-				onScan = {},
+				onScan = onNavigateToScanner,
 			)
 		},
 		snackbarHost = {
