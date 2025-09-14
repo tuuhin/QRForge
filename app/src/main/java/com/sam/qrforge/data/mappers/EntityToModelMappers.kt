@@ -17,7 +17,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-private fun String.toQRModel(): QRContentModel {
+fun String.toQRModel(): QRContentModel {
 	val result = when {
 		startsWith("mailto:") -> QREmailModel.toQRModel(this)
 		startsWith("geo:") -> QRGeoPointModel.toQRModel(this)

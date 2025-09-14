@@ -17,6 +17,7 @@ composeBom = "2025.09.00"
 koinBom = "4.1.0"
 materialIconsExtended = "1.7.8"
 navigationCompose = "2.9.4"
+playServicesMlkitBarcodeScanning = "18.3.1"
 roomCompiler = "2.8.0"
 uiTextGoogleFonts = "1.9.1"
 ksp = "2.2.20-2.0.2"
@@ -51,6 +52,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 #zebra crossing
+play-services-mlkit-barcode-scanning = { module = "com.google.android.gms:play-services-mlkit-barcode-scanning", version.ref = "playServicesMlkitBarcodeScanning" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "core" }
 #koin
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koinBom" }

@@ -102,6 +102,8 @@ dependencies {
 	implementation(libs.androidx.camera.lifecycle)
 	implementation(libs.androidx.camera.mlkit.vision)
 	implementation(libs.androidx.camera.compose)
+	// mlkit
+	implementation(libs.play.services.mlkit.barcode.scanning)
 	//tests
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)
