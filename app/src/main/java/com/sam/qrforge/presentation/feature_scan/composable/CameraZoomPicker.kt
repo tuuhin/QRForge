@@ -55,6 +55,7 @@ fun CameraZoomPicker(
 	zoomState: CameraZoomState,
 	onZoomChange: (Float) -> Unit,
 	modifier: Modifier = Modifier,
+	enabled: Boolean = true,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 ) {
 
@@ -70,6 +71,7 @@ fun CameraZoomPicker(
 				zoomState = zoomState,
 				onZoomChange = onZoomChange,
 				containerColor = containerColor,
+				enabled = enabled,
 				onClosePicker = { showPicker = false },
 				modifier = Modifier
 					.fillMaxWidth(.85f)
@@ -89,6 +91,7 @@ fun CameraZoomPicker(
 				ZoomValueButton(
 					zoomLevel = zoomState.zoomRatio,
 					onShowPicker = { showPicker = true },
+					enabled = enabled,
 					modifier = Modifier.sharedBoundsWrapper(
 						key = ZOOM_PICKER_TRANSITION_KEY,
 						resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
@@ -113,7 +116,8 @@ fun CameraZoomPicker(
 private fun ZoomValueButton(
 	zoomLevel: () -> Float,
 	modifier: Modifier = Modifier,
-	onShowPicker: () -> Unit = {}
+	onShowPicker: () -> Unit = {},
+	enabled: Boolean = true,
 ) {
 	val zoomLevelReadable by remember(zoomLevel) {
 		derivedStateOf { (zoomLevel() * 100).roundToInt() / 100f }
@@ -131,6 +135,7 @@ private fun ZoomValueButton(
 	) {
 		FilledTonalButton(
 			onClick = onShowPicker,
+			enabled = enabled,
 			shape = MaterialTheme.shapes.extraLarge,
 			colors = ButtonDefaults.filledTonalButtonColors(
 				containerColor = MaterialTheme.colorScheme.tertiaryContainer,
@@ -156,6 +161,7 @@ private fun ZoomPickerSlider(
 	modifier: Modifier = Modifier,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 	onClosePicker: () -> Unit = {},
+	enabled: Boolean = true,
 ) {
 	Row(
 		horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -185,6 +191,7 @@ private fun ZoomPickerSlider(
 				Slider(
 					value = zoomState.zoomRatio.invoke(),
 					onValueChange = onZoomChange,
+					enabled = enabled,
 					valueRange = zoomState.zoomRange,
 					modifier = Modifier.weight(1f)
 				)

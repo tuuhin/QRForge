@@ -50,10 +50,12 @@ fun CameraControlOption(
 	onToggleFlash: () -> Unit,
 	modifier: Modifier = Modifier,
 	isFlashOn: Boolean = false,
-	showCaptureButton: Boolean = true,
+	isManualCapture: Boolean = true,
 	cameraState: CameraCaptureState = CameraCaptureState(),
+	actionsEnabled: Boolean = true,
 	onPickImage: () -> Unit = {},
 ) {
+
 	Row(
 		modifier = modifier
 			.animateContentSize()
@@ -75,7 +77,7 @@ fun CameraControlOption(
 				shape = MaterialTheme.shapes.large,
 				color = MaterialTheme.colorScheme.secondary,
 				contentColor = MaterialTheme.colorScheme.onSecondary,
-				enabled = !cameraState.isCapturing,
+				enabled = !cameraState.isCapturing && actionsEnabled,
 				modifier = Modifier
 					.size(52.dp)
 					.semantics {
@@ -112,7 +114,7 @@ fun CameraControlOption(
 			}
 		}
 		AnimatedContent(
-			targetState = showCaptureButton,
+			targetState = isManualCapture,
 			transitionSpec = {
 				scaleIn(
 					animationSpec = tween(durationMillis = 200, easing = EaseInBounce),
@@ -128,7 +130,7 @@ fun CameraControlOption(
 			if (show)
 				CaptureButton(
 					onClick = onCapture,
-					showRipples = !transition.isRunning,
+					enabled = !transition.isRunning && actionsEnabled,
 					isCapturing = cameraState.isCapturing,
 					captureProgress = cameraState.captureProgress,
 					canReadProgress = cameraState.canPropagateProgress
@@ -151,7 +153,7 @@ fun CameraControlOption(
 		) {
 			Surface(
 				onClick = onPickImage,
-				enabled = !cameraState.isCapturing,
+				enabled = !cameraState.isCapturing && actionsEnabled,
 				shape = MaterialTheme.shapes.large,
 				color = MaterialTheme.colorScheme.secondary,
 				contentColor = MaterialTheme.colorScheme.onSecondary,

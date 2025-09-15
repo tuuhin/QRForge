@@ -108,7 +108,8 @@ fun ScanQRScreen(
 					bottom = scPadding.calculateBottomPadding(),
 					start = scPadding.calculateStartPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding),
 					end = scPadding.calculateEndPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding)
-				), modifier = Modifier.fillMaxSize()
+				),
+				modifier = Modifier.fillMaxSize(),
 			)
 		}
 	}
@@ -125,7 +126,8 @@ private fun ScanQRScreenPreview() = QRForgeTheme {
 		onCameraEvent = {},
 		navigation = {
 			Icon(
-				imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back Arrow"
+				imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+				contentDescription = "Back Arrow"
 			)
 		},
 	)

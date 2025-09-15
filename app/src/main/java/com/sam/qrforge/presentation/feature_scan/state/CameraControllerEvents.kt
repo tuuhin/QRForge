@@ -16,4 +16,5 @@ sealed interface CameraControllerEvents {
 		CameraControllerEvents
 
 	data class OnSelectImageURI(val uri: String) : CameraControllerEvents
+	data object OnClearAnalysisResult : CameraControllerEvents
 }

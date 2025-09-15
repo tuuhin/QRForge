@@ -3,27 +3,30 @@ package com.sam.qrforge.presentation.feature_scan.composable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInExpo
-import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
@@ -34,6 +37,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -55,6 +61,7 @@ fun CameraWithControls(
 	onCaptureImage: () -> Unit = {},
 	onToggleFlash: () -> Unit = {},
 	onSelectGalleryImage: (String) -> Unit = {},
+	controlsEnabled: Boolean = true,
 ) {
 
 	val currentOnSelectImage by rememberUpdatedState(onSelectGalleryImage)
@@ -88,7 +95,12 @@ fun CameraWithControls(
 				contentAlignment = Alignment.Center
 			) {
 				// capture overlay
-				CameraCaptureOverlayBox()
+				CameraCaptureOverlayBox(
+					borderStroke = BorderStroke(
+						width = 4.dp,
+						Color.White.copy(alpha = .5f)
+					)
+				)
 				// chip
 				AnalyzerRunningChip(
 					isRunning = analysisState.isAnalyzerRunning,
@@ -102,11 +114,13 @@ fun CameraWithControls(
 					CameraZoomPicker(
 						zoomState = cameraControls.zoomState,
 						onZoomChange = onZoomChange,
+						enabled = controlsEnabled,
 					)
 					// actions
 					CameraControlOption(
 						isFlashOn = cameraControls.isFlashEnabled,
-						showCaptureButton = analysisState.captureType == CaptureType.MANUAL,
+						isManualCapture = analysisState.captureType == CaptureType.MANUAL,
+						actionsEnabled = controlsEnabled,
 						onCapture = onCaptureImage,
 						onToggleFlash = onToggleFlash,
 						cameraState = cameraState,
@@ -125,19 +139,47 @@ fun CameraWithControls(
 		Box(
 			modifier = Modifier
 				.fillMaxWidth()
-				.height(height = 80.dp),
-			contentAlignment = Alignment.Center,
+				.heightIn(min = 80.dp),
+			contentAlignment = Alignment.Center
 		) {
-			// buttons
-			CameraCaptureTypePicker(
-				onCaptureTypeChange = onCaptureTypeChange,
-				selected = analysisState.captureType,
-				enabled = !cameraState.isCapturing
-			)
+			AnimatedContent(
+				targetState = analysisState.isAnalysing,
+				contentAlignment = Alignment.Center,
+			) { isAnalysing ->
+				if (isAnalysing) ShowAnalysisRunningLabel()
+				else CameraCaptureTypePicker(
+					onCaptureTypeChange = onCaptureTypeChange,
+					selected = analysisState.captureType,
+					alwaysShowIcon = false,
+					enabled = !cameraState.isCapturing || !transition.isRunning
+				)
+			}
 		}
 	}
 }
 
+@Composable
+private fun ShowAnalysisRunningLabel(modifier: Modifier = Modifier) {
+	Column(
+		modifier = modifier
+			.fillMaxWidth()
+			.padding(horizontal = dimensionResource(R.dimen.sc_padding)),
+		verticalArrangement = Arrangement.spacedBy(8.dp)
+	) {
+		Text(
+			text = stringResource(R.string.analyzer_running_text),
+			style = MaterialTheme.typography.headlineMedium,
+			color = MaterialTheme.colorScheme.tertiary
+		)
+		LinearProgressIndicator(
+			strokeCap = StrokeCap.Round,
+			gapSize = 10.dp,
+			color = MaterialTheme.colorScheme.onSecondaryContainer,
+			trackColor = MaterialTheme.colorScheme.secondaryContainer,
+			modifier = Modifier.fillMaxWidth(),
+		)
+	}
+}
 
 @Composable
 private fun AnalyzerRunningChip(
@@ -149,11 +191,11 @@ private fun AnalyzerRunningChip(
 		modifier = modifier,
 		enter = slideInVertically() + scaleIn(
 			initialScale = .2f,
-			animationSpec = tween(durationMillis = 600, easing = EaseInExpo)
+			animationSpec = tween(durationMillis = 400, easing = EaseInExpo)
 		),
 		exit = scaleOut(
 			targetScale = .2f,
-			animationSpec = tween(durationMillis = 400, easing = EaseOutBack)
+			animationSpec = tween(durationMillis = 400, easing = EaseOut)
 		) + slideOutVertically()
 	) {
 		SuggestionChip(

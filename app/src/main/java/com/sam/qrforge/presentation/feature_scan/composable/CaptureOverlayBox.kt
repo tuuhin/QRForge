@@ -21,6 +21,7 @@ fun CameraCaptureOverlayBox(
 	modifier: Modifier = Modifier,
 	curveRadius: CornerSize = CornerSize(20.dp),
 	borderStroke: BorderStroke = BorderStroke(3.dp, Color.White),
+	strokeCap: StrokeCap = StrokeCap.Round
 ) {
 
 	Box(
@@ -31,6 +32,7 @@ fun CameraCaptureOverlayBox(
 					extraLineLength = size.width * .1f,
 					curveRadius = curveRadius,
 					borderStroke = borderStroke,
+					strokeCap = strokeCap,
 				)
 			},
 	)
@@ -40,11 +42,12 @@ private fun DrawScope.drawCaptureBox(
 	extraLineLength: Float,
 	curveRadius: CornerSize = CornerSize(40.dp),
 	borderStroke: BorderStroke = BorderStroke(2.dp, Color.White),
+	strokeCap: StrokeCap = StrokeCap.Round
 ) {
 	val radius = curveRadius.toPx(size, this)
+	val strokeWidth = borderStroke.width.toPx()
 
 	val rectSize = Offset(radius, radius)
-
 
 	val curvedPathTopLeft = Path().apply {
 		reset()
@@ -102,35 +105,23 @@ private fun DrawScope.drawCaptureBox(
 	drawPath(
 		path = curvedPathBottomLeft,
 		brush = borderStroke.brush,
-		style = Stroke(
-			width = borderStroke.width.toPx(),
-			cap = StrokeCap.Round
-		),
+		style = Stroke(width = strokeWidth, cap = strokeCap)
 	)
 	drawPath(
 		path = curvedPathTopLeft,
 		brush = borderStroke.brush,
-		style = Stroke(
-			width = borderStroke.width.toPx(),
-			cap = StrokeCap.Round
-		)
+		style = Stroke(width = strokeWidth, cap = strokeCap)
 	)
 	drawPath(
 		path = curvedPathTopRight,
 		brush = borderStroke.brush,
-		style = Stroke(
-			width = borderStroke.width.toPx(),
-			cap = StrokeCap.Round
-		)
+		style = Stroke(width = strokeWidth, cap = strokeCap)
 	)
 
 	drawPath(
 		path = curvedPathBottomRight,
 		brush = borderStroke.brush,
-		style = Stroke(
-			width = borderStroke.width.toPx(),
-			cap = StrokeCap.Round
-		)
+		style = Stroke(width = strokeWidth, cap = strokeCap)
 	)
 
 }

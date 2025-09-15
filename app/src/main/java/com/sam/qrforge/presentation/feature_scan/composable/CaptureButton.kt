@@ -45,12 +45,12 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 fun CaptureButton(
 	onClick: () -> Unit,
 	modifier: Modifier = Modifier,
-	showRipples: Boolean = true,
-	isCapturing: Boolean = false,
 	shape: Shape = CircleShape,
 	baseColor: Color = Color.White,
 	captureProgress: () -> Float = { 0f },
+	isCapturing: Boolean = false,
 	canReadProgress: Boolean = false,
+	enabled: Boolean = true,
 	interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 	capturingIndicatorColor: Color = MaterialTheme.colorScheme.tertiary,
 	content: @Composable () -> Unit,
@@ -60,7 +60,7 @@ fun CaptureButton(
 
 	val boxSize by infiniteTransition.animateValue(
 		initialValue = CaptureButtonDefaults.rippleBoxSizeStart,
-		targetValue = if (showRipples) CaptureButtonDefaults.rippleBoxSizeEnd
+		targetValue = if (enabled) CaptureButtonDefaults.rippleBoxSizeEnd
 		else CaptureButtonDefaults.rippleBoxSizeStart,
 		typeConverter = Dp.VectorConverter,
 		animationSpec = infiniteRepeatable(
@@ -71,7 +71,7 @@ fun CaptureButton(
 	)
 
 	val rippleAlpha by infiniteTransition.animateFloat(
-		initialValue = if (showRipples) .3f else .1f,
+		initialValue = if (enabled) .3f else .1f,
 		targetValue = .1f,
 		animationSpec = infiniteRepeatable(
 			animation = tween(1200, 400, EaseInOutExpo),
@@ -103,7 +103,7 @@ fun CaptureButton(
 			modifier = Modifier
 				.matchParentSize()
 				.drawBehind {
-					if (!isCapturing || !showRipples)
+					if (!isCapturing)
 						drawCircle(
 							color = baseColor,
 							radius = boxSize.toPx() / 2f,
@@ -122,7 +122,7 @@ fun CaptureButton(
 				.clickable(
 					role = Role.Button,
 					onClick = onClick,
-					enabled = showRipples,
+					enabled = enabled,
 					interactionSource = interactionSource,
 					indication = ripple(color = Color.LightGray)
 				)
@@ -136,10 +136,10 @@ fun CaptureButton(
 
 						drawArc(
 							color = capturingIndicatorColor,
-							startAngle = 0f,
-							sweepAngle = progress,
+							startAngle = 270f,
+							sweepAngle = progress.coerceIn(0f..360f),
 							useCenter = false,
-							style = Stroke(4.dp.toPx(), cap = StrokeCap.Round)
+							style = Stroke(6.dp.toPx(), cap = StrokeCap.Round)
 						)
 					} else drawOutline(
 						outline = shape.createOutline(size, layoutDirection, this),
@@ -171,11 +171,28 @@ private object CaptureButtonDefaults {
 
 @Preview
 @Composable
-fun CaptureButtonPreview() = QRForgeTheme {
+private fun CaptureButtonNormalPreview() = QRForgeTheme {
 	CaptureButton(
 		onClick = { },
-		showRipples = false,
-		modifier = Modifier.padding(20.dp)
+		modifier = Modifier.padding(10.dp)
+	) {
+		Icon(
+			painter = painterResource(id = R.drawable.ic_scan),
+			contentDescription = "Shutter",
+			tint = Color.Black
+		)
+	}
+}
+
+@Preview
+@Composable
+private fun CaptureButtonAnimatingPreview() = QRForgeTheme {
+	CaptureButton(
+		onClick = { },
+		enabled = false,
+		isCapturing = true,
+		canReadProgress = true,
+		captureProgress = { .5f },
 	) {
 		Icon(
 			painter = painterResource(id = R.drawable.ic_scan),

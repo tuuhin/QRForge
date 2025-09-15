@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.presentation.common.composables.painter
+import com.sam.qrforge.presentation.common.composables.toActionText
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 
@@ -143,15 +144,3 @@ fun QRCommonActions(
 		}
 	}
 }
-
-private val QRDataType.toActionText: String?
-	@Composable
-	get() = when (this) {
-		QRDataType.TYPE_EMAIL -> stringResource(R.string.qr_action_text_mail)
-		QRDataType.TYPE_PHONE -> stringResource(R.string.qr_action_text_phone)
-		QRDataType.TYPE_GEO -> stringResource(R.string.qr_action_text_geo)
-		QRDataType.TYPE_URL -> stringResource(R.string.qr_action_text_url)
-		QRDataType.TYPE_WIFI -> stringResource(R.string.qr_action_text_wifi)
-		QRDataType.TYPE_SMS -> stringResource(R.string.qr_action_text_sms)
-		else -> null
-	}

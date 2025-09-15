@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -67,14 +66,14 @@ class CameraViewModel(
 	val imageAnalyzerState = _analyzerState.asStateFlow()
 
 	private val _localAnalysis = MutableStateFlow<QRContentModel?>(null)
-	val analysisResult: SharedFlow<QRContentModel>
+	val analysisResult: SharedFlow<QRContentModel?>
 		get() {
 			val imageAnalyzer = qrAnalyzer.resultAnalysis
 				.filter { it.isSuccess }.map { it.getOrNull() }
 
 			return merge(imageAnalyzer, _localAnalysis)
-				.filterIsInstance<QRContentModel>()
 				.onStart { prepareImageAnalyzers() }
+				.distinctUntilChanged()
 				.shareIn(
 					scope = viewModelScope,
 					started = SharingStarted.Lazily,
@@ -111,6 +110,8 @@ class CameraViewModel(
 			is CameraControllerEvents.OnChangeCaptureMode -> _analyzerState.update { state ->
 				state.copy(captureType = event.type)
 			}
+
+			CameraControllerEvents.OnClearAnalysisResult -> _localAnalysis.update { null }
 		}
 	}
 

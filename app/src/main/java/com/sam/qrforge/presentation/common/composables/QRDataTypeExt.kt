@@ -30,3 +30,15 @@ val QRDataType.string: String
 		QRDataType.TYPE_TEXT -> stringResource(R.string.qr_format_text)
 		QRDataType.TYPE_SMS -> stringResource(R.string.qr_format_sms)
 	}
+
+val QRDataType.toActionText: String?
+	@Composable
+	get() = when (this) {
+		QRDataType.TYPE_EMAIL -> stringResource(R.string.qr_action_text_mail)
+		QRDataType.TYPE_PHONE -> stringResource(R.string.qr_action_text_phone)
+		QRDataType.TYPE_GEO -> stringResource(R.string.qr_action_text_geo)
+		QRDataType.TYPE_URL -> stringResource(R.string.qr_action_text_url)
+		QRDataType.TYPE_WIFI -> stringResource(R.string.qr_action_text_wifi)
+		QRDataType.TYPE_SMS -> stringResource(R.string.qr_action_text_sms)
+		else -> null
+	}

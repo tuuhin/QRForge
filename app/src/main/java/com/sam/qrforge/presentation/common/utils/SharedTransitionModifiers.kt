@@ -2,6 +2,7 @@
 
 package com.sam.qrforge.presentation.common.utils
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -31,6 +32,7 @@ fun Modifier.sharedElementWrapper(
 	zIndexInOverlay: Float = 0f,
 	placeHolderSize: SharedTransitionScope.PlaceHolderSize = SharedTransitionScope.PlaceHolderSize.contentSize,
 	boundsTransform: BoundsTransform = BoundsTransform { _, _ -> NormalSpring },
+	keepChildPositions: Boolean = false,
 ) = composed {
 	val transitionScope = LocalSharedTransitionScopeProvider.current ?: return@composed Modifier
 	val visibilityScope =
@@ -39,14 +41,19 @@ fun Modifier.sharedElementWrapper(
 	with(transitionScope) {
 		val state = rememberSharedContentState(key)
 
-		Modifier.sharedElement(
-			sharedContentState = state,
-			animatedVisibilityScope = visibilityScope,
-			renderInOverlayDuringTransition = renderInOverlayDuringTransition,
-			zIndexInOverlay = zIndexInOverlay,
-			placeHolderSize = placeHolderSize,
-			boundsTransform = boundsTransform
-		)
+		val otherModifier = if (keepChildPositions) Modifier.skipToLookaheadSize()
+		else Modifier
+
+		Modifier
+			.sharedElement(
+				sharedContentState = state,
+				animatedVisibilityScope = visibilityScope,
+				renderInOverlayDuringTransition = renderInOverlayDuringTransition,
+				zIndexInOverlay = zIndexInOverlay,
+				placeHolderSize = placeHolderSize,
+				boundsTransform = boundsTransform
+			)
+			.then(otherModifier)
 	}
 }
 
@@ -59,6 +66,7 @@ fun Modifier.sharedBoundsWrapper(
 	zIndexInOverlay: Float = 0f,
 	placeHolderSize: SharedTransitionScope.PlaceHolderSize = SharedTransitionScope.PlaceHolderSize.contentSize,
 	boundsTransform: BoundsTransform = BoundsTransform { _, _ -> NormalSpring },
+	keepChildPositions: Boolean = false,
 ) = composed {
 
 	val transitionScope = LocalSharedTransitionScopeProvider.current ?: return@composed Modifier
@@ -68,16 +76,30 @@ fun Modifier.sharedBoundsWrapper(
 	with(transitionScope) {
 
 		val state = rememberSharedContentState(key)
-		Modifier.sharedBounds(
-			sharedContentState = state,
-			animatedVisibilityScope = visibilityScope,
-			exit = exit,
-			enter = enter,
-			boundsTransform = boundsTransform,
-			renderInOverlayDuringTransition = renderInOverlayDuringTransition,
-			zIndexInOverlay = zIndexInOverlay,
-			placeHolderSize = placeHolderSize,
-			resizeMode = resizeMode,
-		)
+
+		val otherModifier = if (keepChildPositions) Modifier.skipToLookaheadSize()
+		else Modifier
+
+		Modifier
+			.sharedBounds(
+				sharedContentState = state,
+				animatedVisibilityScope = visibilityScope,
+				exit = exit,
+				enter = enter,
+				boundsTransform = boundsTransform,
+				renderInOverlayDuringTransition = renderInOverlayDuringTransition,
+				zIndexInOverlay = zIndexInOverlay,
+				placeHolderSize = placeHolderSize,
+				resizeMode = resizeMode,
+			)
+			.then(otherModifier)
+	}
+}
+
+@SuppressLint("UnnecessaryComposedModifier")
+fun Modifier.sharedTransitionKeepChildSize() = composed {
+	val transitionScope = LocalSharedTransitionScopeProvider.current ?: return@composed Modifier
+	with(transitionScope) {
+		Modifier.skipToLookaheadSize()
 	}
 }

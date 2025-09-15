@@ -35,6 +35,8 @@ fun AndroidCameraView(
 	tapToFocus: (Offset) -> Unit,
 	onRelativeScaleChange: (Float) -> Unit,
 	modifier: Modifier = Modifier,
+	isFocusEnabled: Boolean = true,
+	isZoomEnabled: Boolean = true,
 	focusState: CameraFocusState = CameraFocusState.Unspecified,
 ) {
 	val currentTapToFocus by rememberUpdatedState(tapToFocus)
@@ -47,9 +49,10 @@ fun AndroidCameraView(
 		surfaceRequest = surfaceRequest,
 		coordinateTransformer = coordinateTransformer,
 		modifier = modifier
-			.transformable(transformableState)
-			.pointerInput(Unit) {
+			.transformable(state = transformableState, enabled = isZoomEnabled)
+			.pointerInput(isFocusEnabled) {
 				detectTapGestures { offset ->
+					if (!isFocusEnabled) return@detectTapGestures
 					with(coordinateTransformer) { currentTapToFocus(offset.transform()) }
 				}
 			},
