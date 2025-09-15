@@ -1,6 +1,6 @@
 package com.sam.qrforge.presentation.feature_scan.composable
 
-import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseInOutExpo
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.VectorConverter
@@ -14,6 +14,7 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -39,16 +40,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.ui.theme.QRForgeTheme
-import kotlin.math.sqrt
 
 @Composable
 fun CaptureButton(
 	onClick: () -> Unit,
 	modifier: Modifier = Modifier,
-	isAnimating: Boolean = true,
+	showRipples: Boolean = true,
 	isCapturing: Boolean = false,
 	shape: Shape = CircleShape,
 	baseColor: Color = Color.White,
+	captureProgress: () -> Float = { 0f },
+	canReadProgress: Boolean = false,
 	interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 	capturingIndicatorColor: Color = MaterialTheme.colorScheme.tertiary,
 	content: @Composable () -> Unit,
@@ -58,21 +60,21 @@ fun CaptureButton(
 
 	val boxSize by infiniteTransition.animateValue(
 		initialValue = CaptureButtonDefaults.rippleBoxSizeStart,
-		targetValue = if (isAnimating) CaptureButtonDefaults.rippleBoxSizeEnd
+		targetValue = if (showRipples) CaptureButtonDefaults.rippleBoxSizeEnd
 		else CaptureButtonDefaults.rippleBoxSizeStart,
 		typeConverter = Dp.VectorConverter,
 		animationSpec = infiniteRepeatable(
-			animation = tween(1200, 400, EaseInOut),
+			animation = tween(1200, 400, EaseOut),
 			repeatMode = RepeatMode.Reverse
 		),
 		label = "Ripple Indication"
 	)
 
 	val rippleAlpha by infiniteTransition.animateFloat(
-		initialValue = .35f,
-		targetValue = .2f,
+		initialValue = if (showRipples) .3f else .1f,
+		targetValue = .1f,
 		animationSpec = infiniteRepeatable(
-			animation = tween(1200, 400, EaseInOut),
+			animation = tween(1200, 400, EaseInOutExpo),
 			repeatMode = RepeatMode.Reverse
 		),
 		label = "Ripple colors"
@@ -101,10 +103,10 @@ fun CaptureButton(
 			modifier = Modifier
 				.matchParentSize()
 				.drawBehind {
-					if (!isCapturing)
+					if (!isCapturing || !showRipples)
 						drawCircle(
 							color = baseColor,
-							radius = boxSize.toPx() * sqrt(2f) / 2f,
+							radius = boxSize.toPx() / 2f,
 							alpha = rippleAlpha
 						)
 				},
@@ -120,7 +122,7 @@ fun CaptureButton(
 				.clickable(
 					role = Role.Button,
 					onClick = onClick,
-					enabled = isAnimating,
+					enabled = showRipples,
 					interactionSource = interactionSource,
 					indication = ripple(color = Color.LightGray)
 				)
@@ -129,10 +131,13 @@ fun CaptureButton(
 
 					val scale = .85f
 					if (isCapturing) {
+						val progress = if (canReadProgress) captureProgress() * 360f
+						else sweepAngle
+
 						drawArc(
 							color = capturingIndicatorColor,
 							startAngle = 0f,
-							sweepAngle = sweepAngle,
+							sweepAngle = progress,
 							useCenter = false,
 							style = Stroke(4.dp.toPx(), cap = StrokeCap.Round)
 						)
@@ -159,26 +164,23 @@ fun CaptureButton(
 }
 
 private object CaptureButtonDefaults {
-	val rippleBoxSizeStart = 64.dp
-	val rippleBoxSizeEnd = 96.dp
+	val rippleBoxSizeStart = 68.dp
+	val rippleBoxSizeEnd = 104.dp
 	val contentBoxSize = 72.dp
 }
 
 @Preview
 @Composable
 fun CaptureButtonPreview() = QRForgeTheme {
-	Box(
-		modifier = Modifier.size(150.dp),
-		contentAlignment = Alignment.Center
+	CaptureButton(
+		onClick = { },
+		showRipples = false,
+		modifier = Modifier.padding(20.dp)
 	) {
-		CaptureButton(
-			onClick = { },
-		) {
-			Icon(
-				painter = painterResource(id = R.drawable.ic_scan),
-				contentDescription = "Shutter",
-				tint = Color.Black
-			)
-		}
+		Icon(
+			painter = painterResource(id = R.drawable.ic_scan),
+			contentDescription = "Shutter",
+			tint = Color.Black
+		)
 	}
 }

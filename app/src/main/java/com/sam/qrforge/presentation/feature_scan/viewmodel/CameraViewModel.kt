@@ -1,238 +1,202 @@
 package com.sam.qrforge.presentation.feature_scan.viewmodel
 
-import android.app.Application
-import android.util.Log
-import androidx.camera.core.CameraControl
-import androidx.camera.core.CameraInfo
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.FocusMeteringAction
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.Preview
-import androidx.camera.core.SurfaceOrientedMeteringPointFactory
-import androidx.camera.core.SurfaceRequest
-import androidx.camera.core.TorchState
-import androidx.camera.core.UseCaseGroup
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.lifecycle.awaitInstance
+import android.graphics.Bitmap
 import androidx.compose.foundation.MutatorMutex
-import androidx.compose.ui.geometry.Offset
-import androidx.concurrent.futures.await
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
-import androidx.lifecycle.asFlow
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.viewModelScope
+import com.sam.qrforge.domain.facade.QRImageAnalyzer
+import com.sam.qrforge.domain.facade.QRScannerFacade
+import com.sam.qrforge.domain.models.qr.QRContentModel
+import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.UIEvent
+import com.sam.qrforge.presentation.common.utils.toBytes
+import com.sam.qrforge.presentation.feature_scan.state.CameraCaptureState
 import com.sam.qrforge.presentation.feature_scan.state.CameraControllerEvents
-import com.sam.qrforge.presentation.feature_scan.state.CameraFocusState
-import com.sam.qrforge.presentation.feature_scan.state.CameraZoomState
+import com.sam.qrforge.presentation.feature_scan.state.CameraControlsState
 import com.sam.qrforge.presentation.feature_scan.state.CaptureType
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.sam.qrforge.presentation.feature_scan.state.ImageAnalysisState
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
-private const val TAG = "CAMERA_CONTROLLER"
+class CameraViewModel(
+	private val controller: CameraController,
+	private val qrAnalyzer: QRImageAnalyzer,
+	private val decoder: QRScannerFacade,
+) : AppViewModel() {
 
-@OptIn(ExperimentalCoroutinesApi::class)
-class CameraViewmodel(private val application: Application) : AndroidViewModel(application) {
-
-	private val _isCameraReady = MutableStateFlow(false)
-
-	private val _surface = MutableStateFlow<SurfaceRequest?>(null)
-	val surfaceRequest = _surface.asStateFlow()
-
-	private val _focusState = MutableStateFlow<CameraFocusState>(CameraFocusState.Unspecified)
-	val focusState = _focusState.asStateFlow()
-
-	private val _captureType = MutableStateFlow(CaptureType.AUTO)
-	val captureType = _captureType.asStateFlow()
-
-	val isTorchEnabled = _isCameraReady.filter { it }
-		.flatMapLatest { _cameraInfo?.torchState?.asFlow() ?: emptyFlow() }
-		.map { state -> state == TorchState.ON }.stateIn(
-			scope = viewModelScope,
-			started = SharingStarted.WhileSubscribed(5_000L),
-			initialValue = false
+	val cameraControlState = combine(
+		controller.surface,
+		controller.focusState,
+		controller.cameraZoom,
+		controller.isCameraFlashing
+	) { surface, focus, zoom, flash ->
+		CameraControlsState(
+			surfaceRequest = surface,
+			focusState = focus,
+			isFlashEnabled = flash,
+			zoomState = zoom
 		)
+	}.stateIn(
+		scope = viewModelScope,
+		started = SharingStarted.WhileSubscribed(5_000L),
+		initialValue = CameraControlsState()
+	)
 
-	val zoomLevel = _isCameraReady.filter { it }
-		.flatMapLatest { _cameraInfo?.zoomState?.asFlow() ?: emptyFlow() }
-		.map { state ->
-			CameraZoomState(
-				zoomRatio = { state.zoomRatio },
-				maxZoomRatio = state.maxZoomRatio,
-				minZoomRatio = state.minZoomRatio
-			)
-		}.stateIn(
-			scope = viewModelScope,
-			started = SharingStarted.WhileSubscribed(5_000L),
-			initialValue = CameraZoomState()
-		)
+	private val _cameraCaptureState = MutableStateFlow(CameraCaptureState())
+	val cameraCaptureState = _cameraCaptureState.asStateFlow()
 
-	private var _meteringPointFactory: SurfaceOrientedMeteringPointFactory? = null
-	private var _cameraControl: CameraControl? = null
-	private var _cameraInfo: CameraInfo? = null
+	private val _analyzerState = MutableStateFlow(ImageAnalysisState())
+	val imageAnalyzerState = _analyzerState.asStateFlow()
 
-	private val _uiMutex = MutatorMutex()
+	private val _localAnalysis = MutableStateFlow<QRContentModel?>(null)
+	val analysisResult: SharedFlow<QRContentModel>
+		get() {
+			val imageAnalyzer = qrAnalyzer.resultAnalysis
+				.filter { it.isSuccess }.map { it.getOrNull() }
 
-	private val _cameraPreviewUseCase = Preview.Builder().build()
-		.apply {
-			setSurfaceProvider { request ->
-				_surface.update { request }
-				_meteringPointFactory = SurfaceOrientedMeteringPointFactory(
-					request.resolution.width.toFloat(),
-					request.resolution.height.toFloat()
+			return merge(imageAnalyzer, _localAnalysis)
+				.filterIsInstance<QRContentModel>()
+				.onStart { prepareImageAnalyzers() }
+				.shareIn(
+					scope = viewModelScope,
+					started = SharingStarted.Lazily,
 				)
-			}
 		}
 
-	private val _captureUseCase = ImageCapture.Builder().build()
-
-	private val _analysisUseCase = ImageAnalysis.Builder()
-		.setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-		.build()
-
-	private val _cameraUseCaseGroup = UseCaseGroup.Builder()
-		.addUseCase(_cameraPreviewUseCase)
-		.addUseCase(_captureUseCase)
-		.addUseCase(_analysisUseCase)
-		.build()
+	private var _bindCameraJob: Job? = null
+	private val _uiMutex = MutatorMutex()
 
 	private val _uiEvent = MutableSharedFlow<UIEvent>()
-	val uiEvents = _uiEvent.asSharedFlow()
+	override val uiEvents: SharedFlow<UIEvent>
+		get() = _uiEvent
 
-	fun onEvent(event: CameraControllerEvents) {
+	fun onCameraEvents(event: CameraControllerEvents) {
 		when (event) {
 			CameraControllerEvents.BindCamera -> bindCamera()
 			CameraControllerEvents.UnBindCamera -> unBindCamera()
-			is CameraControllerEvents.OnZoomLevelChange -> onZoomLevelChange(
-				event.zoom,
-				event.isRelative
-			)
+			CameraControllerEvents.ToggleFlash -> controller.onToggleFlash()
+			is CameraControllerEvents.OnZoomLevelChange -> viewModelScope.launch {
+				_uiMutex.mutate {
+					controller.onZoomLevelChange(
+						event.zoom,
+						event.isRelative
+					)
+				}
+			}
 
-			is CameraControllerEvents.TapToFocus -> onTapToFocus(event.offset)
-			CameraControllerEvents.ToggleFlash -> onToggleFlash()
-			is CameraControllerEvents.OnChangeCaptureMode -> _captureType.update { event.mode }
+			is CameraControllerEvents.TapToFocus -> viewModelScope.launch {
+				controller.onTapToFocus(event.offset)
+			}
+
+			CameraControllerEvents.CaptureImage -> captureImage()
+			is CameraControllerEvents.OnSelectImageURI -> onGalleryImageSelected(event.uri)
+			is CameraControllerEvents.OnChangeCaptureMode -> _analyzerState.update { state ->
+				state.copy(captureType = event.type)
+			}
 		}
 	}
 
-	private var _bindCameraJob: Job? = null
-
 	private fun bindCamera() {
 		_bindCameraJob = viewModelScope.launch {
-
-			val cameraProvider = ProcessCameraProvider.awaitInstance(application)
-			val scopedLifecycle = CoroutineLifecycleOwner(this.coroutineContext)
-			val camera = cameraProvider.bindToLifecycle(
-				scopedLifecycle, CameraSelector.DEFAULT_BACK_CAMERA, _cameraUseCaseGroup
-			)
-			_cameraControl = camera.cameraControl
-			_cameraInfo = camera.cameraInfo
-
-			_isCameraReady.update { true }
-			try {
-				// this will stop it from being finishing
-				awaitCancellation()
-			} finally {
-				cameraProvider.unbindAll()
-			}
+			controller.prepareCameraInstance(this)
 		}
 	}
 
 	private fun unBindCamera() {
 		_bindCameraJob?.invokeOnCompletion {
-			_isCameraReady.update { false }
-			_cameraControl = null
-			_cameraInfo = null
+			controller.cameraCleanUp()
 		}
 		_bindCameraJob?.cancel()
 		_bindCameraJob = null
 	}
 
-	private fun onToggleFlash() = viewModelScope.launch {
-		if (_cameraInfo?.hasFlashUnit() == false) return@launch
-
-		val isOn = _cameraInfo?.torchState?.value == TorchState.ON
-		_cameraControl?.enableTorch(!isOn)
-	}
-
-	private fun onZoomLevelChange(zoom: Float, isRelative: Boolean = false) =
-		viewModelScope.launch {
-			val controller = _cameraControl ?: return@launch
-			val currentZoom = _cameraInfo?.zoomState?.value?.zoomRatio ?: return@launch
-
-			_uiMutex.mutate {
-				controller.cancelFocusAndMetering()
-				controller.setZoomRatio(if (isRelative) zoom * currentZoom else zoom)
-			}
-		}
-
-	private fun onTapToFocus(offset: Offset) = viewModelScope.launch {
-		val point = _meteringPointFactory?.createPoint(offset.x, offset.y) ?: return@launch
-		_focusState.update {
-			CameraFocusState.Specified(
-				coordinates = offset,
-				status = CameraFocusState.FocusStatus.RUNNING
-			)
-		}
-		val focusPoint = FocusMeteringAction.Builder(point).build()
-
-		val status = try {
-			val futures = _cameraControl?.startFocusAndMetering(focusPoint)
-			val isSuccessful = futures?.await()?.isFocusSuccessful == true
-			if (isSuccessful) CameraFocusState.FocusStatus.SUCCESS
-			else CameraFocusState.FocusStatus.FAILURE
-
-		} catch (_: CameraControl.OperationCanceledException) {
-			CameraFocusState.FocusStatus.CANCELLED
-		}
-
-		_focusState.update {
-			CameraFocusState.Specified(
-				coordinates = offset,
-				status = status
-			)
-		}
-	}
-
-	private inner class CoroutineLifecycleOwner(coroutineContext: CoroutineContext) :
-		LifecycleOwner {
-
-		val lifecycleRegistry = LifecycleRegistry(this).apply {
-			currentState = Lifecycle.State.INITIALIZED
-		}
-
-		override val lifecycle: Lifecycle
-			get() = lifecycleRegistry
-
-		init {
-			// get the job
-			if (coroutineContext[Job]?.isActive == true) {
-				lifecycleRegistry.currentState = Lifecycle.State.RESUMED
-				Log.d(TAG, "Lifecycle Resumed")
-				coroutineContext[Job]?.invokeOnCompletion {
-					Log.d(TAG, "Lifecycle destroyed")
-					lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
+	private fun prepareImageAnalyzers() {
+		_analyzerState.map { it.captureType }
+			.distinctUntilChanged()
+			.onEach { type ->
+				when (type) {
+					CaptureType.AUTO -> controller.setAnalyzer(qrAnalyzer)
+					CaptureType.MANUAL -> controller.clearAnalyzer()
 				}
-			} else {
-				Log.d(TAG, "Lifecycle destroyed job inactive")
-				lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
+				_analyzerState.update { state ->
+					state.copy(isAnalyserSet = type == CaptureType.AUTO, isAnalysing = false)
+				}
+			}.launchIn(viewModelScope)
+	}
+
+	private fun onGalleryImageSelected(uriString: String) = viewModelScope.launch {
+		_analyzerState.update { state -> state.copy(isAnalysing = true) }
+		val results = decoder.decodeFromFile(uriString)
+
+		results.fold(
+			onSuccess = { model -> _localAnalysis.update { model } },
+			onFailure = { err ->
+				val message = err.message ?: "Some error"
+				_uiEvent.emit(UIEvent.ShowToast(message))
+			},
+		)
+		_analyzerState.update { state -> state.copy(isAnalysing = false) }
+	}
+
+	private fun captureImage() = viewModelScope.launch {
+		controller.captureImage(
+			onStateChange = { state ->
+				// if capture progress is supported then this will increase progress
+				_cameraCaptureState.update { state.copy(canPropagateProgress = controller.isCaptureProgressSupported) }
+			},
+			onPreviewBitmap = { bitmap ->
+				// if post view mode is supported then this call back will provide a image preview
+				val previous = _cameraCaptureState
+					.getAndUpdate { state -> state.copy(postCapturePreview = bitmap) }
+				previous.postCapturePreview?.recycle()
+			},
+			onImageCapture = ::analyzeBitmap,
+			onError = { err ->
+				val message = err.message ?: "SOME ERROR"
+				_uiEvent.emit(UIEvent.ShowSnackBar(message))
+			},
+			cleanUp = {
+				val previous = _cameraCaptureState
+					.getAndUpdate { CameraCaptureState(canPropagateProgress = controller.isCaptureProgressSupported) }
+				previous.postCapturePreview?.recycle()
 			}
-		}
+		)
+	}
+
+	private fun analyzeBitmap(bitmap: Bitmap, rotate: Int) = viewModelScope.launch {
+		_analyzerState.update { state -> state.copy(isAnalysing = true) }
+		val bytes = bitmap.asImageBitmap().toBytes()
+		val results = decoder.decodeAsBitMap(bytes, bitmap.width, bitmap.height, rotate)
+		results.fold(
+			onSuccess = { model -> _localAnalysis.update { model } },
+			onFailure = { err ->
+				val message = err.message ?: "Some error"
+				_uiEvent.emit(UIEvent.ShowToast(message))
+			},
+		)
+		_analyzerState.update { state -> state.copy(isAnalysing = false) }
+	}
+
+	override fun onCleared() {
+		qrAnalyzer.cleanUp()
+		super.onCleared()
 	}
 }

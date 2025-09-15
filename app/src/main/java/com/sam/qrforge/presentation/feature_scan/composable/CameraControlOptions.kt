@@ -1,36 +1,49 @@
 package com.sam.qrforge.presentation.feature_scan.composable
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.EaseInCubic
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseInBounce
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.EaseOutBounce
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandIn
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.roundToIntSize
-import androidx.compose.ui.unit.toSize
 import com.sam.qrforge.R
+import com.sam.qrforge.presentation.feature_scan.state.CameraCaptureState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CameraControlOption(
 	onCapture: () -> Unit,
@@ -38,79 +51,118 @@ fun CameraControlOption(
 	modifier: Modifier = Modifier,
 	isFlashOn: Boolean = false,
 	showCaptureButton: Boolean = true,
-	zoomLevel: () -> Float = { 1f },
-	onShowZoomPicker: () -> Unit = {},
+	cameraState: CameraCaptureState = CameraCaptureState(),
+	onPickImage: () -> Unit = {},
 ) {
 	Row(
-		modifier = modifier,
+		modifier = modifier
+			.animateContentSize()
+			.heightIn(110.dp),
 		horizontalArrangement = Arrangement.SpaceAround,
 		verticalAlignment = Alignment.CenterVertically,
 	) {
-		FilledTonalButton(
-			onClick = onToggleFlash,
-			shape = MaterialTheme.shapes.extraLarge,
-			contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
-			colors = ButtonDefaults.filledTonalButtonColors(
-				containerColor = MaterialTheme.colorScheme.secondaryContainer,
-				contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-			)
+		TooltipBox(
+			positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+			tooltip = {
+				PlainTooltip {
+					Text(text = stringResource(R.string.camera_action_control_flash))
+				}
+			},
+			state = rememberTooltipState()
 		) {
-			AnimatedContent(
-				targetState = isFlashOn,
-				transitionSpec = {
-					slideInVertically() + expandVertically() togetherWith slideOutVertically() + shrinkVertically()
-				},
-				contentAlignment = Alignment.Center,
-			) { isOn ->
-				if (isOn)
-					Icon(
-						painter = painterResource(R.drawable.ic_flash_filled),
-						contentDescription = "Flashing"
+			Surface(
+				onClick = onToggleFlash,
+				shape = MaterialTheme.shapes.large,
+				color = MaterialTheme.colorScheme.secondary,
+				contentColor = MaterialTheme.colorScheme.onSecondary,
+				enabled = !cameraState.isCapturing,
+				modifier = Modifier
+					.size(52.dp)
+					.semantics {
+						role = Role.Button
+					},
+			) {
+				AnimatedContent(
+					targetState = isFlashOn,
+					transitionSpec = {
+						scaleIn(
+							animationSpec = spring(
+								Spring.DampingRatioLowBouncy,
+								Spring.StiffnessLow
+							)
+						) togetherWith scaleOut(
+							animationSpec = tween(durationMillis = 200, easing = EaseIn)
+						)
+					},
+					contentAlignment = Alignment.Center,
+					modifier = Modifier.padding(12.dp)
+				) { isOn ->
+					if (isOn)
+						Icon(
+							painter = painterResource(R.drawable.ic_flash_filled),
+							contentDescription = "Flashing",
+							modifier = Modifier.fillMaxSize()
+						)
+					else Icon(
+						painter = painterResource(R.drawable.ic_no_flash),
+						contentDescription = "No flashing",
+						modifier = Modifier.fillMaxSize()
 					)
-				else Icon(
-					painter = painterResource(R.drawable.ic_no_flash),
-					contentDescription = "No flashing"
-				)
+				}
 			}
 		}
 		AnimatedContent(
 			targetState = showCaptureButton,
 			transitionSpec = {
-				expandIn(
-					animationSpec = tween(durationMillis = 200, easing = EaseInCubic),
-					expandFrom = Alignment.Center,
-					initialSize = { it.toSize().times(.2f).roundToIntSize() }
-				) + fadeIn() togetherWith shrinkOut(
-					animationSpec = tween(durationMillis = 200, easing = EaseInCubic),
-					shrinkTowards = Alignment.Center,
-					targetSize = { it.toSize().times(.2f).roundToIntSize() }
-				) + fadeOut()
+				scaleIn(
+					animationSpec = tween(durationMillis = 200, easing = EaseInBounce),
+					initialScale = .2f,
+				) + fadeIn(animationSpec = tween(easing = EaseIn)) togetherWith scaleOut(
+					animationSpec = tween(durationMillis = 200, easing = EaseOutBounce),
+					targetScale = .2f
+				) + fadeOut(animationSpec = tween(easing = EaseOut))
 			},
 			contentAlignment = Alignment.Center,
-			modifier = Modifier.defaultMinSize(minWidth = 72.dp, minHeight = 72.dp)
-		) { isReady ->
-			if (isReady)
+			modifier = Modifier.defaultMinSize(72.dp),
+		) { show ->
+			if (show)
 				CaptureButton(
 					onClick = onCapture,
-					isAnimating = !transition.isRunning
+					showRipples = !transition.isRunning,
+					isCapturing = cameraState.isCapturing,
+					captureProgress = cameraState.captureProgress,
+					canReadProgress = cameraState.canPropagateProgress
 				) {
 					Icon(
 						painter = painterResource(id = R.drawable.ic_scan),
 						contentDescription = "Shutter",
-						tint = MaterialTheme.colorScheme.surfaceTint,
+						tint = Color.Black,
 					)
 				}
-
 		}
-		FilledTonalButton(
-			onClick = onShowZoomPicker,
-			contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
-			colors = ButtonDefaults.filledTonalButtonColors(
-				containerColor = MaterialTheme.colorScheme.secondaryContainer,
-				contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-			)
+		TooltipBox(
+			positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+			tooltip = {
+				PlainTooltip {
+					Text(text = stringResource(R.string.camera_action_pick_image))
+				}
+			},
+			state = rememberTooltipState()
 		) {
-			Text(text = stringResource(R.string.zoom_formated_2_decimal_place, zoomLevel()))
+			Surface(
+				onClick = onPickImage,
+				enabled = !cameraState.isCapturing,
+				shape = MaterialTheme.shapes.large,
+				color = MaterialTheme.colorScheme.secondary,
+				contentColor = MaterialTheme.colorScheme.onSecondary,
+				modifier = Modifier.size(52.dp),
+			) {
+				Icon(
+					painter = painterResource(R.drawable.ic_gallery),
+					contentDescription = stringResource(R.string.camera_action_pick_image),
+					modifier = Modifier.padding(12.dp)
+				)
+			}
 		}
 	}
 }
