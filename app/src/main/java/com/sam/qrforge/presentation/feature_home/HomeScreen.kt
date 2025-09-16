@@ -37,6 +37,7 @@ import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
+import com.sam.qrforge.presentation.common.utils.slideUpToReveal
 import com.sam.qrforge.presentation.feature_home.composables.FilterListBottomSheet
 import com.sam.qrforge.presentation.feature_home.composables.GenerateORScanActions
 import com.sam.qrforge.presentation.feature_home.composables.HomeScreenContent
@@ -44,14 +45,16 @@ import com.sam.qrforge.presentation.feature_home.composables.HomeScreenTopAppBar
 import com.sam.qrforge.presentation.feature_home.state.FilterQRListState
 import com.sam.qrforge.presentation.feature_home.state.HomeScreenEvents
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
-import com.sam.qrforge.presentation.navigation.animatedComposable
+import com.sam.qrforge.presentation.navigation.fadeAnimatedComposable
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-fun NavGraphBuilder.homeRoute(controller: NavController) = animatedComposable<NavRoutes.HomeRoute> {
+fun NavGraphBuilder.homeRoute(
+	controller: NavController
+) = fadeAnimatedComposable<NavRoutes.HomeRoute> {
 
 	val viewModel = koinViewModel<HomeViewModel>()
 	val qrHistory by viewModel.savedQR.collectAsStateWithLifecycle()
@@ -127,6 +130,7 @@ private fun HomeScreen(
 			GenerateORScanActions(
 				onGenerate = onNavigateToCreateNew,
 				onScan = onNavigateToScanner,
+				modifier = Modifier.slideUpToReveal()
 			)
 		},
 		snackbarHost = {
@@ -150,7 +154,7 @@ private fun HomeScreen(
 			onSelectItem = onNavigateToItemDetailed,
 			contentPadding = PaddingValues(
 				top = scPadding.calculateTopPadding(),
-				bottom = scPadding.calculateBottomPadding(),
+				bottom = dimensionResource(R.dimen.sc_padding),
 				start = scPadding.calculateStartPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding),
 				end = scPadding.calculateEndPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding)
 			),

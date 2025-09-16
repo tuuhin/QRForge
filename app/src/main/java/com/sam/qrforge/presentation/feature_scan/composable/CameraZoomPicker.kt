@@ -1,13 +1,16 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package com.sam.qrforge.presentation.feature_scan.composable
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.ArcMode
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.EaseInOutBounce
+import androidx.compose.animation.core.EaseInOutExpo
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,9 +41,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
+import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionScopeProvider
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.feature_scan.state.CameraZoomState
@@ -77,35 +81,23 @@ fun CameraZoomPicker(
 					.fillMaxWidth(.85f)
 					.sharedBoundsWrapper(
 						key = ZOOM_PICKER_TRANSITION_KEY,
-						resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-						placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-						boundsTransform = BoundsTransform { initial, target ->
-							keyframes {
-								durationMillis = 400
-								initial at 0 using ArcMode.ArcBelow using FastOutSlowInEasing
-								target at 400
-							}
+						boundsTransform = BoundsTransform { _, _ ->
+							tween(durationMillis = 400, easing = EaseInOutExpo)
 						}
 					)
-			) else {
-				ZoomValueButton(
-					zoomLevel = zoomState.zoomRatio,
-					onShowPicker = { showPicker = true },
-					enabled = enabled,
-					modifier = Modifier.sharedBoundsWrapper(
-						key = ZOOM_PICKER_TRANSITION_KEY,
-						resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-						placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-						boundsTransform = BoundsTransform { initial, target ->
-							keyframes {
-								durationMillis = 400
-								initial at 0 using ArcMode.ArcBelow using FastOutSlowInEasing
-								target at 400
-							}
-						}
-					)
+			)
+			else ZoomValueButton(
+				zoomLevel = zoomState.zoomRatio,
+				onShowPicker = { showPicker = true },
+				enabled = enabled,
+				modifier = Modifier.sharedBoundsWrapper(
+					key = ZOOM_PICKER_TRANSITION_KEY,
+					clipShape = MaterialTheme.shapes.large,
+					boundsTransform = BoundsTransform { _, _ ->
+						tween(durationMillis = 400, easing = EaseInOutBounce)
+					}
 				)
-			}
+			)
 		}
 	}
 }
@@ -168,6 +160,19 @@ private fun ZoomPickerSlider(
 		verticalAlignment = Alignment.CenterVertically,
 		modifier = modifier,
 	) {
+		FilledTonalIconButton(
+			onClick = { onZoomChange(zoomState.minZoomRatio) },
+			colors = IconButtonDefaults.filledTonalIconButtonColors(
+				containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+				contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+			),
+			shape = MaterialTheme.shapes.large,
+		) {
+			Icon(
+				painter = painterResource(R.drawable.ic_restore),
+				contentDescription = "Close"
+			)
+		}
 		Surface(
 			shape = MaterialTheme.shapes.extraLarge,
 			color = containerColor,
@@ -222,13 +227,22 @@ private fun ZoomPickerSlider(
 	}
 }
 
-@PreviewLightDark
+@Preview
 @Composable
 private fun CameraZoomPickerPreview() = QRForgeTheme {
-	CameraZoomPicker(
-		zoomState = CameraZoomState(maxZoomRatio = 10f),
-		onZoomChange = {},
-		containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-		modifier = Modifier.padding(4.dp)
-	)
+	SharedTransitionLayout {
+		CompositionLocalProvider(LocalSharedTransitionScopeProvider provides this) {
+			Box(
+				contentAlignment = Alignment.Center,
+				modifier = Modifier.fillMaxWidth()
+			) {
+				CameraZoomPicker(
+					zoomState = CameraZoomState(maxZoomRatio = 10f),
+					onZoomChange = {},
+					containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+					modifier = Modifier.padding(4.dp)
+				)
+			}
+		}
+	}
 }

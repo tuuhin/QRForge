@@ -1,7 +1,6 @@
 package com.sam.qrforge.presentation.feature_export
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,18 +27,13 @@ import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
-import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
-import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.feature_export.composable.ExportQRScreenContent
 import com.sam.qrforge.presentation.feature_export.composable.ExportScreenTopAppBar
 import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenEvents
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.coroutines.launch
 
-@OptIn(
-	ExperimentalMaterial3Api::class,
-	ExperimentalSharedTransitionApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExportQRScreen(
 	decoration: QRDecorationOption,
@@ -81,9 +75,7 @@ fun ExportQRScreen(
 				)
 			}
 		},
-		modifier = modifier
-			.nestedScroll(scrollBehavior.nestedScrollConnection)
-			.sharedBoundsWrapper(SharedTransitionKeys.EXPORT_BUTTON_TO_EXPORT_SCREEN),
+		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
 	) { scPadding ->
 		Crossfade(
 			targetState = generatedQR != null,

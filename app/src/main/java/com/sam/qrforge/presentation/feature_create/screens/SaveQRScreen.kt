@@ -1,6 +1,5 @@
 package com.sam.qrforge.presentation.feature_create.screens
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -27,17 +26,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
-import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
-import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.feature_create.composables.SaveQRScreenContent
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenEvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenState
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
-@OptIn(
-	ExperimentalMaterial3Api::class,
-	ExperimentalSharedTransitionApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SaveQRScreen(
 	state: SaveQRScreenState,
@@ -82,9 +76,7 @@ fun SaveQRScreen(
 				)
 			}
 		},
-		modifier = modifier
-			.nestedScroll(scrollBehavior.nestedScrollConnection)
-			.sharedBoundsWrapper(SharedTransitionKeys.PREVIEW_SCREEN_TO_SAVE_SCREEN)
+		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
 	) { scPadding ->
 		SaveQRScreenContent(
 			state = state,

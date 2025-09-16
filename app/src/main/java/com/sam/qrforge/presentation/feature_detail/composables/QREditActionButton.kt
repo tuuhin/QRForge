@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,7 +26,7 @@ fun QREditActionButton(
 	onEdit: () -> Unit,
 	modifier: Modifier = Modifier,
 	isExpanded: Boolean = true,
-	shape: Shape = MaterialTheme.shapes.large,
+	shape: Shape = MaterialTheme.shapes.extraLarge,
 	containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
 	contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
 ) {
@@ -51,6 +52,7 @@ fun QREditActionButton(
 			expanded = isExpanded,
 			containerColor = containerColor,
 			contentColor = contentColor,
+			elevation = FloatingActionButtonDefaults.loweredElevation(),
 			text = { Text(text = stringResource(R.string.action_edit)) },
 		)
 	}

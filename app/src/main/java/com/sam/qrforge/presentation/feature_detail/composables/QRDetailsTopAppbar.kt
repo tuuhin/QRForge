@@ -2,14 +2,16 @@ package com.sam.qrforge.presentation.feature_detail.composables
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseInCirc
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.EaseOutCirc
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -29,13 +31,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.SavedQRModel
-import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
-import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 
-@OptIn(
-	ExperimentalMaterial3Api::class,
-	ExperimentalSharedTransitionApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QRDetailsTopAppBar(
 	modifier: Modifier = Modifier,
@@ -50,21 +47,22 @@ fun QRDetailsTopAppBar(
 			AnimatedVisibility(
 				visible = qrModel != null,
 				enter = slideInHorizontally(
-					animationSpec = tween(durationMillis = 200, easing = EaseInOut)
-				) + fadeIn(),
-				exit = slideOutVertically(
-					animationSpec = tween(durationMillis = 200, easing = EaseInOut)
-				) + fadeOut(),
-				modifier = Modifier.then(
-					if (qrModel == null) Modifier
-					else Modifier.sharedBoundsWrapper(
-						SharedTransitionKeys.sharedBoundsTitleToDetails(qrModel.id),
-					)
-				)
+					animationSpec = tween(durationMillis = 200, easing = EaseIn)
+				) + fadeIn(
+					initialAlpha = .2f,
+					animationSpec = tween(durationMillis = 300, easing = EaseInCirc)
+				),
+				exit = slideOutHorizontally(
+					animationSpec = tween(durationMillis = 200, easing = EaseOut)
+				) + fadeOut(
+					targetAlpha = .2f,
+					animationSpec = tween(durationMillis = 300, easing = EaseOutCirc)
+				),
 			) {
 				Text(
 					text = qrModel?.title ?: "",
-					maxLines = 1, overflow = TextOverflow.Ellipsis
+					maxLines = 1,
+					overflow = TextOverflow.Ellipsis,
 				)
 			}
 		},

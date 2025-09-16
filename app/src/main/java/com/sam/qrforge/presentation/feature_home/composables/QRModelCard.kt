@@ -2,6 +2,7 @@ package com.sam.qrforge.presentation.feature_home.composables
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -43,8 +44,8 @@ import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import com.sam.qrforge.presentation.common.utils.PLAIN_DATE
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
-import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.common.utils.sharedElementWrapper
+import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildSize
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.datetime.LocalDateTime
@@ -99,8 +100,11 @@ fun QRModelCard(
 				verticalAlignment = Alignment.CenterVertically,
 			) {
 				AnimatedQRContent(
-					uiModel = model.uiModel, modifier = Modifier.sharedElementWrapper(
-						SharedTransitionKeys.sharedElementQRCodeItemToDetail(model.qrModel.id)
+					uiModel = model.uiModel,
+					modifier = Modifier.sharedElementWrapper(
+						key = SharedTransitionKeys.sharedElementQRCodeItemToDetail(model.qrModel.id),
+						placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+						clipShape = MaterialTheme.shapes.large
 					)
 				)
 				Column(
@@ -118,9 +122,7 @@ fun QRModelCard(
 								style = MaterialTheme.typography.titleMedium,
 								color = MaterialTheme.colorScheme.primary,
 								fontWeight = FontWeight.SemiBold,
-								modifier = Modifier.sharedBoundsWrapper(
-									SharedTransitionKeys.sharedBoundsTitleToDetails(model.qrModel.id)
-								)
+								modifier = Modifier.sharedTransitionSkipChildSize()
 							)
 							model.qrModel.desc?.let { desc ->
 								Text(
@@ -128,6 +130,7 @@ fun QRModelCard(
 									style = MaterialTheme.typography.bodyMedium,
 									maxLines = 2,
 									overflow = TextOverflow.Ellipsis,
+									modifier = Modifier.sharedTransitionSkipChildSize()
 								)
 							}
 						}

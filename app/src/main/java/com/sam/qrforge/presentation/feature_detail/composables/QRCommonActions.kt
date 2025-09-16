@@ -1,7 +1,6 @@
 package com.sam.qrforge.presentation.feature_detail.composables
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -37,10 +36,8 @@ import com.sam.qrforge.R
 import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.presentation.common.composables.painter
 import com.sam.qrforge.presentation.common.composables.toActionText
-import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
-import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QRCommonActions(
 	isQRReady: Boolean,
@@ -131,9 +128,6 @@ fun QRCommonActions(
 					shape = MaterialTheme.shapes.extraLarge,
 					containerColor = MaterialTheme.colorScheme.secondaryContainer,
 					contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-					modifier = Modifier.sharedBoundsWrapper(
-						SharedTransitionKeys.EXPORT_BUTTON_TO_EXPORT_SCREEN
-					)
 				) {
 					Icon(
 						painter = painterResource(R.drawable.ic_export),

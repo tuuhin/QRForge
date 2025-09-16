@@ -2,6 +2,7 @@ package com.sam.qrforge.presentation.feature_detail.screens
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,7 @@ import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
+import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildSize
 import com.sam.qrforge.presentation.feature_detail.composables.ConfirmDeleteDialog
 import com.sam.qrforge.presentation.feature_detail.composables.MissingQRDetailsContent
 import com.sam.qrforge.presentation.feature_detail.composables.QRDetailsScreenContent
@@ -96,6 +98,7 @@ fun QRDetailsScreen(
 				onDeleteItem = { onEvent(QRDetailsScreenEvents.ToggleDeleteDialog) },
 				navigation = navigation,
 				scrollBehavior = scrollBehavior,
+				modifier = Modifier.sharedTransitionSkipChildSize()
 			)
 		},
 		floatingActionButton = {
@@ -103,7 +106,6 @@ fun QRDetailsScreen(
 				showButton = state.qrModel != null,
 				onEdit = onNavigateToEdit,
 				isExpanded = !hasScrolled,
-				modifier = Modifier.sharedBoundsWrapper(key = SharedTransitionKeys.QR_DETAILS_SCREEN_TO_EDIT_SCREEN)
 			)
 		},
 		snackbarHost = {
@@ -119,7 +121,11 @@ fun QRDetailsScreen(
 		},
 		modifier = modifier
 			.nestedScroll(scrollBehavior.nestedScrollConnection)
-			.sharedBoundsWrapper(SharedTransitionKeys.sharedBoundsToItemDetail(qrId))
+			.sharedBoundsWrapper(
+				key = SharedTransitionKeys.sharedBoundsToItemDetail(qrId),
+				resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+				placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+			)
 	) { scPadding ->
 		Crossfade(
 			targetState = loadState,

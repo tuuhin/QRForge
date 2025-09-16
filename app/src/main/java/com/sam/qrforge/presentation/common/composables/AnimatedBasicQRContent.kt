@@ -3,10 +3,10 @@ package com.sam.qrforge.presentation.common.composables
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.EaseInBounce
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -63,10 +63,10 @@ fun AnimatedBasicQRContent(
 				fadeIn(
 					initialAlpha = .4f,
 					animationSpec = tween(durationMillis = 200, easing = EaseInBounce)
-				) + expandIn(expandFrom = Alignment.Center) togetherWith fadeOut(
+				) + scaleIn() togetherWith fadeOut(
 					targetAlpha = .1f,
 					animationSpec = tween(durationMillis = 90)
-				) + shrinkOut(shrinkTowards = Alignment.Center)
+				) + scaleOut()
 			},
 			modifier = Modifier.size(300.dp)
 		) { isReady ->

@@ -9,6 +9,7 @@ import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseInCubic
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.EaseOutCubic
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -25,7 +26,12 @@ inline fun <reified T : Any> NavGraphBuilder.animatedComposable(
 	typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap(),
 	deepLinks: List<NavDeepLink> = emptyList(),
 	noinline sizeTransform: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards SizeTransform?)? = {
-		SizeTransform(clip = false) { _, _ -> spring() }
+		SizeTransform(clip = false) { _, _ ->
+			spring(
+				dampingRatio = Spring.DampingRatioLowBouncy,
+				stiffness = Spring.StiffnessMedium
+			)
+		}
 	},
 	noinline content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit,
 ) = composable<T>(
@@ -33,6 +39,29 @@ inline fun <reified T : Any> NavGraphBuilder.animatedComposable(
 	deepLinks = deepLinks,
 	enterTransition = { slideIntoContainerAndFadeIn },
 	exitTransition = { slideOutOfContainerAndFadeOut },
+	popEnterTransition = { slideIntoContainerAndFadeIn },
+	popExitTransition = { slideOutOfContainerAndFadeOut },
+	sizeTransform = sizeTransform,
+	content = content
+)
+
+inline fun <reified T : Any> NavGraphBuilder.fadeAnimatedComposable(
+	typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap(),
+	deepLinks: List<NavDeepLink> = emptyList(),
+	noinline sizeTransform: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards SizeTransform?)? = {
+		SizeTransform(clip = false) { _, _ ->
+			spring(
+				dampingRatio = Spring.DampingRatioLowBouncy,
+				stiffness = Spring.StiffnessMedium
+			)
+		}
+	},
+	noinline content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit,
+) = composable<T>(
+	typeMap = typeMap,
+	deepLinks = deepLinks,
+	enterTransition = { fadeIn(animationSpec = tween(easing = EaseIn, durationMillis = 300)) },
+	exitTransition = { fadeOut(animationSpec = tween(easing = EaseOut, durationMillis = 300)) },
 	popEnterTransition = { slideIntoContainerAndFadeIn },
 	popExitTransition = { slideOutOfContainerAndFadeOut },
 	sizeTransform = sizeTransform,

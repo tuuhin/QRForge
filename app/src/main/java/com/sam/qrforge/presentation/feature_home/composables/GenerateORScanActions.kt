@@ -1,6 +1,7 @@
 package com.sam.qrforge.presentation.feature_home.composables
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
+import com.sam.qrforge.presentation.common.utils.sharedTransitionRenderInOverlay
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -44,17 +46,21 @@ fun GenerateORScanActions(
 	generateButtonColor: Color = MaterialTheme.colorScheme.primary,
 	scanButtonColor: Color = MaterialTheme.colorScheme.secondary,
 ) {
+	val clipShape = MaterialTheme.shapes.extraLarge.copy(
+		bottomStart = ZeroCornerSize,
+		bottomEnd = ZeroCornerSize
+	)
 
 	Box(
 		modifier = modifier
-			.background(
-				MaterialTheme.colorScheme.surfaceContainer,
-				shape = MaterialTheme.shapes.extraLarge.copy(
-					bottomStart = ZeroCornerSize, bottomEnd = ZeroCornerSize
-				),
-			)
+			.sharedTransitionRenderInOverlay(1f)
 			.fillMaxWidth()
-			.heightIn(100.dp), contentAlignment = Alignment.Center
+			.heightIn(100.dp)
+			.background(
+				color = MaterialTheme.colorScheme.surfaceContainerHigh,
+				shape = clipShape,
+			),
+		contentAlignment = Alignment.Center
 	) {
 		Row(
 			horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -69,7 +75,12 @@ fun GenerateORScanActions(
 				contentPadding = PaddingValues(vertical = 16.dp),
 				modifier = Modifier
 					.weight(1f)
-					.sharedBoundsWrapper(SharedTransitionKeys.HOME_SCREEN_TO_CREATE_QR_SCREEN)
+					.sharedBoundsWrapper(
+						key = SharedTransitionKeys.HOME_SCREEN_TO_CREATE_QR_SCREEN,
+						resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+						clipShape = MaterialTheme.shapes.extraLarge,
+						zIndexInOverlay = 2f,
+					),
 			) {
 				Icon(
 					painter = painterResource(R.drawable.ic_qr_simplified),
@@ -89,7 +100,12 @@ fun GenerateORScanActions(
 				contentPadding = PaddingValues(vertical = 16.dp),
 				modifier = Modifier
 					.weight(1f)
-					.sharedBoundsWrapper(SharedTransitionKeys.SCAN_BUTTON_TO_SCAN_SCREEN)
+					.sharedBoundsWrapper(
+						key = SharedTransitionKeys.SCAN_BUTTON_TO_SCAN_SCREEN,
+						resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+						clipShape = MaterialTheme.shapes.extraLarge,
+						zIndexInOverlay = 2f,
+					),
 			) {
 				Icon(
 					painter = painterResource(R.drawable.ic_scan),

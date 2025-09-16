@@ -1,6 +1,7 @@
 package com.sam.qrforge.presentation.feature_create.screens
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -18,6 +19,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -34,6 +38,7 @@ import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
+import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildSize
 import com.sam.qrforge.presentation.feature_create.composables.CreateQRScreenContent
 import com.sam.qrforge.presentation.feature_create.composables.ShowGeneratedQRButton
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
@@ -54,7 +59,12 @@ fun CreateQRScreen(
 
 	val snackBarHostState = LocalSnackBarState.current
 	val layoutDirection = LocalLayoutDirection.current
-	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+	val showPreviewButton by remember(content) {
+		derivedStateOf { content.isValid }
+	}
 
 	Scaffold(
 		topBar = {
@@ -62,11 +72,12 @@ fun CreateQRScreen(
 				title = { Text(text = stringResource(R.string.create_qr_screen_title)) },
 				navigationIcon = navigation,
 				scrollBehavior = scrollBehavior,
+				modifier = Modifier.sharedTransitionSkipChildSize()
 			)
 		},
 		bottomBar = {
 			ShowGeneratedQRButton(
-				showButton = content.isValid,
+				showButton = showPreviewButton,
 				onGenerateQR = onPreviewQR,
 			)
 		},
@@ -83,8 +94,11 @@ fun CreateQRScreen(
 		},
 		modifier = modifier
 			.nestedScroll(scrollBehavior.nestedScrollConnection)
-			.sharedBoundsWrapper(SharedTransitionKeys.HOME_SCREEN_TO_CREATE_QR_SCREEN)
-			.imePadding()
+			.sharedBoundsWrapper(
+				key = SharedTransitionKeys.HOME_SCREEN_TO_CREATE_QR_SCREEN,
+				resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+				clipShape = MaterialTheme.shapes.extraLarge,
+			)
 	) { scPadding ->
 		CreateQRScreenContent(
 			content = content,
@@ -94,11 +108,13 @@ fun CreateQRScreen(
 			onReadContactsDetails = { onEvent(CreateQREvents.CheckContactsDetails(it)) },
 			contentPadding = PaddingValues(
 				top = scPadding.calculateTopPadding() + dimensionResource(R.dimen.sc_padding),
-				bottom = scPadding.calculateBottomPadding() + dimensionResource(R.dimen.sc_padding),
+				bottom = dimensionResource(R.dimen.sc_padding),
 				start = scPadding.calculateStartPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding),
 				end = scPadding.calculateEndPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding)
 			),
-			modifier = Modifier.fillMaxSize(),
+			modifier = Modifier
+				.fillMaxSize()
+				.imePadding(),
 		)
 	}
 }

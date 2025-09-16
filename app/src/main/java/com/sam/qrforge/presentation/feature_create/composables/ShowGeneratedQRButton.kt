@@ -3,6 +3,7 @@ package com.sam.qrforge.presentation.feature_create.composables
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -10,9 +11,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,8 +35,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
-import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
-import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -55,7 +53,7 @@ fun ShowGeneratedQRButton(
 			animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)
 		),
 		exit = slideOutVertically(
-			animationSpec = tween(durationMillis = 200, easing = EaseIn),
+			animationSpec = tween(durationMillis = 200, easing = EaseOut),
 			targetOffsetY = { height -> height / 4 }
 		) + shrinkVertically(
 			shrinkTowards = Alignment.Bottom,
@@ -63,22 +61,20 @@ fun ShowGeneratedQRButton(
 		),
 		modifier = modifier,
 	) {
-		Row(
+		Box(
 			modifier = Modifier
 				.fillMaxWidth()
 				.heightIn(80.dp)
-				.windowInsetsPadding(WindowInsets.navigationBars)
-				.sharedBoundsWrapper(SharedTransitionKeys.CREATE_QR_SCREEN_TO_GENERATE_SCREEN),
-			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.Center
+				.windowInsetsPadding(WindowInsets.navigationBars),
+			contentAlignment = Alignment.Center,
 		) {
 			Button(
 				onClick = onGenerateQR,
 				enabled = showButton,
 				contentPadding = PaddingValues(vertical = 16.dp),
+				shape = MaterialTheme.shapes.extraLarge,
 				colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-				modifier = Modifier
-					.widthIn(min = dimensionResource(R.dimen.bottom_bar_button_min_size))
+				modifier = Modifier.widthIn(min = dimensionResource(R.dimen.bottom_bar_button_min_size))
 			) {
 				Icon(
 					painter = painterResource(R.drawable.ic_qr_simplified),

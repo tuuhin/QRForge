@@ -1,7 +1,6 @@
 package com.sam.qrforge.presentation.feature_create.composables
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -25,10 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
-import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
-import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ExportShareActions(
 	onShare: () -> Unit,
@@ -69,7 +65,6 @@ fun ExportShareActions(
 				shape = MaterialTheme.shapes.extraLarge,
 				containerColor = MaterialTheme.colorScheme.primaryContainer,
 				contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-				modifier = Modifier.sharedBoundsWrapper(SharedTransitionKeys.EXPORT_BUTTON_TO_EXPORT_SCREEN)
 			) {
 				Icon(
 					painter = painterResource(R.drawable.ic_export),

@@ -88,7 +88,7 @@ fun QRDetailsScreenContent(
 			modifier = Modifier.sharedElementWrapper(
 				key = SharedTransitionKeys.sharedElementQRCodeItemToDetail(savedContent.id),
 				placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-				renderInOverlayDuringTransition = false,
+				clipShape = MaterialTheme.shapes.large
 			)
 		)
 		QRCommonActions(

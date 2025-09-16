@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
@@ -33,8 +33,6 @@ import com.sam.qrforge.domain.models.qr.QRPlainTextModel
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
-import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
-import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.feature_create.composables.PreviewQRScreenContent
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
 import com.sam.qrforge.ui.theme.QRForgeTheme
@@ -66,12 +64,9 @@ fun PreviewQRScreen(
 				navigationIcon = navigation,
 				scrollBehavior = scrollBehavior,
 				actions = {
-					Button(
+					FilledTonalButton(
 						onClick = onNavigateToSave,
 						shape = MaterialTheme.shapes.extraLarge,
-						modifier = Modifier.sharedBoundsWrapper(
-							SharedTransitionKeys.PREVIEW_SCREEN_TO_SAVE_SCREEN
-						),
 					) {
 						Text(text = stringResource(R.string.action_save))
 					}
@@ -90,9 +85,7 @@ fun PreviewQRScreen(
 				)
 			}
 		},
-		modifier = modifier
-			.nestedScroll(scrollBehavior.nestedScrollConnection)
-			.sharedBoundsWrapper(SharedTransitionKeys.CREATE_QR_SCREEN_TO_GENERATE_SCREEN)
+		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
 	) { scPadding ->
 		PreviewQRScreenContent(
 			content = content,

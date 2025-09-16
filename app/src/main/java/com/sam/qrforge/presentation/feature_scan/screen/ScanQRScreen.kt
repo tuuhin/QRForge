@@ -86,7 +86,8 @@ fun ScanQRScreen(
 		modifier = modifier.sharedBoundsWrapper(
 			key = SharedTransitionKeys.SCAN_BUTTON_TO_SCAN_SCREEN,
 			resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-			placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+			clipShape = MaterialTheme.shapes.extraLarge,
+			zIndexInOverlay = 2f
 		),
 	) { scPadding ->
 		Crossfade(

@@ -20,6 +20,7 @@ import com.sam.qrforge.presentation.feature_detail.screens.QREditScreen
 import com.sam.qrforge.presentation.feature_export.ExportQRScreen
 import com.sam.qrforge.presentation.feature_export.ExportQRViewModel
 import com.sam.qrforge.presentation.navigation.animatedComposable
+import com.sam.qrforge.presentation.navigation.fadeAnimatedComposable
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import kotlinx.coroutines.flow.merge
 import org.koin.compose.viewmodel.koinViewModel
@@ -28,7 +29,7 @@ import org.koin.compose.viewmodel.sharedKoinViewModel
 fun NavGraphBuilder.qrDetailsRoute(controller: NavController) =
 	navigation<NavRoutes.QRDetailsRoute>(startDestination = QRDetailsNavGraph.DetailsRoute) {
 
-		animatedComposable<QRDetailsNavGraph.DetailsRoute> { entry ->
+		fadeAnimatedComposable<QRDetailsNavGraph.DetailsRoute> { entry ->
 			val route = entry.savedStateHandle.toRoute<NavRoutes.QRDetailsRoute>()
 
 			val viewModel = entry.sharedKoinViewModel<QRDetailsViewModel>(controller)

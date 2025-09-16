@@ -3,9 +3,9 @@ package com.sam.qrforge.presentation.feature_scan.composable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseInBounce
+import androidx.compose.animation.core.EaseInCubic
 import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.EaseOutBounce
+import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -117,12 +117,14 @@ fun CameraControlOption(
 			targetState = isManualCapture,
 			transitionSpec = {
 				scaleIn(
-					animationSpec = tween(durationMillis = 200, easing = EaseInBounce),
+					animationSpec = tween(durationMillis = 300, easing = EaseInCubic),
 					initialScale = .2f,
-				) + fadeIn(animationSpec = tween(easing = EaseIn)) togetherWith scaleOut(
-					animationSpec = tween(durationMillis = 200, easing = EaseOutBounce),
+				) + fadeIn(
+					animationSpec = tween(durationMillis = 200, easing = EaseIn)
+				) togetherWith scaleOut(
+					animationSpec = tween(durationMillis = 300, easing = EaseOutCubic),
 					targetScale = .2f
-				) + fadeOut(animationSpec = tween(easing = EaseOut))
+				) + fadeOut(animationSpec = tween(durationMillis = 200, easing = EaseOut))
 			},
 			contentAlignment = Alignment.Center,
 			modifier = Modifier.defaultMinSize(72.dp),

@@ -33,6 +33,7 @@ import com.sam.qrforge.presentation.feature_scan.state.ScanResultScreenEvents
 import com.sam.qrforge.presentation.feature_scan.viewmodel.CameraViewModel
 import com.sam.qrforge.presentation.feature_scan.viewmodel.ScanQRViewModel
 import com.sam.qrforge.presentation.navigation.animatedComposable
+import com.sam.qrforge.presentation.navigation.fadeAnimatedComposable
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -42,7 +43,7 @@ import org.koin.compose.viewmodel.sharedKoinViewModel
 fun NavGraphBuilder.scanRoute(controller: NavController) =
 	navigation<NavRoutes.ScanRoute>(startDestination = ScanQRNavGraph.ScanQRRoute) {
 
-		animatedComposable<ScanQRNavGraph.ScanQRRoute> { backStack ->
+		fadeAnimatedComposable<ScanQRNavGraph.ScanQRRoute> { backStack ->
 
 			val viewModel = backStack.sharedKoinViewModel<ScanQRViewModel>(controller)
 

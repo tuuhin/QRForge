@@ -20,15 +20,17 @@ import com.sam.qrforge.presentation.feature_create.screens.SaveQRScreen
 import com.sam.qrforge.presentation.feature_export.ExportQRScreen
 import com.sam.qrforge.presentation.feature_export.ExportQRViewModel
 import com.sam.qrforge.presentation.navigation.animatedComposable
+import com.sam.qrforge.presentation.navigation.fadeAnimatedComposable
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import kotlinx.coroutines.flow.merge
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.viewmodel.sharedKoinViewModel
 
-fun NavGraphBuilder.createNewQRRoute(controller: NavController) = navigation<NavRoutes.CreateRoute>(
-	startDestination = CreateNewQRNavGraph.CreateNewRoute
-) {
-	animatedComposable<CreateNewQRNavGraph.CreateNewRoute> { backStack ->
+fun NavGraphBuilder.createNewQRRoute(
+	controller: NavController
+) = navigation<NavRoutes.CreateRoute>(startDestination = CreateNewQRNavGraph.CreateNewRoute) {
+
+	fadeAnimatedComposable<CreateNewQRNavGraph.CreateNewRoute> { backStack ->
 
 		val viewModel = backStack.sharedKoinViewModel<CreateNewQRViewModel>(controller)
 		val currentContent by viewModel.qrContent.collectAsStateWithLifecycle()

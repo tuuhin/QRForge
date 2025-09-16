@@ -5,7 +5,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.Spring
@@ -104,9 +103,7 @@ fun QRContentInputContainer(
 				) using SizeTransform(clip = false)
 			},
 			contentAlignment = Alignment.Center,
-			modifier = modifier
-				.fillMaxWidth()
-				.animateContentSize()
+			modifier = Modifier.fillMaxWidth()
 		) { type ->
 			when (type) {
 				QRDataType.TYPE_EMAIL -> QRFormatEmailInput(onStateChange = onContentChange)

@@ -1,9 +1,12 @@
 package com.sam.qrforge.presentation.feature_home.composables
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -60,8 +63,16 @@ fun QRModelList(
 				modifier = Modifier
 					.fillMaxWidth()
 					.animateItem()
-					.sharedBoundsWrapper(SharedTransitionKeys.sharedBoundsToItemDetail(item.qrModel.id)),
+					.sharedBoundsWrapper(
+						key = SharedTransitionKeys.sharedBoundsToItemDetail(item.qrModel.id),
+						resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+						placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+					),
 			)
+		}
+		// an extra item space  at the end of the list
+		item {
+			Spacer(modifier = Modifier.height(72.dp))
 		}
 	}
 }

@@ -1,7 +1,5 @@
 package com.sam.qrforge.presentation.feature_detail.screens
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -24,17 +22,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
-import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
-import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.feature_detail.composables.QREditScreenContent
 import com.sam.qrforge.presentation.feature_detail.state.EditQRScreenEvent
 import com.sam.qrforge.presentation.feature_detail.state.EditQRScreenState
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
-@OptIn(
-	ExperimentalMaterial3Api::class,
-	ExperimentalSharedTransitionApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QREditScreen(
 	state: EditQRScreenState,
@@ -69,12 +62,7 @@ fun QREditScreen(
 				)
 			}
 		},
-		modifier = modifier
-			.nestedScroll(scrollBehavior.nestedScrollConnection)
-			.sharedBoundsWrapper(
-				key = SharedTransitionKeys.QR_DETAILS_SCREEN_TO_EDIT_SCREEN,
-				placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-			)
+		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
 	) { scPadding ->
 		QREditScreenContent(
 			state = state,

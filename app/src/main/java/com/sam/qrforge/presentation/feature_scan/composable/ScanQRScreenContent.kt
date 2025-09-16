@@ -16,7 +16,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +29,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.sam.qrforge.presentation.common.utils.sharedTransitionKeepChildSize
+import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildSize
 import com.sam.qrforge.presentation.feature_scan.state.CameraCaptureState
 import com.sam.qrforge.presentation.feature_scan.state.CameraControllerEvents
 import com.sam.qrforge.presentation.feature_scan.state.CameraControlsState
@@ -140,7 +139,7 @@ private fun CameraContent(
 	Crossfade(
 		targetState = surfaceRequest != null,
 		animationSpec = tween(durationMillis = 400, easing = EaseInOutCirc),
-		modifier = modifier.sharedTransitionKeepChildSize()
+		modifier = modifier.sharedTransitionSkipChildSize()
 	) { isReady ->
 		if (isReady && surfaceRequest != null) {
 			AndroidCameraView(
@@ -150,7 +149,7 @@ private fun CameraContent(
 				isFocusEnabled = isActionsEnabled,
 				onRelativeScaleChange = onRelativeZoom,
 				tapToFocus = onTapToFocus,
-				modifier = Modifier.fillMaxWidth()
+				modifier = Modifier.fillMaxSize()
 			)
 		} else Box(
 			modifier = Modifier
