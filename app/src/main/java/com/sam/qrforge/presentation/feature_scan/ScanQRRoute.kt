@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -20,12 +21,14 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.dialog
 import androidx.navigation.navigation
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.presentation.common.composables.LaunchActivityEventsSideEffect
 import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
+import com.sam.qrforge.presentation.feature_scan.composable.SaveResultsDialogContent
 import com.sam.qrforge.presentation.feature_scan.screen.ScanQRScreen
 import com.sam.qrforge.presentation.feature_scan.screen.ScanResultsScreen
 import com.sam.qrforge.presentation.feature_scan.state.CameraControllerEvents
@@ -103,6 +106,7 @@ fun NavGraphBuilder.scanRoute(controller: NavController) =
 					content = content,
 					onEvent = viewModel::onEvent,
 					generatedModel = generatedUI,
+					onNavigateToSave = dropUnlessResumed { controller.navigate(ScanQRNavGraph.SaveResultDialog) },
 					navigation = {
 						if (controller.previousBackStackEntry != null)
 							IconButton(onClick = dropUnlessResumed { controller.popBackStack() }) {
@@ -114,6 +118,28 @@ fun NavGraphBuilder.scanRoute(controller: NavController) =
 					}
 				)
 			}
+		}
+
+		dialog<ScanQRNavGraph.SaveResultDialog>(
+			dialogProperties = DialogProperties(dismissOnBackPress = false)
+		) { backStack ->
+
+			val viewModel = backStack.sharedKoinViewModel<ScanQRViewModel>(controller)
+			val saveDialogState by viewModel.saveDialogState.collectAsStateWithLifecycle()
+
+			UIEventsSideEffect(
+				events = viewModel::uiEvents,
+				onNavigateBack = {
+					// navigate back till home
+					controller.popBackStack(NavRoutes.HomeRoute, inclusive = false)
+				},
+			)
+
+			SaveResultsDialogContent(
+				state = saveDialogState,
+				onEvent = viewModel::onEvent,
+				onDismissDialog = dropUnlessResumed { controller.popBackStack() },
+			)
 		}
 	}
 

@@ -91,4 +91,12 @@
   <string name="camera_capture_type_auto">Auto</string>
   <string name="camera_action_pick_image">Select Image</string>
   <string name="analyzer_running_text">Looking for QR Code</string>
+  <string name="scan_qr_option_select_from_gallery">Use Gallery</string>
+  <string name="dialog_action_delete">Delete</string>
+  <string name="qr_content_missing_title">QR Data Absent</string>
+  <string name="qr_content_missing_desc">QR data maybe deleted or the data is not being saved</string>
+  <string name="action_back_home">Back to Home</string>
+  <string name="dialog_action_save">Save</string>
+  <string name="save_scan_results_dialog_title">Save Results</string>
+  <string name="save_scan_results_dialog_text">Save current scan qr code to app</string>
 </resources>

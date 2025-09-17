@@ -13,6 +13,7 @@ import com.sam.qrforge.domain.util.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -30,6 +31,22 @@ class SaveQRDataRepoImpl(private val dao: QRDataDao) : SavedQRDataRepository {
 		} catch (e: Exception) {
 			Result.failure(e)
 		}
+	}
+
+	override fun insertQRDataFlow(model: CreateNewQRModel): Flow<Resource<SavedQRModel, Exception>> {
+		return flow {
+			emit(Resource.Loading)
+			try {
+				val id = dao.insertNewQR(model.toEntity())
+				val new = dao.fetchQREntityById(id)
+					?: return@flow emit(Resource.Error(CannotFindMatchingIdException()))
+				emit(Resource.Success(new.toModel()))
+			} catch (_: SQLException) {
+				emit(Resource.Error(UnableToProcessSQLException()))
+			} catch (e: Exception) {
+				emit(Resource.Error(e))
+			}
+		}.flowOn(Dispatchers.IO)
 	}
 
 	override suspend fun updateQRModel(model: SavedQRModel): Result<SavedQRModel> {

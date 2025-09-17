@@ -42,7 +42,7 @@ fun ConfirmDeleteDialog(
 					containerColor = MaterialTheme.colorScheme.errorContainer
 				)
 			) {
-				Text(text = stringResource(R.string.dialog_action_confirm))
+				Text(text = stringResource(R.string.dialog_action_delete))
 			}
 		},
 		dismissButton = {

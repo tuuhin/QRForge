@@ -10,4 +10,7 @@ sealed interface ScanQRNavGraph {
 
 	@Serializable
 	data object ScanResultsRoute : ScanQRNavGraph
+
+	@Serializable
+	data object SaveResultDialog : ScanQRNavGraph
 }

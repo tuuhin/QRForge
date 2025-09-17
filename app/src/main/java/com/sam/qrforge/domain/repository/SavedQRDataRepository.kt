@@ -9,6 +9,8 @@ interface SavedQRDataRepository {
 
 	suspend fun insertQRData(model: CreateNewQRModel): Result<SavedQRModel>
 
+	fun insertQRDataFlow(model: CreateNewQRModel): Flow<Resource<SavedQRModel, Exception>>
+
 	fun fetchAllSavedQR(): Flow<Resource<List<SavedQRModel>, Exception>>
 
 	suspend fun deleteQRModel(model: SavedQRModel): Result<Unit>

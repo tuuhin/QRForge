@@ -104,6 +104,13 @@ fun ScanQRScreen(
 				)
 			} else PermissionPlaceHolder(
 				onPermissionChanged = { perms -> hasPermission = perms },
+				onGalleryImageSelected = { uri ->
+					onCameraEvent(
+						CameraControllerEvents.OnSelectImageURI(
+							uri
+						)
+					)
+				},
 				contentPadding = PaddingValues(
 					top = scPadding.calculateTopPadding(),
 					bottom = scPadding.calculateBottomPadding(),

@@ -2,7 +2,6 @@ package com.sam.qrforge.presentation.feature_home.composables
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -103,7 +102,6 @@ fun QRModelCard(
 					uiModel = model.uiModel,
 					modifier = Modifier.sharedElementWrapper(
 						key = SharedTransitionKeys.sharedElementQRCodeItemToDetail(model.qrModel.id),
-						placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
 						clipShape = MaterialTheme.shapes.large
 					)
 				)

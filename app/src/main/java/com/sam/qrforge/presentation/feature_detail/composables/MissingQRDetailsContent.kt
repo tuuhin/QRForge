@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -16,9 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
+import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @Composable
 fun MissingQRDetailsContent(
@@ -36,25 +40,35 @@ fun MissingQRDetailsContent(
 			colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.tertiary),
 			modifier = Modifier.size(200.dp),
 		)
-		Spacer(modifier = Modifier.height(12.dp))
+		Spacer(modifier = Modifier.height(20.dp))
 		Text(
-			text = "QR Data Absent",
+			text = stringResource(R.string.qr_content_missing_title),
 			style = MaterialTheme.typography.titleLarge,
 			color = MaterialTheme.colorScheme.secondary
 		)
 		Text(
-			text = "QR data maybe deleted or the data is not being saved in the database",
+			text = stringResource(R.string.qr_content_missing_desc),
 			style = MaterialTheme.typography.bodyMedium,
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
 			textAlign = TextAlign.Center,
+			modifier = Modifier.widthIn(max = 280.dp)
 		)
 		Spacer(modifier = Modifier.height(8.dp))
 		Button(
 			onClick = onBackToHome,
 			shape = MaterialTheme.shapes.large,
-			contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+			contentPadding = PaddingValues(horizontal = 24.dp, vertical = 10.dp)
 		) {
-			Text("Back To Home")
+			Text(text = stringResource(R.string.action_back_home))
 		}
 	}
+}
+
+@PreviewLightDark
+@Composable
+private fun MissingQRDetailsContentPreview() = QRForgeTheme {
+	MissingQRDetailsContent(
+		onBackToHome = {},
+		modifier = Modifier.fillMaxSize()
+	)
 }

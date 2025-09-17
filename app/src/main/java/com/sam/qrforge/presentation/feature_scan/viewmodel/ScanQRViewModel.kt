@@ -4,9 +4,11 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.viewModelScope
 import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
+import com.sam.qrforge.domain.models.CreateNewQRModel
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.domain.models.qr.QRWiFiModel
 import com.sam.qrforge.domain.provider.WIFIConnectionProvider
+import com.sam.qrforge.domain.repository.SavedQRDataRepository
 import com.sam.qrforge.domain.util.Resource
 import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
@@ -14,6 +16,7 @@ import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.LaunchActivityEvent
 import com.sam.qrforge.presentation.common.utils.UIEvent
 import com.sam.qrforge.presentation.common.utils.toBytes
+import com.sam.qrforge.presentation.feature_scan.state.SaveResultsDialogState
 import com.sam.qrforge.presentation.feature_scan.state.ScanResultScreenEvents
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +36,7 @@ class ScanQRViewModel(
 	private val generator: QRGeneratorFacade,
 	private val wifiConnector: WIFIConnectionProvider,
 	private val fileFacade: FileStorageFacade,
+	private val repository: SavedQRDataRepository,
 ) : AppViewModel() {
 
 	private val _generatedModel = MutableStateFlow<GeneratedQRUIModel?>(null)
@@ -42,6 +46,9 @@ class ScanQRViewModel(
 
 	private val _qrContentModel = MutableStateFlow<QRContentModel?>(null)
 	val qrContent = _qrContentModel.asStateFlow()
+
+	private val _saveQRDialogState = MutableStateFlow(SaveResultsDialogState())
+	val saveDialogState = _saveQRDialogState.asStateFlow()
 
 	private val _uiEvents = MutableSharedFlow<UIEvent>()
 	override val uiEvents: SharedFlow<UIEvent>
@@ -55,7 +62,48 @@ class ScanQRViewModel(
 			ScanResultScreenEvents.ConnectToWifi -> connectToWifiNetwork()
 			is ScanResultScreenEvents.ShareScannedResults -> onShareGeneratedQR(event.bitmap)
 			is ScanResultScreenEvents.GenerateQR -> _qrContentModel.update { event.content }
+			ScanResultScreenEvents.OnSaveItem -> onSaveResults()
+			is ScanResultScreenEvents.OnUpdateTitle -> _saveQRDialogState.update { state ->
+				state.copy(titleText = event.title, errorString = null)
+			}
 		}
+	}
+
+	private fun onSaveResults() {
+		val dialogState = _saveQRDialogState.value
+		val contentState = _qrContentModel.value ?: return
+		val createModel = CreateNewQRModel(
+			title = dialogState.titleText,
+			desc = null,
+			content = contentState.toQRString(),
+			format = contentState.type
+		)
+
+		if (createModel.title.isBlank() || !contentState.isValid) {
+			_saveQRDialogState.update { state -> state.copy(errorString = "Empty String") }
+			return
+		}
+
+		repository.insertQRDataFlow(createModel)
+			.onEach { res ->
+				when (res) {
+					is Resource.Error -> {
+						val message = res.message ?: res.error.message ?: "Unable to save"
+						_saveQRDialogState.update { state -> state.copy(errorString = message) }
+					}
+
+					is Resource.Success -> {
+						_uiEvents.emit(UIEvent.ShowToast("Saved!!"))
+						_uiEvents.emit(UIEvent.NavigateBack)
+					}
+
+					else -> {}
+				}
+				val isLoading = res is Resource.Loading
+				_saveQRDialogState.update { state -> state.copy(isSaveEnabled = !isLoading) }
+			}
+			.launchIn(viewModelScope)
+
 	}
 
 	private fun onShareGeneratedQR(bitmap: ImageBitmap) = viewModelScope.launch {

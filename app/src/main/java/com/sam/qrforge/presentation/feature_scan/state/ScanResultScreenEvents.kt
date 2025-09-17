@@ -8,4 +8,7 @@ sealed interface ScanResultScreenEvents {
 
 	data class ShareScannedResults(val bitmap: ImageBitmap) : ScanResultScreenEvents
 	data object ConnectToWifi : ScanResultScreenEvents
+
+	data object OnSaveItem : ScanResultScreenEvents
+	data class OnUpdateTitle(val title: String) : ScanResultScreenEvents
 }
