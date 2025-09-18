@@ -12,4 +12,5 @@ sealed interface ExportQRScreenEvents {
 	data class OnExportDimensionChange(val dimen: ExportDimensions) : ExportQRScreenEvents
 	data class OnExportMimeTypeChange(val mimeType: ImageMimeTypes) : ExportQRScreenEvents
 	data class OnExportBitmap(val bitmap: ImageBitmap) : ExportQRScreenEvents
+	data object OnCancelExport : ExportQRScreenEvents
 }

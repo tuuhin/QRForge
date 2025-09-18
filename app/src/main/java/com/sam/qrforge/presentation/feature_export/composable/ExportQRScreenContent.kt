@@ -37,9 +37,10 @@ fun ExportQRScreenContent(
 	onEvent: (ExportQRScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
 	decoration: QRDecorationOption = QRDecorationOption.QRDecorationOptionBasic(),
-	isExportRunning: Boolean = false,
+	showExportProgress: Boolean = false,
+	showFaultyQRWarning: Boolean = false,
 	dimensions: ExportDimensions = ExportDimensions.Medium,
-	exportType: ImageMimeTypes = ImageMimeTypes.PNG,
+	exportMimeType: ImageMimeTypes = ImageMimeTypes.PNG,
 	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
 	contentPadding: PaddingValues = PaddingValues(12.dp),
 	scrollState: LazyListState = rememberLazyListState(),
@@ -53,7 +54,7 @@ fun ExportQRScreenContent(
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.spacedBy(12.dp),
 	) {
-		if (isExportRunning) {
+		if (showExportProgress) {
 			item {
 				LinearProgressIndicator(
 					strokeCap = StrokeCap.Round,
@@ -61,6 +62,11 @@ fun ExportQRScreenContent(
 						.fillMaxWidth()
 						.animateItem(),
 				)
+			}
+		}
+		if (showFaultyQRWarning) {
+			item {
+				FaultyQRWarningCard(modifier = Modifier.fillMaxWidth())
 			}
 		}
 		item {
@@ -82,7 +88,7 @@ fun ExportQRScreenContent(
 				SingleChoiceSegmentedButtonRow {
 					ImageMimeTypes.entries.forEachIndexed { index, mime ->
 						SegmentedButton(
-							selected = exportType == mime,
+							selected = exportMimeType == mime,
 							onClick = { onEvent(ExportQRScreenEvents.OnExportMimeTypeChange(mime)) },
 							label = { Text(mime.localeString) },
 							shape = SegmentedButtonDefaults.itemShape(
@@ -116,9 +122,6 @@ fun ExportQRScreenContent(
 				onDecorationChange = { onEvent(ExportQRScreenEvents.OnDecorationChange(it)) },
 				modifier = Modifier.fillMaxWidth()
 			)
-		}
-		item {
-			FaultyQRWarningCard(modifier = Modifier.fillMaxWidth())
 		}
 	}
 }

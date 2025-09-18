@@ -11,9 +11,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.domain.models.SavedQRModel
@@ -48,7 +50,7 @@ fun QRModelList(
 		verticalArrangement = Arrangement.spacedBy(6.dp),
 		contentPadding = contentPadding,
 		state = state,
-		modifier = modifier,
+		modifier = modifier.clip(MaterialTheme.shapes.large),
 	) {
 		itemsIndexed(
 			items = generatedQR,
@@ -71,7 +73,7 @@ fun QRModelList(
 			)
 		}
 		// an extra item space  at the end of the list
-		item {
+		item(contentType = "Empty Space") {
 			Spacer(modifier = Modifier.height(72.dp))
 		}
 	}

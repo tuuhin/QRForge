@@ -124,9 +124,7 @@ fun NavGraphBuilder.createNewQRRoute(
 		val viewModel = koinViewModel<ExportQRViewModel>()
 
 		val decoration by viewModel.selectedDecoration.collectAsStateWithLifecycle()
-		val dimensions by viewModel.dimension.collectAsStateWithLifecycle()
-		val isExportRunning by viewModel.isExportRunning.collectAsStateWithLifecycle()
-		val mimetype by viewModel.mimeType.collectAsStateWithLifecycle()
+		val exportState by viewModel.exportScreenState.collectAsStateWithLifecycle()
 
 		UIEventsSideEffect(
 			events = { merge(createViewModel.uiEvents, viewModel.uiEvents) },
@@ -138,10 +136,8 @@ fun NavGraphBuilder.createNewQRRoute(
 		CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 			ExportQRScreen(
 				decoration = decoration,
+				state = exportState,
 				generatedQR = generated,
-				dimensions = dimensions,
-				isExportRunning = isExportRunning,
-				exportType = mimetype,
 				onEvent = viewModel::onEvent,
 				navigation = {
 					if (controller.previousBackStackEntry != null)

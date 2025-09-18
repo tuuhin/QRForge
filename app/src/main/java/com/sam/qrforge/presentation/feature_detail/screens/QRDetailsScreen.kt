@@ -106,6 +106,7 @@ fun QRDetailsScreen(
 				showButton = state.qrModel != null,
 				onEdit = onNavigateToEdit,
 				isExpanded = !hasScrolled,
+				shape = MaterialTheme.shapes.large,
 			)
 		},
 		snackbarHost = {

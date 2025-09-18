@@ -15,6 +15,7 @@ import com.sam.qrforge.domain.enums.ExportDimensions
 import com.sam.qrforge.domain.enums.ImageMimeTypes
 import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.exception.CannotCreateFileException
+import com.sam.qrforge.domain.facade.exception.CannotScaleBitmapException
 import com.sam.qrforge.domain.util.Resource
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -58,7 +59,7 @@ class FileStorageFacadeImpl(private val context: Context) : FileStorageFacade {
 		}
 	}
 
-	override suspend fun saveImageContentToStorage(
+	override fun saveImageContentToStorage(
 		bytes: ByteArray,
 		dimensions: ExportDimensions,
 		mimeType: ImageMimeTypes,
@@ -87,12 +88,20 @@ class FileStorageFacadeImpl(private val context: Context) : FileStorageFacade {
 
 		emit(Resource.Loading)
 
-		val scaledBitmap = withContext(Dispatchers.IO) {
-			val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-			bitmap.scale(dimensions.sizeInPx, dimensions.sizeInPx)
+		val scaledBitmap = try {
+			withContext(Dispatchers.IO) {
+				val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+				bitmap.scale(dimensions.sizeInPx, dimensions.sizeInPx)
+			}
+		} catch (e: Exception) {
+			e.printStackTrace()
+			null
 		}
-
-		// creates the new uri if failed return null
+		if (scaledBitmap == null) {
+			emit(Resource.Error(CannotScaleBitmapException()))
+			return@flow
+		}
+		// will return if we cannot create the uri
 		val newURI = withContext(Dispatchers.IO) {
 			context.contentResolver.insert(imagesParentURI, contentValues)
 		} ?: run {
@@ -101,7 +110,6 @@ class FileStorageFacadeImpl(private val context: Context) : FileStorageFacade {
 		}
 
 		try {
-			// TODO: Check for effective uri delete if anything goes incorrect
 			// ensure the coroutine is active
 			currentCoroutineContext().ensureActive()
 			// then start updating the flow

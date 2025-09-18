@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -99,11 +98,7 @@ fun QRCommonActions(
 				Button(
 					onClick = onAction,
 					shape = MaterialTheme.shapes.extraLarge,
-					colors = ButtonDefaults.buttonColors(
-						containerColor = MaterialTheme.colorScheme.primaryContainer,
-						contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-					),
-					contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+					contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
 				) {
 					Icon(painter = type.painter, contentDescription = "Action")
 					Spacer(modifier = Modifier.width(6.dp))

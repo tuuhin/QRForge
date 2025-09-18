@@ -76,7 +76,7 @@
   <string name="dimension_option_title">Select Dimension</string>
   <string name="qr_editor_title">QR Editor</string>
   <string name="action_done">Done</string>
-  <string name="faulty_qr_warning_text">Editing this QR too much, may become useless for scanner to scan</string>
+  <string name="faulty_qr_warning_text">Current QR has been modified too much, it cannot be feed to scanner</string>
   <string name="dialog_action_allow">Allow</string>
   <string name="allow_permission_title">Allow permission</string>
   <string name="allow_permission_external_storage">Allow permission to export the QR to external storage</string>
@@ -99,4 +99,6 @@
   <string name="dialog_action_save">Save</string>
   <string name="save_scan_results_dialog_title">Save Results</string>
   <string name="save_scan_results_dialog_text">Save current scan qr code to app</string>
+  <string name="export_running_dialog_title">Export Running</string>
+  <string name="export_running_dialog_desc">Currently Exporting your qr please wait</string>
 </resources>

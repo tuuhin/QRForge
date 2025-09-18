@@ -21,15 +21,15 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.sam.qrforge.R
-import com.sam.qrforge.domain.enums.ExportDimensions
-import com.sam.qrforge.domain.enums.ImageMimeTypes
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.feature_export.composable.ExportQRScreenContent
+import com.sam.qrforge.presentation.feature_export.composable.ExportRunningBackHandler
 import com.sam.qrforge.presentation.feature_export.composable.ExportScreenTopAppBar
 import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenEvents
+import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenState
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.coroutines.launch
 
@@ -39,10 +39,8 @@ fun ExportQRScreen(
 	decoration: QRDecorationOption,
 	onEvent: (ExportQRScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
+	state: ExportQRScreenState = ExportQRScreenState(),
 	generatedQR: GeneratedQRUIModel? = null,
-	isExportRunning: Boolean = false,
-	dimensions: ExportDimensions = ExportDimensions.Medium,
-	exportType: ImageMimeTypes = ImageMimeTypes.PNG,
 	navigation: @Composable () -> Unit = {}
 ) {
 	val snackBarHostState = LocalSnackBarState.current
@@ -50,6 +48,11 @@ fun ExportQRScreen(
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 	val graphicsLayer = rememberGraphicsLayer()
 	val scope = rememberCoroutineScope()
+
+	ExportRunningBackHandler(
+		isExportRunning = state.isExporting,
+		onCancelExport = { onEvent(ExportQRScreenEvents.OnCancelExport) },
+	)
 
 	Scaffold(
 		topBar = {
@@ -60,6 +63,7 @@ fun ExportQRScreen(
 						onEvent(ExportQRScreenEvents.OnExportBitmap(bitmap))
 					}
 				},
+				isExporting = state.isExporting,
 				navigation = navigation,
 				scrollBehavior = scrollBehavior
 			)
@@ -84,9 +88,10 @@ fun ExportQRScreen(
 			if (isReady && generatedQR != null) {
 				ExportQRScreenContent(
 					generatedQR = generatedQR,
-					isExportRunning = isExportRunning,
-					dimensions = dimensions,
-					exportType = exportType,
+					showExportProgress = state.isExporting,
+					dimensions = state.exportDimensions,
+					showFaultyQRWarning = state.showTooMuchEdit,
+					exportMimeType = state.selectedMimeType,
 					onEvent = onEvent,
 					graphicsLayer = { graphicsLayer },
 					contentPadding = PaddingValues(dimensionResource(R.dimen.sc_padding)),

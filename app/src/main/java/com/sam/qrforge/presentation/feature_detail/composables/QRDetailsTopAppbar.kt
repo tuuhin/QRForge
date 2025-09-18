@@ -15,7 +15,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -71,10 +70,6 @@ fun QRDetailsTopAppBar(
 				FilledTonalButton(
 					onClick = { onToggleFavourite(model) },
 					shape = MaterialTheme.shapes.extraLarge,
-					colors = ButtonDefaults.filledTonalButtonColors(
-						containerColor = MaterialTheme.colorScheme.primaryContainer,
-						contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-					),
 					contentPadding = PaddingValues(),
 				) {
 					Crossfade(
@@ -102,6 +97,7 @@ fun QRDetailsTopAppBar(
 						contentDescription = "Delete Action"
 					)
 				}
+				Spacer(modifier = Modifier.width(2.dp))
 			}
 		},
 		navigationIcon = navigation,

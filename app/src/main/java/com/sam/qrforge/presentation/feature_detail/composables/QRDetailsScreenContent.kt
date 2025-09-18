@@ -85,10 +85,11 @@ fun QRDetailsScreenContent(
 		AnimatedBasicQRContent(
 			generated = generatedModel,
 			graphicsLayer = { graphicsLayer },
+			shape = MaterialTheme.shapes.medium,
 			modifier = Modifier.sharedElementWrapper(
 				key = SharedTransitionKeys.sharedElementQRCodeItemToDetail(savedContent.id),
 				placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-				clipShape = MaterialTheme.shapes.large
+				clipShape = MaterialTheme.shapes.medium
 			)
 		)
 		QRCommonActions(

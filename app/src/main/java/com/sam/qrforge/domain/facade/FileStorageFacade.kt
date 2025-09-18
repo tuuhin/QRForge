@@ -9,7 +9,7 @@ interface FileStorageFacade {
 
 	suspend fun saveContentToShare(bytes: ByteArray): Result<String>
 
-	suspend fun saveImageContentToStorage(
+	fun saveImageContentToStorage(
 		bytes: ByteArray,
 		dimensions: ExportDimensions = ExportDimensions.Medium,
 		mimeType: ImageMimeTypes = ImageMimeTypes.PNG,

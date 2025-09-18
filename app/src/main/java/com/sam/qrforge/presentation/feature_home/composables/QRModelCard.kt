@@ -102,7 +102,7 @@ fun QRModelCard(
 					uiModel = model.uiModel,
 					modifier = Modifier.sharedElementWrapper(
 						key = SharedTransitionKeys.sharedElementQRCodeItemToDetail(model.qrModel.id),
-						clipShape = MaterialTheme.shapes.large
+						clipShape = MaterialTheme.shapes.medium,
 					)
 				)
 				Column(

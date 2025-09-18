@@ -101,7 +101,7 @@ private fun HomeScreen(
 
 	val snackBarHostState = LocalSnackBarState.current
 	val layoutDirection = LocalLayoutDirection.current
-	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
 	val sheetState = rememberModalBottomSheetState()
 	val scope = rememberCoroutineScope()

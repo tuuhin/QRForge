@@ -4,7 +4,8 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -23,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.data.utils.hasWriteStoragePermission
 
@@ -59,21 +61,18 @@ fun ExportScreenTopAppBar(
 	MediumTopAppBar(
 		title = { Text(text = stringResource(R.string.qr_editor_title)) },
 		actions = {
-			AnimatedVisibility(
-				visible = !isExporting,
+			OutlinedButton(
+				onClick = {
+					if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !hasPermission)
+						showPermissionDialog = true
+					else onBeginExport()
+				},
+				shape = MaterialTheme.shapes.extraLarge,
+				enabled = !isExporting,
 			) {
-				OutlinedButton(
-					onClick = {
-						if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !hasPermission)
-							showPermissionDialog = true
-						else onBeginExport()
-					},
-					shape = MaterialTheme.shapes.extraLarge,
-					enabled = !isExporting,
-				) {
-					Text(text = stringResource(R.string.action_export))
-				}
+				Text(text = stringResource(R.string.action_export))
 			}
+			Spacer(modifier = Modifier.width(2.dp))
 		},
 		navigationIcon = navigation,
 		scrollBehavior = scrollBehavior,

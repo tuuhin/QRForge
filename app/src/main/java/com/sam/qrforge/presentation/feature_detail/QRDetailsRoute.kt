@@ -35,7 +35,10 @@ fun NavGraphBuilder.qrDetailsRoute(controller: NavController) =
 			val viewModel = entry.sharedKoinViewModel<QRDetailsViewModel>(controller)
 			val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
-			UIEventsSideEffect(viewModel::uiEvents)
+			UIEventsSideEffect(
+				events = viewModel::uiEvents,
+				onNavigateBack = { controller.popBackStack() },
+			)
 			LaunchActivityEventsSideEffect(viewModel::activityEvents)
 
 			CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
@@ -102,9 +105,7 @@ fun NavGraphBuilder.qrDetailsRoute(controller: NavController) =
 			val viewModel = koinViewModel<ExportQRViewModel>()
 
 			val decoration by viewModel.selectedDecoration.collectAsStateWithLifecycle()
-			val dimensions by viewModel.dimension.collectAsStateWithLifecycle()
-			val isExportRunning by viewModel.isExportRunning.collectAsStateWithLifecycle()
-			val mimetype by viewModel.mimeType.collectAsStateWithLifecycle()
+			val exportState by viewModel.exportScreenState.collectAsStateWithLifecycle()
 
 			UIEventsSideEffect(
 				events = { merge(detailsViewModel.uiEvents, viewModel.uiEvents) },
@@ -116,10 +117,8 @@ fun NavGraphBuilder.qrDetailsRoute(controller: NavController) =
 			CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 				ExportQRScreen(
 					decoration = decoration,
+					state = exportState,
 					generatedQR = screenState.generatedModel,
-					dimensions = dimensions,
-					isExportRunning = isExportRunning,
-					exportType = mimetype,
 					onEvent = viewModel::onEvent,
 					navigation = {
 						if (controller.previousBackStackEntry != null)
