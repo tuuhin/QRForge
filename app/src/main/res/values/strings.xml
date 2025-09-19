@@ -101,4 +101,8 @@
   <string name="save_scan_results_dialog_text">Save current scan qr code to app</string>
   <string name="export_running_dialog_title">Export Running</string>
   <string name="export_running_dialog_desc">Currently Exporting your qr please wait</string>
+  <string name="shortcut_short_label_generate_qr">Generate</string>
+  <string name="shortcut_label_generate_qr">Generate QR</string>
+  <string name="shortcut_short_label_scan_qr">Scan</string>
+  <string name="shortcut_label_scan_qr">Scan QR</string>
 </resources>

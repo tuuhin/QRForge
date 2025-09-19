@@ -1,5 +1,6 @@
 package com.sam.qrforge
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,14 +10,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.NavController
+import com.sam.qrforge.data.utils.animateOnExit
 import com.sam.qrforge.presentation.navigation.AppNavigation
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 class MainActivity : ComponentActivity() {
 
+	lateinit var navHostController: NavController
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		// set the splash screen
-		installSplashScreen()
+		val splash = installSplashScreen()
+		splash.animateOnExit()
 
 		super.onCreate(savedInstanceState)
 
@@ -29,9 +35,19 @@ class MainActivity : ComponentActivity() {
 					modifier = Modifier.fillMaxSize(),
 					color = MaterialTheme.colorScheme.background
 				) {
-					AppNavigation()
+					AppNavigation(
+						onNavControllerReady = { controller ->
+							navHostController = controller
+						},
+					)
 				}
 			}
 		}
 	}
+
+	override fun onNewIntent(intent: Intent) {
+		super.onNewIntent(intent)
+		navHostController.handleDeepLink(intent)
+	}
+
 }

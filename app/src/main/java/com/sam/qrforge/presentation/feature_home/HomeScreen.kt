@@ -24,6 +24,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,6 +51,7 @@ import com.sam.qrforge.presentation.navigation.fadeAnimatedComposable
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -163,11 +166,22 @@ private fun HomeScreen(
 	}
 }
 
+private class QRHistoryListPreviewParams
+	: CollectionPreviewParameterProvider<ImmutableList<SavedAndGeneratedQRModel>>(
+	listOf(
+		PreviewFakes.FAKE_IMMUTABLE_LIST_QR_MODEL,
+		persistentListOf()
+	)
+)
+
 @PreviewLightDark
 @Composable
-private fun HomeScreenPreview() = QRForgeTheme {
+private fun HomeScreenPreview(
+	@PreviewParameter(QRHistoryListPreviewParams::class)
+	qrHistory: ImmutableList<SavedAndGeneratedQRModel>,
+) = QRForgeTheme {
 	HomeScreen(
-		qrHistory = PreviewFakes.FAKE_IMMUTABLE_LIST_QR_MODEL,
+		qrHistory = qrHistory,
 		onEvent = {},
 	)
 }

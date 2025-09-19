@@ -21,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +42,6 @@ fun GenerateORScanActions(
 	onGenerate: () -> Unit,
 	onScan: () -> Unit,
 	modifier: Modifier = Modifier,
-	contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
 	buttonShape: Shape = MaterialTheme.shapes.extraLarge,
 	generateButtonColor: Color = MaterialTheme.colorScheme.primary,
 	scanButtonColor: Color = MaterialTheme.colorScheme.secondary,
@@ -64,14 +64,18 @@ fun GenerateORScanActions(
 	) {
 		Row(
 			horizontalArrangement = Arrangement.spacedBy(12.dp),
+			verticalAlignment = Alignment.CenterVertically,
 			modifier = Modifier
-				.padding(contentPadding)
 				.windowInsetsPadding(WindowInsets.navigationBars)
+				.padding(horizontal = 12.dp, vertical = 4.dp)
 		) {
 			Button(
 				onClick = onGenerate,
 				shape = buttonShape,
-				colors = ButtonDefaults.buttonColors(containerColor = generateButtonColor),
+				colors = ButtonDefaults.buttonColors(
+					containerColor = generateButtonColor,
+					contentColor = contentColorFor(generateButtonColor)
+				),
 				contentPadding = PaddingValues(vertical = 16.dp),
 				modifier = Modifier
 					.weight(1f)
@@ -96,7 +100,10 @@ fun GenerateORScanActions(
 			Button(
 				onClick = onScan,
 				shape = buttonShape,
-				colors = ButtonDefaults.buttonColors(containerColor = scanButtonColor),
+				colors = ButtonDefaults.buttonColors(
+					containerColor = scanButtonColor,
+					contentColor = contentColorFor(scanButtonColor)
+				),
 				contentPadding = PaddingValues(vertical = 16.dp),
 				modifier = Modifier
 					.weight(1f)
