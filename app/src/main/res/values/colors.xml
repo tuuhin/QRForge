@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="surface">#FFFDF8FF</color>
-  <color name="primary_container">#FFDEE0FF</color>
+  <color name="surface">#FFF4FAFB</color>
+  <color name="primary_container">#FFDEE1FF</color>
   <color name="on_primary_container">#FF394379</color>
   <color name="primary">#FF515B92</color>
   <color name="on_primary">#FFFFFFFF</color>
+  <color name="app_icon_background">#FFBAC3FF</color>
 
   <!--  Light colors-->
   <color name="tailwind_color_red_light">#F87171</color>

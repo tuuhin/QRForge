@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="surface">#FF141318</color>
+  <color name="surface">#FF0E1415</color>
   <color name="primary_container">#FF394379</color>
-  <color name="on_primary_container">#FFDEE0FF</color>
+  <color name="on_primary_container">#FFDEE1FF</color>
   <color name="primary">#FFBAC3FF</color>
   <color name="on_primary">#FF222C61</color>
 </resources>

@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
 	alias(libs.plugins.android.application)
@@ -23,9 +24,44 @@ android {
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
 
+	signingConfigs {
+		// find if there is a properties file
+		val keySecretFile = rootProject.file("keystore.properties")
+		if (!keySecretFile.exists()) return@signingConfigs
+
+		// load the properties
+		val properties = Properties()
+		keySecretFile.inputStream().use { properties.load(it) }
+
+		val userHome = System.getProperty("user.home")
+		val storeFileName = properties.getProperty("STORE_FILE_NAME")
+
+		val keyStoreFolder = File(userHome, "keystore")
+		if (!keyStoreFolder.exists()) return@signingConfigs
+
+		val keyStoreFile = File(keyStoreFolder, storeFileName)
+		if (!keyStoreFile.exists()) return@signingConfigs
+
+		create("release") {
+			storeFile = keyStoreFile
+			keyAlias = properties.getProperty("KEY_ALIAS")
+			keyPassword = properties.getProperty("KEY_PASSWORD")
+			storePassword = properties.getProperty("STORE_PASSWORD")
+		}
+	}
+
 	buildTypes {
+
+		debug {
+			applicationIdSuffix = ".debug"
+		}
+
 		release {
-			isMinifyEnabled = false
+			isMinifyEnabled = true
+			isShrinkResources = true
+			multiDexEnabled = true
+			// change the signing config if release is not found
+			signingConfig = signingConfigs.findByName("release")
 			proguardFiles(
 				getDefaultProguardFile("proguard-android-optimize.txt"),
 				"proguard-rules.pro"
@@ -66,46 +102,34 @@ room {
 dependencies {
 
 	implementation(libs.androidx.core.ktx)
+	implementation(libs.androidx.core.splashscreen)
 	implementation(libs.androidx.activity.compose)
+	// compose
 	implementation(platform(libs.androidx.compose.bom))
-	implementation(libs.androidx.ui)
-	implementation(libs.androidx.ui.graphics)
-	implementation(libs.androidx.ui.tooling.preview)
-	implementation(libs.androidx.material3)
+	implementation(libs.bundles.compose.ui)
 	// lifecyle and navigation
-	implementation(libs.androidx.lifecycle.runtime.ktx)
-	implementation(libs.androidx.lifecycle.runtime.compose)
+	implementation(libs.bundles.androidx.lifecycle)
 	implementation(libs.androidx.navigation.compose)
 	//koin
 	implementation(platform(libs.koin.bom))
-	implementation(libs.koin.core)
-	implementation(libs.koin.android)
-	implementation(libs.koin.compose)
-	implementation(libs.koin.compose.navigation)
-	implementation(libs.koin.android.startup)
+	implementation(libs.bundles.koin)
 	//room
-	implementation(libs.androidx.room.ktx)
-	implementation(libs.androidx.room.runtime)
-	implementation(libs.gms.play.services.location)
+	implementation(libs.bundles.androidx.room)
 	ksp(libs.androidx.room.compiler)
-	// others
-	implementation(libs.androidx.material.icons.extended)
-	implementation(libs.zxing.core)
-	implementation(libs.androidx.ui.text.google.fonts)
-	implementation(libs.androidx.core.splashscreen)
-	implementation(libs.kotlinx.datetime)
-	implementation(libs.kotlinx.collections.immutable)
-	implementation(libs.androidx.concurrent.futures.ktx)
 	// camerax
-	implementation(libs.androidx.camera.core)
-	implementation(libs.androidx.camera.camera2)
-	implementation(libs.androidx.camera.lifecycle)
-	implementation(libs.androidx.camera.mlkit.vision)
-	implementation(libs.androidx.camera.compose)
-	// mlkit
+	implementation(libs.bundles.androidx.camerax)
+	// kotlinx
+	implementation(libs.bundles.kotlinx)
+	// others
+	implementation(libs.gms.play.services.location)
+	implementation(libs.zxing.core)
+	implementation(libs.androidx.concurrent.futures.ktx)
 	implementation(libs.play.services.mlkit.barcode.scanning)
 	//tests
+	testImplementation(libs.kotlin.test)
+	testImplementation(libs.kotlinx.coroutines.test)
 	testImplementation(libs.junit)
+	// android tests
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
 	androidTestImplementation(platform(libs.androidx.compose.bom))

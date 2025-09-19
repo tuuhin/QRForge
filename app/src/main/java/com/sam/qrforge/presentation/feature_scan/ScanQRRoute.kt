@@ -1,5 +1,6 @@
 package com.sam.qrforge.presentation.feature_scan
 
+import android.content.Intent
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -22,6 +23,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.dialog
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
@@ -37,6 +39,7 @@ import com.sam.qrforge.presentation.feature_scan.viewmodel.CameraViewModel
 import com.sam.qrforge.presentation.feature_scan.viewmodel.ScanQRViewModel
 import com.sam.qrforge.presentation.navigation.animatedComposable
 import com.sam.qrforge.presentation.navigation.fadeAnimatedComposable
+import com.sam.qrforge.presentation.navigation.nav_graph.NavDeepLinks
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -46,7 +49,14 @@ import org.koin.compose.viewmodel.sharedKoinViewModel
 fun NavGraphBuilder.scanRoute(controller: NavController) =
 	navigation<NavRoutes.ScanRoute>(startDestination = ScanQRNavGraph.ScanQRRoute) {
 
-		fadeAnimatedComposable<ScanQRNavGraph.ScanQRRoute> { backStack ->
+		fadeAnimatedComposable<ScanQRNavGraph.ScanQRRoute>(
+			deepLinks = listOf(
+				navDeepLink {
+					this.action = Intent.ACTION_VIEW
+					this.uriPattern = NavDeepLinks.SCAN_QR_DEEP_LINK
+				}
+			)
+		) { backStack ->
 
 			val viewModel = backStack.sharedKoinViewModel<ScanQRViewModel>(controller)
 

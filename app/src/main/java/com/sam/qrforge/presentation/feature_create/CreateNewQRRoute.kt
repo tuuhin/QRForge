@@ -1,5 +1,6 @@
 package com.sam.qrforge.presentation.feature_create
 
+import android.content.Intent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -10,6 +11,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.sam.qrforge.presentation.common.composables.LaunchActivityEventsSideEffect
 import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
@@ -21,6 +23,7 @@ import com.sam.qrforge.presentation.feature_export.ExportQRScreen
 import com.sam.qrforge.presentation.feature_export.ExportQRViewModel
 import com.sam.qrforge.presentation.navigation.animatedComposable
 import com.sam.qrforge.presentation.navigation.fadeAnimatedComposable
+import com.sam.qrforge.presentation.navigation.nav_graph.NavDeepLinks
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import kotlinx.coroutines.flow.merge
 import org.koin.compose.viewmodel.koinViewModel
@@ -30,7 +33,14 @@ fun NavGraphBuilder.createNewQRRoute(
 	controller: NavController
 ) = navigation<NavRoutes.CreateRoute>(startDestination = CreateNewQRNavGraph.CreateNewRoute) {
 
-	fadeAnimatedComposable<CreateNewQRNavGraph.CreateNewRoute> { backStack ->
+	fadeAnimatedComposable<CreateNewQRNavGraph.CreateNewRoute>(
+		deepLinks = listOf(
+			navDeepLink {
+				this.action = Intent.ACTION_VIEW
+				this.uriPattern = NavDeepLinks.CREATE_NEW_QR_DEEP_LINK
+			}
+		)
+	) { backStack ->
 
 		val viewModel = backStack.sharedKoinViewModel<CreateNewQRViewModel>(controller)
 		val currentContent by viewModel.qrContent.collectAsStateWithLifecycle()

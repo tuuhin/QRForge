@@ -9,6 +9,7 @@ junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 kotlinxCollectionsImmutable = "0.4.0"
+kotlinxCoroutinesTest = "1.10.2"
 playServicesLocationVersion = "21.3.0"
 kotlinxDatetime = "0.7.1"
 lifecycleRuntimeKtx = "2.9.3"
@@ -48,9 +49,12 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-#kotin libs
+#kotlin libs
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+
 #zebra crossing
 play-services-mlkit-barcode-scanning = { module = "com.google.android.gms:play-services-mlkit-barcode-scanning", version.ref = "playServicesMlkitBarcodeScanning" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "core" }
@@ -83,3 +87,11 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 androidx_room = { id = "androidx.room", version.ref = "roomCompiler" }
+
+[bundles]
+koin = ["koin-core", "koin-android", "koin-android-startup", "koin-compose", "koin-compose-navigation", ]
+androidx-camerax = ["androidx-camera-core", "androidx-camera-camera2", "androidx-camera-lifecycle", "androidx-camera-compose", "androidx-camera-mlkit-vision"]
+compose-ui = ["androidx-ui", "androidx-ui-graphics", "androidx-ui-tooling-preview", "androidx-material3", "androidx-material-icons-extended", "androidx-ui-text-google-fonts"]
+androidx-lifecycle = ["androidx-lifecycle-runtime-compose", "androidx-lifecycle-runtime-ktx"]
+androidx-room = ["androidx-room-runtime", "androidx-room-ktx"]
+kotlinx = ["kotlinx-collections-immutable", "kotlinx-datetime"]

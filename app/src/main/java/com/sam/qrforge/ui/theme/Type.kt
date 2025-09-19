@@ -2,9 +2,8 @@ package com.sam.qrforge.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontFamily
-
-import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import com.sam.qrforge.R
 
 private val provider = GoogleFont.Provider(
@@ -13,24 +12,24 @@ private val provider = GoogleFont.Provider(
 	certificates = R.array.com_google_android_gms_fonts_certs
 )
 
-val MONTSERRAT_FONT_FAMILY = FontFamily(
+val displayFontFamily = FontFamily(
 	Font(
-		googleFont = GoogleFont("Montserrat"),
+		googleFont = GoogleFont("Montserrat Alternates"),
 		fontProvider = provider,
 	)
 )
 
 // Default Material 3 typography values
-private val baseline = Typography()
+val baseline = Typography()
 
 val AppTypography = Typography(
-	displayLarge = baseline.displayLarge.copy(fontFamily = MONTSERRAT_FONT_FAMILY),
-	displayMedium = baseline.displayMedium.copy(fontFamily = MONTSERRAT_FONT_FAMILY),
-	displaySmall = baseline.displaySmall.copy(fontFamily = MONTSERRAT_FONT_FAMILY),
-	headlineLarge = baseline.headlineLarge.copy(fontFamily = MONTSERRAT_FONT_FAMILY),
-	headlineMedium = baseline.headlineMedium.copy(fontFamily = MONTSERRAT_FONT_FAMILY),
-	headlineSmall = baseline.headlineSmall.copy(fontFamily = MONTSERRAT_FONT_FAMILY),
-	titleLarge = baseline.titleLarge.copy(fontFamily = MONTSERRAT_FONT_FAMILY),
-	titleMedium = baseline.titleMedium.copy(fontFamily = MONTSERRAT_FONT_FAMILY),
-	titleSmall = baseline.titleSmall.copy(fontFamily = MONTSERRAT_FONT_FAMILY),
+	displayLarge = baseline.displayLarge.copy(fontFamily = displayFontFamily),
+	displayMedium = baseline.displayMedium.copy(fontFamily = displayFontFamily),
+	displaySmall = baseline.displaySmall.copy(fontFamily = displayFontFamily),
+	headlineLarge = baseline.headlineLarge.copy(fontFamily = displayFontFamily),
+	headlineMedium = baseline.headlineMedium.copy(fontFamily = displayFontFamily),
+	headlineSmall = baseline.headlineSmall.copy(fontFamily = displayFontFamily),
+	titleLarge = baseline.titleLarge.copy(fontFamily = displayFontFamily),
+	titleMedium = baseline.titleMedium.copy(fontFamily = displayFontFamily),
+	titleSmall = baseline.titleSmall.copy(fontFamily = displayFontFamily),
 )
