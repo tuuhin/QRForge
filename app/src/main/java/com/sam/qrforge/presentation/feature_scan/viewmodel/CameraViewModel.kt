@@ -4,12 +4,12 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.MutatorMutex
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.viewModelScope
+import com.sam.qrforge.data.mappers.toCompressedByteArray
 import com.sam.qrforge.domain.facade.QRImageAnalyzer
 import com.sam.qrforge.domain.facade.QRScannerFacade
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.UIEvent
-import com.sam.qrforge.presentation.common.utils.toBytes
 import com.sam.qrforge.presentation.feature_scan.state.CameraCaptureState
 import com.sam.qrforge.presentation.feature_scan.state.CameraControllerEvents
 import com.sam.qrforge.presentation.feature_scan.state.CameraControlsState
@@ -72,7 +72,10 @@ class CameraViewModel(
 				.filter { it.isSuccess }.map { it.getOrNull() }
 
 			return merge(imageAnalyzer, _localAnalysis)
-				.onStart { prepareImageAnalyzers() }
+				.onStart {
+					// set analyzers
+					prepareImageAnalyzers()
+				}
 				.distinctUntilChanged()
 				.shareIn(
 					scope = viewModelScope,
@@ -184,7 +187,7 @@ class CameraViewModel(
 
 	private fun analyzeBitmap(bitmap: Bitmap, rotate: Int) = viewModelScope.launch {
 		_analyzerState.update { state -> state.copy(isAnalysing = true) }
-		val bytes = bitmap.asImageBitmap().toBytes()
+		val bytes = bitmap.asImageBitmap().toCompressedByteArray()
 		val results = decoder.decodeAsBitMap(bytes, bitmap.width, bitmap.height, rotate)
 		results.fold(
 			onSuccess = { model -> _localAnalysis.update { model } },

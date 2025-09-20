@@ -2,17 +2,17 @@ package com.sam.qrforge.presentation.feature_export
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.viewModelScope
+import com.sam.qrforge.data.mappers.toCompressedByteArray
+import com.sam.qrforge.data.mappers.toRGBAModel
 import com.sam.qrforge.domain.enums.ExportDimensions
 import com.sam.qrforge.domain.enums.ImageMimeTypes
 import com.sam.qrforge.domain.facade.FileStorageFacade
-import com.sam.qrforge.domain.facade.QRScannerFacade
-import com.sam.qrforge.domain.facade.exception.NoQRCodeFoundException
+import com.sam.qrforge.domain.facade.QRValidatorFacade
 import com.sam.qrforge.domain.util.Resource
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.LaunchActivityEvent
 import com.sam.qrforge.presentation.common.utils.UIEvent
-import com.sam.qrforge.presentation.common.utils.toBytes
 import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenEvents
 import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenState
 import kotlinx.coroutines.Job
@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 
 class ExportQRViewModel(
 	private val fileFacade: FileStorageFacade,
-	private val decoder: QRScannerFacade,
+	private val validator: QRValidatorFacade,
 ) : AppViewModel() {
 
 	private val _decoration =
@@ -99,16 +99,14 @@ class ExportQRViewModel(
 		_exportJob?.cancel()
 		_exportJob = viewModelScope.launch {
 
-			val bytes = bitmap.toBytes()
-
-			val isValid = validateExport(bytes, bitmap.width, bitmap.height)
+			val isValid = validateExport(bitmap)
 			val isTooMuchEdit = _isTooMuchEdit.updateAndGet { !isValid }
 			if (isTooMuchEdit) return@launch
 
 			_uiEvents.emit(UIEvent.ShowToast("Verified"))
 
 			val fileSaveFlow = fileFacade.saveImageContentToStorage(
-				bytes = bytes,
+				bytes = bitmap.toCompressedByteArray(),
 				dimensions = _dimension.value,
 				mimeType = _mimetype.value
 			)
@@ -144,12 +142,11 @@ class ExportQRViewModel(
 		_exportJob = null
 	}
 
-	private suspend fun validateExport(bytes: ByteArray, width: Int, height: Int): Boolean {
-		val result = decoder.decodeAsBitMap(bytes, width, height, 0)
-		if (result.isSuccess) return true
-		else if (result.exceptionOrNull() is NoQRCodeFoundException) return false
-		_uiEvents.emit(UIEvent.ShowSnackBar("Error In validating qr"))
-		return false
+	private suspend fun validateExport(bitmap: ImageBitmap): Boolean {
+		val result = validator.isValid(bitmap.toRGBAModel())
+		if (result.isFailure) {
+			_uiEvents.emit(UIEvent.ShowSnackBar("Error In validating qr"))
+		}
+		return result.getOrNull() ?: false
 	}
-
 }

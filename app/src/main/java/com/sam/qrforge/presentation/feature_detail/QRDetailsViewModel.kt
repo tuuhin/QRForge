@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.sam.qrforge.data.mappers.toCompressedByteArray
 import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
 import com.sam.qrforge.domain.models.GeneratedQRModel
@@ -16,7 +17,6 @@ import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.LaunchActivityEvent
 import com.sam.qrforge.presentation.common.utils.UIEvent
-import com.sam.qrforge.presentation.common.utils.toBytes
 import com.sam.qrforge.presentation.feature_detail.state.DeleteQRDialogState
 import com.sam.qrforge.presentation.feature_detail.state.EditQRScreenEvent
 import com.sam.qrforge.presentation.feature_detail.state.EditQRScreenState
@@ -143,7 +143,7 @@ class QRDetailsViewModel(
 	}
 
 	private fun onShareGeneratedQR(bitmap: ImageBitmap) = viewModelScope.launch {
-		val bytes = bitmap.toBytes()
+		val bytes = bitmap.toCompressedByteArray()
 		val fileResult = fileFacade.saveContentToShare(bytes)
 		fileResult.fold(
 			onSuccess = { uriToShare ->

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.compose.runtime.Composer
 import androidx.compose.runtime.ExperimentalComposeRuntimeApi
 import com.sam.qrforge.di.appModule
+import com.sam.qrforge.di.mlKitModule
 import com.sam.qrforge.di.presentationModule
 import com.sam.qrforge.domain.provider.AppShortcutProvider
 import org.koin.android.ext.android.inject
@@ -31,7 +32,7 @@ class QRForgeApp : Application(), KoinStartup {
 	override fun onKoinStartup(): KoinConfiguration = koinConfiguration {
 		androidContext(this@QRForgeApp)
 		androidLogger()
-		modules(appModule + presentationModule)
+		modules(appModule + presentationModule + mlKitModule)
 	}
 
 }

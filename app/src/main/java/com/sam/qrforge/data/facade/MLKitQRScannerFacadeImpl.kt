@@ -4,9 +4,7 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.core.net.toUri
 import com.google.mlkit.common.MlKitException
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.common.InputImage
 import com.sam.qrforge.data.mappers.toQRModel
 import com.sam.qrforge.data.utils.await
@@ -16,25 +14,20 @@ import com.sam.qrforge.domain.facade.exception.NoQRCodeFoundException
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import java.io.IOException
 
-class MLKitQRScannerFacadeImpl(private val context: Context) : QRScannerFacade {
-
-	private val _options = BarcodeScannerOptions.Builder()
-		.setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-		.build()
-
-	private val _client by lazy { BarcodeScanning.getClient(_options) }
+class MLKitQRScannerFacadeImpl(
+	private val context: Context,
+	private val scanner: BarcodeScanner
+) : QRScannerFacade {
 
 	private suspend fun decodeQR(image: InputImage): Result<QRContentModel> {
 		return try {
-			val barcodes = _client.process(image).await()
+			val barcodes = scanner.process(image).await()
 			val result = barcodes.firstOrNull()?.rawValue?.toQRModel()
 				?: return Result.failure(NoQRCodeFoundException())
 			Result.success(result)
 		} catch (e: MlKitException) {
 			val exception = when (e.errorCode) {
-				MlKitException.UNAVAILABLE -> Exception("ML Kit not found")
-				MlKitException.NETWORK_ISSUE -> Exception("Internet connection not found")
-				MlKitException.NOT_ENOUGH_SPACE -> Exception("Cannot install model")
+				MlKitException.UNAVAILABLE -> Exception("MLKit module unavailable")
 				else -> e
 			}
 			Result.failure(exception)

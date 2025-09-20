@@ -2,6 +2,7 @@ package com.sam.qrforge.presentation.feature_create
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.viewModelScope
+import com.sam.qrforge.data.mappers.toCompressedByteArray
 import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
 import com.sam.qrforge.domain.models.CreateNewQRModel
@@ -18,7 +19,6 @@ import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.LaunchActivityEvent
 import com.sam.qrforge.presentation.common.utils.UIEvent
-import com.sam.qrforge.presentation.common.utils.toBytes
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenEvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenState
@@ -96,7 +96,7 @@ class CreateNewQRViewModel(
 	}
 
 	private fun onShareGeneratedQR(bitmap: ImageBitmap) = viewModelScope.launch {
-		val bytes = bitmap.toBytes()
+		val bytes = bitmap.toCompressedByteArray()
 		val fileResult = saveGeneratedQRFacade.saveContentToShare(bytes)
 		fileResult.fold(
 			onSuccess = { uriToShare ->
