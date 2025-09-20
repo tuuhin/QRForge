@@ -5,9 +5,11 @@
   <color name="on_primary_container">#FF394379</color>
   <color name="primary">#FF515B92</color>
   <color name="on_primary">#FFFFFFFF</color>
-  <color name="app_icon_background">#FFBAC3FF</color>
+  <color name="app_icon_background">#ffA5ABD0</color>
 
   <!--  Light colors-->
+  <color name="tailwind_color_slate_light">#94a3b8</color>
+  <color name="tailwind_color_stone_light">#a8a29e</color>
   <color name="tailwind_color_red_light">#F87171</color>
   <color name="tailwind_color_orange_light">#FB923C</color>
   <color name="tailwind_color_amber_light">#FBBF24</color>
@@ -26,6 +28,8 @@
   <color name="tailwind_color_rose_light">#FB7185</color>
 
   <!--  Dark Colors-->
+  <color name="tailwind_color_slate_dark">#1e293b</color>
+  <color name="tailwind_color_stone_dark">#292524</color>
   <color name="tailwind_color_red_dark">#991B1B</color>
   <color name="tailwind_color_orange_dark">#9A3412</color>
   <color name="tailwind_color_amber_dark">#92400E</color>

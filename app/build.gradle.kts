@@ -124,7 +124,7 @@ dependencies {
 	implementation(libs.gms.play.services.location)
 	implementation(libs.zxing.core)
 	implementation(libs.androidx.concurrent.futures.ktx)
-	implementation(libs.play.services.mlkit.barcode.scanning)
+	implementation(libs.barcode.scanning)
 	//tests
 	testImplementation(libs.kotlin.test)
 	testImplementation(libs.kotlinx.coroutines.test)

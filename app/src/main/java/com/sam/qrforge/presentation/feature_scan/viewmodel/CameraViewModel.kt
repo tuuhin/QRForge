@@ -94,13 +94,10 @@ class CameraViewModel(
 		when (event) {
 			CameraControllerEvents.BindCamera -> bindCamera()
 			CameraControllerEvents.UnBindCamera -> unBindCamera()
-			CameraControllerEvents.ToggleFlash -> controller.onToggleFlash()
+			CameraControllerEvents.ToggleFlash -> onToggleFlash()
 			is CameraControllerEvents.OnZoomLevelChange -> viewModelScope.launch {
 				_uiMutex.mutate {
-					controller.onZoomLevelChange(
-						event.zoom,
-						event.isRelative
-					)
+					controller.onZoomLevelChange(event.zoom, event.isRelative)
 				}
 			}
 
@@ -158,6 +155,11 @@ class CameraViewModel(
 			},
 		)
 		_analyzerState.update { state -> state.copy(isAnalysing = false) }
+	}
+
+	private fun onToggleFlash() = viewModelScope.launch {
+		val isSuccess = controller.onToggleFlash()
+		if (!isSuccess) _uiEvent.emit(UIEvent.ShowToast("Flash unit not found"))
 	}
 
 	private fun captureImage() = viewModelScope.launch {

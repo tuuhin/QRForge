@@ -164,11 +164,11 @@ class CameraController(private val context: Context) {
 		}
 	}
 
-
-	fun onToggleFlash() {
-		if (_cameraInfo?.hasFlashUnit() == false) return
+	fun onToggleFlash(): Boolean {
+		if (_cameraInfo?.hasFlashUnit() == false) return false
 		val isTorchOn = _cameraInfo?.torchState?.value == TorchState.ON
 		_cameraControl?.enableTorch(!isTorchOn)
+		return true
 	}
 
 	fun onZoomLevelChange(zoom: Float, isRelative: Boolean = false) {
