@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -37,19 +38,22 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 fun ColorOptionSelector(
 	onColorChange: (Color) -> Unit,
 	modifier: Modifier = Modifier,
-	selected: Color = Color.Transparent,
+	selected: Color? = null,
 	subheadingStyle: TextStyle = MaterialTheme.typography.labelLarge,
 	subheadingColor: Color = MaterialTheme.colorScheme.onSurface,
 	contentPadding: PaddingValues = PaddingValues(8.dp),
 ) {
+	val surfaceColors = listOf(
+		MaterialTheme.colorScheme.background,
+		MaterialTheme.colorScheme.onBackground
+	)
+
 	val themedColors = listOf(
-		Color.Transparent,
-		MaterialTheme.colorScheme.onBackground,
 		MaterialTheme.colorScheme.primaryContainer,
-		MaterialTheme.colorScheme.secondaryContainer,
-		MaterialTheme.colorScheme.tertiaryContainer,
 		MaterialTheme.colorScheme.onPrimaryContainer,
+		MaterialTheme.colorScheme.secondaryContainer,
 		MaterialTheme.colorScheme.onSecondaryContainer,
+		MaterialTheme.colorScheme.tertiaryContainer,
 		MaterialTheme.colorScheme.onTertiaryContainer,
 	)
 
@@ -70,9 +74,12 @@ fun ColorOptionSelector(
 		colorResource(R.color.tailwind_color_purple_light),
 		colorResource(R.color.tailwind_color_pink_light),
 		colorResource(R.color.tailwind_color_rose_light),
+		colorResource(R.color.tailwind_color_slate_light),
+		colorResource(R.color.tailwind_color_stone_light),
 	)
 
 	val darkColors = listOf(
+
 		colorResource(R.color.tailwind_color_red_dark),
 		colorResource(R.color.tailwind_color_orange_dark),
 		colorResource(R.color.tailwind_color_amber_dark),
@@ -89,6 +96,8 @@ fun ColorOptionSelector(
 		colorResource(R.color.tailwind_color_purple_dark),
 		colorResource(R.color.tailwind_color_pink_dark),
 		colorResource(R.color.tailwind_color_rose_dark),
+		colorResource(R.color.tailwind_color_slate_dark),
+		colorResource(R.color.tailwind_color_stone_dark),
 	)
 
 	LazyVerticalGrid(
@@ -103,9 +112,19 @@ fun ColorOptionSelector(
 			contentType = "Title"
 		) {
 			Text(
-				text = "Colors",
+				text = stringResource(R.string.export_color_options_themed_colors),
 				style = subheadingStyle,
 				color = subheadingColor,
+			)
+		}
+		itemsIndexed(
+			items = surfaceColors,
+			contentType = { _, _ -> Color::class.java },
+		) { _, color ->
+			ColorOption(
+				color = color,
+				onSelectColor = { onColorChange(color) },
+				isSelected = color == selected,
 			)
 		}
 		itemsIndexed(
@@ -123,7 +142,7 @@ fun ColorOptionSelector(
 			contentType = "Title",
 		) {
 			Text(
-				text = "Light Colors",
+				text = stringResource(R.string.export_color_options_light_colors),
 				style = subheadingStyle,
 				color = subheadingColor,
 			)
@@ -143,7 +162,7 @@ fun ColorOptionSelector(
 			contentType = "Title",
 		) {
 			Text(
-				text = "Dark Colors",
+				text = stringResource(R.string.export_color_options_dark_colors),
 				style = subheadingStyle,
 				color = subheadingColor,
 			)

@@ -86,8 +86,8 @@ fun DrawScope.drawFindersClassic(
 						pivot = pivot
 					)
 					translate(
-						left = outerRectSize.width * .25f * fractionOffset.x,
-						top = outerRectSize.height * .25f * fractionOffset.y,
+						left = blockSize * .5f * fractionOffset.x,
+						top = blockSize * .5f * fractionOffset.y,
 					)
 				},
 			) {
@@ -126,7 +126,6 @@ fun DrawScope.drawFindersMinimalistic(
 		finders.forEach { offset ->
 			val baseSize = Size(blockSize, blockSize)
 			val innerRectSize = baseSize.times(3f)
-			val rectSize = baseSize.times(5f)
 			val outerRectSize = baseSize.times(7f)
 
 
@@ -297,12 +296,12 @@ fun DrawScope.drawDataBlocks(
 	bitsColor: Color = Color.Black,
 	blendMode: BlendMode = BlendMode.SrcOver,
 ) {
+	val finalSize = Size(blockSize * multiplier, blockSize * multiplier)
+		.times(1.05f)
+	val halfBlock = blockSize * .5f
+
 	scale(scaleFactor) {
 		blocks.forEach { offset ->
-			val finalSize = Size(
-				blockSize * multiplier,
-				blockSize * multiplier
-			)
 			withTransform(
 				transformBlock = {
 					val pivot = Offset(
@@ -318,8 +317,8 @@ fun DrawScope.drawDataBlocks(
 						pivot = pivot
 					)
 					translate(
-						left = blockSize * .5f * fractionOffset.x,
-						top = blockSize * .5f * fractionOffset.y,
+						left = halfBlock * fractionOffset.x,
+						top = halfBlock * fractionOffset.y,
 					)
 				},
 			) {
@@ -327,8 +326,8 @@ fun DrawScope.drawDataBlocks(
 					color = bitsColor,
 					topLeft = offset,
 					cornerRadius = CornerRadius(
-						blockSize * .5f * multiplier * roundness,
-						blockSize * .5f * multiplier * roundness
+						halfBlock * multiplier * roundness,
+						halfBlock * multiplier * roundness
 					),
 					size = finalSize,
 					blendMode = blendMode,

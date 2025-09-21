@@ -30,9 +30,8 @@ private fun QRTemplateMinimalistic(
 	bitsSizeMultiplier: Float = .5f,
 	contentMargin: Dp = 0.dp,
 	isDiamond: Boolean = false,
-	showBackground: Boolean = true,
 	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
-	backgroundColor: Color = MaterialTheme.colorScheme.background,
+	backgroundColor: Color? = null,
 	bitsColor: Color = MaterialTheme.colorScheme.onBackground,
 	finderColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
@@ -58,7 +57,7 @@ private fun QRTemplateMinimalistic(
 					val scaleFactor = 1 - (2 * limitMarginWidth / size.width)
 					// draw background
 					layer.record {
-						if (showBackground) drawRect(color = backgroundColor)
+						if (backgroundColor != null) drawRect(color = backgroundColor)
 
 						// blocks
 						drawDataBlocks(
@@ -102,7 +101,7 @@ fun QRTemplateMinimalistic(
 		contentMargin = decoration.contentMargin,
 		bitsColor = decoration.bitsColor ?: MaterialTheme.colorScheme.onBackground,
 		finderColor = decoration.findersColor ?: MaterialTheme.colorScheme.onBackground,
-		showBackground = decoration.showBackground,
+		backgroundColor = if (decoration.showBackground) MaterialTheme.colorScheme.background else null,
 		graphicsLayer = graphicsLayer,
 		modifier = modifier,
 	)

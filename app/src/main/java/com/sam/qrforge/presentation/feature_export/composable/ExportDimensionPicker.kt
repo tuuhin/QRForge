@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -54,7 +55,8 @@ fun ExportDimensionPicker(
 					color = MaterialTheme.colorScheme.secondary
 				)
 				Surface(
-					color = MaterialTheme.colorScheme.secondaryContainer,
+					color = MaterialTheme.colorScheme.tertiary,
+					contentColor = MaterialTheme.colorScheme.onTertiary,
 					shape = MaterialTheme.shapes.extraLarge,
 				) {
 					Text(
@@ -65,13 +67,24 @@ fun ExportDimensionPicker(
 					)
 				}
 			}
-			FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+			FlowRow(
+				horizontalArrangement = Arrangement.spacedBy(4.dp)
+			) {
 				ExportDimensions.entries.forEach { option ->
 					FilterChip(
 						selected = option == selected,
 						onClick = { onDimensionChange(option) },
 						label = { Text(text = option.localeString) },
-						shape = MaterialTheme.shapes.large
+						shape = MaterialTheme.shapes.large,
+						border = FilterChipDefaults.filterChipBorder(
+							enabled = true,
+							selected = option == selected,
+							borderColor = MaterialTheme.colorScheme.outlineVariant
+						),
+						colors = FilterChipDefaults.filterChipColors(
+							selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+							selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+						)
 					)
 				}
 			}

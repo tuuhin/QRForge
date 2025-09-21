@@ -26,11 +26,11 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 private fun QRTemplateLayered(
 	model: GeneratedQRUIModel,
 	modifier: Modifier = Modifier,
-	coloredLayers: QRColorLayer = QRColorLayer(),
 	contentMargin: Dp = 0.dp,
 	roundness: Float = 0f,
 	bitsSizeMultiplier: Float = 1f,
 	isDiamond: Boolean = false,
+	coloredLayers: QRColorLayer = QRColorLayer.Blocks,
 	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
 	backgroundColor: Color = MaterialTheme.colorScheme.background,
 	fallbackContentColor: Color = MaterialTheme.colorScheme.onBackground,
@@ -55,8 +55,7 @@ private fun QRTemplateLayered(
 				onDrawBehind {
 
 					val layers = coloredLayers.copyEnsureOneExists(fallbackContentColor)
-						.copyEnsuresOnlyValidOffsets()
-						.layers
+						.filterValidOverlayColor()
 
 					val limitMarginWidth = contentMargin.coerceIn(0.dp, 20.dp).toPx()
 					val limitedRoundness = roundness.coerceIn(0f..1f)
@@ -126,7 +125,7 @@ private fun QRTemplateLayeredPreview() = QRForgeTheme {
 		model = PreviewFakes.FAKE_GENERATED_UI_MODEL,
 		decoration = QRDecorationOption.QRDecorationOptionColorLayer(
 			backGroundColor = MaterialTheme.colorScheme.background,
-			coloredLayers = QRColorLayer.COLOR_BLOCKS
+			coloredLayers = QRColorLayer.PowerRangers,
 		)
 	)
 }

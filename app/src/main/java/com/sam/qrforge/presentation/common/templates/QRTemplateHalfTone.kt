@@ -45,7 +45,7 @@ fun QRTemplateHalfTone(
 	showQRBackground: Boolean = false,
 	showTimingPatterns: Boolean = false,
 	showAlignmentPatterns: Boolean = false,
-	painter: Painter? = null,
+	painterDeferred: @Composable () -> Painter? = { null },
 	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
 	backgroundColor: Color = MaterialTheme.colorScheme.background,
 	bitsColor: Color = MaterialTheme.colorScheme.onBackground,
@@ -56,6 +56,7 @@ fun QRTemplateHalfTone(
 ) {
 
 	val layer = graphicsLayer?.invoke() ?: rememberGraphicsLayer()
+	val painter = painterDeferred()
 
 	Spacer(
 		modifier = modifier
@@ -65,6 +66,7 @@ fun QRTemplateHalfTone(
 			)
 			.drawWithCache {
 
+				// TODO: Fix the logic here
 				val marginWidth = contentMargin.coerceIn(0.dp, 20.dp).toPx()
 				val limitedScale = imageScale.coerceIn(.1f..1f)
 				val limitedRoundness = roundness.coerceIn(0f..1f)
@@ -204,7 +206,7 @@ private fun painterToBitmap(
 private fun QRTemplateHalfTonePreview() = QRForgeTheme {
 	QRTemplateHalfTone(
 		model = PreviewFakes.FAKE_GENERATED_UI_MODEL_4,
-		painter = painterResource(R.drawable.android_bot),
+		painterDeferred = { painterResource(R.drawable.android_bot) },
 		modifier = Modifier.size(200.dp)
 	)
 }

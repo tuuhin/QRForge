@@ -76,7 +76,7 @@
   <string name="dimension_option_title">Select Dimension</string>
   <string name="qr_editor_title">QR Editor</string>
   <string name="action_done">Done</string>
-  <string name="faulty_qr_warning_text">Current QR has been modified too much, it cannot be feed to scanner</string>
+  <string name="faulty_qr_warning_text">Current QR has been modified too much, it cannot be identified by scanner</string>
   <string name="dialog_action_allow">Allow</string>
   <string name="allow_permission_title">Allow permission</string>
   <string name="allow_permission_external_storage">Allow permission to export the QR to external storage</string>
@@ -105,4 +105,13 @@
   <string name="shortcut_label_generate_qr">Generate QR</string>
   <string name="shortcut_short_label_scan_qr">Scan</string>
   <string name="shortcut_label_scan_qr">Scan QR</string>
+  <string name="quantity_unit_px">%d px</string>
+  <string name="export_color_options_themed_colors">Themed Colors</string>
+  <string name="export_color_options_light_colors">Light Colors</string>
+  <string name="export_color_options_dark_colors">Dar Colors</string>
+  <string name="qr_edit_property_show_background_title">Show Background</string>
+  <string name="qr_edit_property_show_background_text">Show a colored background</string>
+  <string name="qr_edit_property_layered_color_selector">Layered Colors</string>
+  <string name="qr_edit_property_select_color_text">Tap to select</string>
+  <string name="qr_edit_property_layered_color_selector_text">Color are not overlapped they may have differnt blendmode</string>
 </resources>

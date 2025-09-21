@@ -6,16 +6,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Immutable
-sealed class QRDecorationOption(
-	val templateType: QRTemplateOption,
-	open val roundness: Float = 0f,
-	open val bitsSizeMultiplier: Float = 1f,
-	open val contentMargin: Dp = 0.dp,
-	open val backGroundColor: Color? = null,
-	open val bitsColor: Color? = null,
-	open val findersColor: Color? = null,
-	open val isDiamond: Boolean = false,
-) {
+sealed class QRDecorationOption(val templateType: QRTemplateOption) {
+
+	abstract val roundness: Float
+	abstract val bitsSizeMultiplier: Float
+	abstract val contentMargin: Dp
+	abstract val backGroundColor: Color?
+	abstract val bitsColor: Color?
+	abstract val findersColor: Color?
+	abstract val isDiamond: Boolean
 
 	@Immutable
 	data class QRDecorationOptionBasic(
@@ -30,16 +29,7 @@ sealed class QRDecorationOption(
 		val alignmentColor: Color? = null,
 		val timingColor: Color? = null,
 		val frameColor: Color? = null,
-	) : QRDecorationOption(
-		templateType = QRTemplateOption.BASIC,
-		roundness = roundness,
-		contentMargin = contentMargin,
-		bitsSizeMultiplier = bitsSizeMultiplier,
-		backGroundColor = backGroundColor,
-		isDiamond = isDiamond,
-		bitsColor = bitsColor,
-		findersColor = findersColor,
-	)
+	) : QRDecorationOption(templateType = QRTemplateOption.BASIC)
 
 	@Immutable
 	data class QRDecorationOptionMinimal(
@@ -51,16 +41,7 @@ sealed class QRDecorationOption(
 		override val bitsColor: Color? = null,
 		override val findersColor: Color? = null,
 		val showBackground: Boolean = false,
-	) : QRDecorationOption(
-		templateType = QRTemplateOption.MINIMALISTIC,
-		roundness = roundness,
-		contentMargin = contentMargin,
-		bitsSizeMultiplier = bitsSizeMultiplier,
-		backGroundColor = backGroundColor,
-		isDiamond = isDiamond,
-		bitsColor = bitsColor,
-		findersColor = findersColor,
-	)
+	) : QRDecorationOption(templateType = QRTemplateOption.MINIMALISTIC)
 
 	@Immutable
 	data class QRDecorationOptionColorLayer(
@@ -68,22 +49,31 @@ sealed class QRDecorationOption(
 		override val bitsSizeMultiplier: Float = 1f,
 		override val contentMargin: Dp = 0.dp,
 		override val backGroundColor: Color? = null,
-		override val isDiamond: Boolean = false,
-		val coloredLayers: QRColorLayer = QRColorLayer.COLOR_DISCO,
-	) : QRDecorationOption(
-		templateType = QRTemplateOption.COLOR_LAYERED,
-		roundness = roundness,
-		contentMargin = contentMargin,
-		bitsSizeMultiplier = bitsSizeMultiplier,
-		backGroundColor = backGroundColor,
-		isDiamond = isDiamond,
-	)
+		val coloredLayers: QRColorLayer = QRColorLayer.PowerRangers,
+	) : QRDecorationOption(templateType = QRTemplateOption.COLOR_LAYERED) {
+
+		override val bitsColor: Color?
+			get() = null
+		override val findersColor: Color?
+			get() = null
+
+		override val isDiamond: Boolean
+			get() = false
+	}
+
+
+	val canHaveBackgroundOption: Boolean
+		get() = when (this) {
+			is QRDecorationOptionBasic -> true
+			is QRDecorationOptionColorLayer -> true
+			is QRDecorationOptionMinimal -> showBackground
+		}
 
 	fun copyBackgroundColor(color: Color?): QRDecorationOption {
 		return when (this) {
 			is QRDecorationOptionBasic -> copy(backGroundColor = color)
 			is QRDecorationOptionColorLayer -> copy(backGroundColor = color)
-			is QRDecorationOptionMinimal -> copy(backGroundColor = color)
+			is QRDecorationOptionMinimal -> copy(backGroundColor = if (showBackground) color else null)
 		}
 	}
 
@@ -128,7 +118,6 @@ sealed class QRDecorationOption(
 				roundness = roundness ?: this.roundness,
 				bitsSizeMultiplier = bitsSizeMultiplier ?: this.bitsSizeMultiplier,
 				contentMargin = contentMargin ?: this.contentMargin,
-				isDiamond = isDiamond ?: this.isDiamond
 			)
 		}
 	}
@@ -160,7 +149,6 @@ sealed class QRDecorationOption(
 				contentMargin = contentMargin,
 				bitsSizeMultiplier = bitsSizeMultiplier,
 				backGroundColor = backGroundColor,
-				isDiamond = isDiamond,
 			)
 		}
 	}
