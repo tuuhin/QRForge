@@ -297,7 +297,6 @@ fun DrawScope.drawDataBlocks(
 	blendMode: BlendMode = BlendMode.SrcOver,
 ) {
 	val finalSize = Size(blockSize * multiplier, blockSize * multiplier)
-		.times(1.05f)
 	val halfBlock = blockSize * .5f
 
 	scale(scaleFactor) {

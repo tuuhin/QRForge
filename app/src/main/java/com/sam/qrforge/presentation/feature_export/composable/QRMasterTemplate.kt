@@ -1,18 +1,8 @@
 package com.sam.qrforge.presentation.feature_export.composable
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.EaseInCubic
-import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.unit.dp
@@ -30,27 +20,17 @@ fun QRMasterTemplate(
 	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
 	decoration: QRDecorationOption = QRDecorationOption.QRDecorationOptionBasic(),
 ) {
-
-	AnimatedContent(
-		targetState = decoration.templateType,
-		transitionSpec = {
-			fadeIn(initialAlpha = .3f) + scaleIn(
-				animationSpec = tween(400, easing = EaseInCubic)
-			) togetherWith fadeOut(targetAlpha = .2f) + scaleOut(
-				animationSpec = tween(durationMillis = 400, easing = EaseOut)
-			)
-		},
-		contentAlignment = Alignment.Center,
+	Box(
 		modifier = modifier.defaultMinSize(minWidth = 120.dp, 120.dp),
-	) { template ->
-		when (template) {
+	) {
+		when (decoration.templateType) {
 			QRTemplateOption.BASIC -> {
 				val decor = decoration as? QRDecorationOption.QRDecorationOptionBasic
 				QRTemplateBasic(
 					model = model,
 					decoration = decor ?: QRDecorationOption.QRDecorationOptionBasic(),
 					graphicsLayer = graphicsLayer,
-					modifier = Modifier.fillMaxSize()
+					modifier = Modifier.matchParentSize()
 				)
 			}
 
@@ -61,7 +41,7 @@ fun QRMasterTemplate(
 					model = model,
 					decoration = type ?: QRDecorationOption.QRDecorationOptionMinimal(),
 					graphicsLayer = graphicsLayer,
-					modifier = Modifier.fillMaxSize(),
+					modifier = Modifier.matchParentSize(),
 				)
 			}
 
@@ -71,7 +51,7 @@ fun QRMasterTemplate(
 					model = model,
 					decoration = type ?: QRDecorationOption.QRDecorationOptionColorLayer(),
 					graphicsLayer = graphicsLayer,
-					modifier = Modifier.fillMaxSize()
+					modifier = Modifier.matchParentSize()
 				)
 			}
 		}

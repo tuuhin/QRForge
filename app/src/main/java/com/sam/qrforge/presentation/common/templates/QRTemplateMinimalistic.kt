@@ -26,9 +26,9 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 private fun QRTemplateMinimalistic(
 	model: GeneratedQRUIModel,
 	modifier: Modifier = Modifier,
-	roundness: Float = 0f,
-	bitsSizeMultiplier: Float = .5f,
-	contentMargin: Dp = 0.dp,
+	roundness: () -> Float = { 0f },
+	bitsSizeMultiplier: () -> Float = { .5f },
+	contentMargin: () -> Dp = { 0.dp },
 	isDiamond: Boolean = false,
 	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
 	backgroundColor: Color? = null,
@@ -51,10 +51,11 @@ private fun QRTemplateMinimalistic(
 				val blocks = model.dataBitsOffset(blockSize)
 
 				onDrawBehind {
-					val limitRoundness = roundness.coerceIn(0f..1f)
-					val bitsMultiplier = bitsSizeMultiplier.coerceIn(.2f..1.5f)
-					val limitMarginWidth = contentMargin.coerceIn(0.dp, 20.dp).toPx()
+					val limitRoundness = roundness().coerceIn(0f..1f)
+					val bitsMultiplier = bitsSizeMultiplier().coerceIn(.2f..1.5f)
+					val limitMarginWidth = contentMargin().coerceIn(0.dp, 20.dp).toPx()
 					val scaleFactor = 1 - (2 * limitMarginWidth / size.width)
+
 					// draw background
 					layer.record {
 						if (backgroundColor != null) drawRect(color = backgroundColor)
@@ -95,13 +96,13 @@ fun QRTemplateMinimalistic(
 ) {
 	QRTemplateMinimalistic(
 		model = model,
-		roundness = decoration.roundness,
-		bitsSizeMultiplier = decoration.bitsSizeMultiplier,
+		roundness = { decoration.roundness },
+		bitsSizeMultiplier = { decoration.bitsSizeMultiplier },
+		contentMargin = { decoration.contentMargin },
 		isDiamond = decoration.isDiamond,
-		contentMargin = decoration.contentMargin,
 		bitsColor = decoration.bitsColor ?: MaterialTheme.colorScheme.onBackground,
 		finderColor = decoration.findersColor ?: MaterialTheme.colorScheme.onBackground,
-		backgroundColor = if (decoration.showBackground) MaterialTheme.colorScheme.background else null,
+		backgroundColor = decoration.backGroundColor,
 		graphicsLayer = graphicsLayer,
 		modifier = modifier,
 	)

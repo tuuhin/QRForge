@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,35 +57,46 @@ fun QREditBlockSelectColorLayer(
 	titleColor: Color = MaterialTheme.colorScheme.onSurface,
 	bodyStyle: TextStyle = MaterialTheme.typography.labelMedium,
 	bodyColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+	shape: Shape = MaterialTheme.shapes.large,
+	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+	contentPadding: PaddingValues = PaddingValues(12.dp),
 ) {
 
 	val colorLayers = remember { QRColorLayer.DEFAULT_OPTIONS }
 
-	Column(
-		verticalArrangement = Arrangement.spacedBy(2.dp),
-		modifier = modifier,
+	Surface(
+		shape = shape,
+		color = containerColor,
+		modifier = modifier
 	) {
-		Text(
-			text = stringResource(R.string.qr_edit_property_layered_color_selector),
-			style = titleStyle,
-			color = titleColor,
-		)
-		Text(
-			text = stringResource(R.string.qr_edit_property_layered_color_selector_text),
-			style = bodyStyle,
-			color = bodyColor,
-		)
-		Spacer(modifier = Modifier.height(8.dp))
-		Row(
-			modifier = Modifier.fillMaxWidth(),
-			horizontalArrangement = Arrangement.spacedBy(8.dp)
+		Column(
+			verticalArrangement = Arrangement.spacedBy(2.dp),
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(contentPadding),
 		) {
-			colorLayers.forEach { layer ->
-				CanvasColorLayered(
-					layer = layer,
-					onClick = { onSelectLayer(layer) },
-					isSelected = selected.name == layer.name,
-				)
+			Text(
+				text = stringResource(R.string.qr_edit_property_layered_color_selector),
+				style = titleStyle,
+				color = titleColor,
+			)
+			Text(
+				text = stringResource(R.string.qr_edit_property_layered_color_selector_text),
+				style = bodyStyle,
+				color = bodyColor,
+			)
+			Spacer(modifier = Modifier.height(8.dp))
+			Row(
+				modifier = Modifier.fillMaxWidth(),
+				horizontalArrangement = Arrangement.spacedBy(8.dp)
+			) {
+				colorLayers.forEach { layer ->
+					CanvasColorLayered(
+						layer = layer,
+						onClick = { onSelectLayer(layer) },
+						isSelected = selected.name == layer.name,
+					)
+				}
 			}
 		}
 	}

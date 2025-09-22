@@ -26,9 +26,9 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 private fun QRTemplateBasic(
 	model: GeneratedQRUIModel,
 	modifier: Modifier = Modifier,
-	roundness: Float = 0f,
-	bitsSizeMultiplier: Float = 1f,
-	contentMargin: Dp = 0.dp,
+	roundness: () -> Float = { 0f },
+	bitsSizeMultiplier: () -> Float = { 1f },
+	contentMargin: () -> Dp = { 0.dp },
 	showFrame: Boolean = false,
 	isDiamond: Boolean = false,
 	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
@@ -52,9 +52,9 @@ private fun QRTemplateBasic(
 				val blocks = model.dataBitsOffset(blockSize)
 
 				onDrawBehind {
-					val limitRoundness = roundness.coerceIn(0f..1f)
-					val bitsMultiplier = bitsSizeMultiplier.coerceIn(.2f..1.5f)
-					val limitMarginWidth = contentMargin.coerceIn(0.dp, 20.dp).toPx()
+					val limitRoundness = roundness().coerceIn(0f..1f)
+					val bitsMultiplier = bitsSizeMultiplier().coerceIn(.2f..1.5f)
+					val limitMarginWidth = contentMargin().coerceIn(0.dp, 20.dp).toPx()
 
 
 					layer.record {    // draw background
@@ -102,10 +102,10 @@ fun QRTemplateBasic(
 ) {
 	QRTemplateBasic(
 		model = model,
-		roundness = decoration.roundness,
-		bitsSizeMultiplier = decoration.bitsSizeMultiplier,
+		roundness = { decoration.roundness },
+		bitsSizeMultiplier = { decoration.bitsSizeMultiplier },
+		contentMargin = { decoration.contentMargin },
 		isDiamond = decoration.isDiamond,
-		contentMargin = decoration.contentMargin,
 		showFrame = decoration.showFrame,
 		finderColor = decoration.findersColor ?: MaterialTheme.colorScheme.onBackground,
 		bitsColor = decoration.bitsColor ?: MaterialTheme.colorScheme.onBackground,

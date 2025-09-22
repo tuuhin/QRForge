@@ -11,6 +11,10 @@ sealed interface ExportQRScreenEvents {
 	data class OnQRTemplateChange(val template: QRTemplateOption) : ExportQRScreenEvents
 	data class OnExportDimensionChange(val dimen: ExportDimensions) : ExportQRScreenEvents
 	data class OnExportMimeTypeChange(val mimeType: ImageMimeTypes) : ExportQRScreenEvents
-	data class OnExportBitmap(val bitmap: ImageBitmap) : ExportQRScreenEvents
+
+	data class OnVerifyBitmap(val bitmap: ImageBitmap) : ExportQRScreenEvents
+	data object OnResetVerify : ExportQRScreenEvents
+
+	data object OnExportBitmap : ExportQRScreenEvents
 	data object OnCancelExport : ExportQRScreenEvents
 }

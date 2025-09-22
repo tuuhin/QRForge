@@ -1,13 +1,21 @@
 package com.sam.qrforge.presentation.feature_export
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -16,6 +24,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
@@ -25,33 +34,44 @@ import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
+import com.sam.qrforge.presentation.feature_export.composable.ExportFormatSelectorDialog
 import com.sam.qrforge.presentation.feature_export.composable.ExportQRScreenContent
 import com.sam.qrforge.presentation.feature_export.composable.ExportRunningBackHandler
 import com.sam.qrforge.presentation.feature_export.composable.ExportScreenTopAppBar
 import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenEvents
 import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenState
+import com.sam.qrforge.presentation.feature_export.state.VerificationState
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExportQRScreen(
+	state: ExportQRScreenState,
 	decoration: QRDecorationOption,
 	onEvent: (ExportQRScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
-	state: ExportQRScreenState = ExportQRScreenState(),
 	generatedQR: GeneratedQRUIModel? = null,
 	navigation: @Composable () -> Unit = {}
 ) {
 	val snackBarHostState = LocalSnackBarState.current
 
-	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 	val graphicsLayer = rememberGraphicsLayer()
 	val scope = rememberCoroutineScope()
 
 	ExportRunningBackHandler(
-		isExportRunning = state.isExporting,
+		isExportRunning = state.verificationState == VerificationState.VERIFYING,
 		onCancelExport = { onEvent(ExportQRScreenEvents.OnCancelExport) },
+	)
+
+	ExportFormatSelectorDialog(
+		showDialog = state.verificationState == VerificationState.VERIFIED,
+		onDismiss = { onEvent(ExportQRScreenEvents.OnResetVerify) },
+		onConfirm = { onEvent(ExportQRScreenEvents.OnExportBitmap) },
+		selectedExportType = state.selectedMimeType,
+		isExportRunning = !state.canExport,
+		onExportTypeChange = { onEvent(ExportQRScreenEvents.OnExportMimeTypeChange(it)) }
 	)
 
 	Scaffold(
@@ -60,10 +80,10 @@ fun ExportQRScreen(
 				onBeginExport = {
 					scope.launch {
 						val bitmap = graphicsLayer.toImageBitmap()
-						onEvent(ExportQRScreenEvents.OnExportBitmap(bitmap))
+						onEvent(ExportQRScreenEvents.OnVerifyBitmap(bitmap))
 					}
 				},
-				isExporting = state.isExporting,
+				enabled = state.canVerify,
 				navigation = navigation,
 				scrollBehavior = scrollBehavior
 			)
@@ -86,18 +106,28 @@ fun ExportQRScreen(
 			modifier = Modifier.padding(scPadding)
 		) { isReady ->
 			if (isReady && generatedQR != null) {
-				ExportQRScreenContent(
-					generatedQR = generatedQR,
-					showExportProgress = state.isExporting,
-					dimensions = state.exportDimensions,
-					showFaultyQRWarning = state.showTooMuchEdit,
-					exportMimeType = state.selectedMimeType,
-					onEvent = onEvent,
-					graphicsLayer = { graphicsLayer },
-					contentPadding = PaddingValues(dimensionResource(R.dimen.sc_padding)),
-					decoration = decoration,
-					modifier = Modifier.fillMaxSize()
-				)
+				Column(modifier = Modifier.fillMaxSize()) {
+					AnimatedVisibility(
+						visible = state.verificationState == VerificationState.VERIFYING,
+						enter = slideInHorizontally() + fadeIn(),
+						exit = slideOutHorizontally() + fadeOut(),
+					) {
+						LinearProgressIndicator(
+							strokeCap = StrokeCap.Round,
+							modifier = Modifier.fillMaxWidth()
+						)
+					}
+					ExportQRScreenContent(
+						generatedQR = generatedQR,
+						dimensions = state.exportDimensions,
+						showFaultyQRWarning = state.verificationState == VerificationState.FAILED,
+						onEvent = onEvent,
+						graphicsLayer = { graphicsLayer },
+						contentPadding = PaddingValues(all = dimensionResource(R.dimen.sc_padding)),
+						decoration = decoration,
+						modifier = Modifier.weight(1f)
+					)
+				}
 			}
 		}
 	}
@@ -108,6 +138,7 @@ fun ExportQRScreen(
 @Composable
 private fun ExportQRScreenPreview() = QRForgeTheme {
 	ExportQRScreen(
+		state = ExportQRScreenState(),
 		decoration = QRDecorationOption.QRDecorationOptionBasic(),
 		onEvent = {},
 		generatedQR = PreviewFakes.FAKE_GENERATED_UI_MODEL_SMALL,

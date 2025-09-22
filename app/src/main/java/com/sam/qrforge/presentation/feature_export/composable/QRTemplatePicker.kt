@@ -22,12 +22,10 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRTemplateOption
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
@@ -38,12 +36,12 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @Composable
 fun QRTemplatePicker(
-	model: GeneratedQRUIModel,
 	onTemplateChange: (QRTemplateOption) -> Unit,
 	modifier: Modifier = Modifier,
 	selectedTemplate: QRTemplateOption = QRTemplateOption.BASIC,
+	placeHolderModel: GeneratedQRUIModel = PreviewFakes.FAKE_GENERATED_UI_MODEL_SMALL,
 	shape: Shape = MaterialTheme.shapes.large,
-	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
 	contentPadding: PaddingValues = PaddingValues(16.dp),
 ) {
 	Surface(
@@ -51,30 +49,21 @@ fun QRTemplatePicker(
 		color = containerColor,
 		modifier = modifier,
 	) {
-		Column(
-			modifier = Modifier.padding(contentPadding),
+		LazyRow(
+			horizontalArrangement = Arrangement.spacedBy(10.dp),
+			contentPadding = contentPadding,
+			modifier = Modifier.fillMaxWidth(),
 		) {
-			Text(
-				text = stringResource(R.string.select_template_title),
-				style = MaterialTheme.typography.titleMedium,
-				color = MaterialTheme.colorScheme.secondary,
-			)
-			LazyRow(
-				horizontalArrangement = Arrangement.spacedBy(10.dp),
-				contentPadding = PaddingValues(top = 8.dp),
-				modifier = Modifier.fillMaxWidth(),
-			) {
-				itemsIndexed(
-					items = QRTemplateOption.entries,
-					key = { _, item -> item.name },
-				) { _, template ->
-					QRTemplateOption(
-						renderModel = model,
-						onTemplateChange = { onTemplateChange(template) },
-						template = template,
-						isSelected = selectedTemplate == template
-					)
-				}
+			itemsIndexed(
+				items = QRTemplateOption.entries,
+				key = { _, item -> item.name },
+			) { _, template ->
+				QRTemplateOption(
+					renderModel = placeHolderModel,
+					onTemplateChange = { onTemplateChange(template) },
+					template = template,
+					isSelected = selectedTemplate == template
+				)
 			}
 		}
 	}
@@ -156,7 +145,7 @@ private fun QRTemplateOption(
 @Composable
 private fun QRTemplatePickerPreview() = QRForgeTheme {
 	QRTemplatePicker(
-		model = PreviewFakes.FAKE_GENERATED_UI_MODEL_SMALL,
+		placeHolderModel = PreviewFakes.FAKE_GENERATED_UI_MODEL_SMALL,
 		onTemplateChange = {},
 		modifier = Modifier.fillMaxWidth()
 	)

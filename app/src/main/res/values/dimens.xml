@@ -2,6 +2,7 @@
 <resources>
   <dimen name="sc_padding">12dp</dimen>
   <dimen name="sc_padding_secondary">6dp</dimen>
+  <dimen name="qr_edit_option_internal_padding">12dp</dimen>
   <dimen name="min_qr_size">64dp</dimen>
   <dimen name="card_internal_padding">8dp</dimen>
   <dimen name="bottom_bar_button_min_size">300dp</dimen>

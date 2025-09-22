@@ -31,7 +31,7 @@ fun ExportDimensionPicker(
 	onDimensionChange: (ExportDimensions) -> Unit,
 	modifier: Modifier = Modifier,
 	selected: ExportDimensions = ExportDimensions.Medium,
-	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
 	shape: Shape = MaterialTheme.shapes.large,
 	contentPadding: PaddingValues = PaddingValues(16.dp),
 ) {
@@ -42,7 +42,7 @@ fun ExportDimensionPicker(
 	) {
 		Column(
 			modifier = Modifier.padding(contentPadding),
-			verticalArrangement = Arrangement.spacedBy(8.dp)
+			verticalArrangement = Arrangement.spacedBy(4.dp)
 		) {
 			Row(
 				modifier = Modifier.fillMaxWidth(),
@@ -52,6 +52,7 @@ fun ExportDimensionPicker(
 				Text(
 					text = stringResource(R.string.dimension_option_title),
 					style = MaterialTheme.typography.titleMedium,
+					fontWeight = FontWeight.SemiBold,
 					color = MaterialTheme.colorScheme.secondary
 				)
 				Surface(
@@ -63,7 +64,7 @@ fun ExportDimensionPicker(
 						text = "${selected.sizeInPx} x ${selected.sizeInPx}",
 						style = MaterialTheme.typography.labelMedium,
 						fontWeight = FontWeight.Bold,
-						modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp),
+						modifier = Modifier.padding(vertical = 4.dp, horizontal = 10.dp),
 					)
 				}
 			}

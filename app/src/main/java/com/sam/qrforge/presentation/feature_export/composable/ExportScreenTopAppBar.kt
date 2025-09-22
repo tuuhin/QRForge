@@ -33,7 +33,7 @@ import com.sam.qrforge.data.utils.hasWriteStoragePermission
 fun ExportScreenTopAppBar(
 	onBeginExport: () -> Unit,
 	modifier: Modifier = Modifier,
-	isExporting: Boolean = false,
+	enabled: Boolean = false,
 	navigation: @Composable () -> Unit = {},
 	scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
@@ -68,9 +68,9 @@ fun ExportScreenTopAppBar(
 					else onBeginExport()
 				},
 				shape = MaterialTheme.shapes.extraLarge,
-				enabled = !isExporting,
+				enabled = enabled,
 			) {
-				Text(text = stringResource(R.string.action_export))
+				Text(text = stringResource(R.string.action_verify))
 			}
 			Spacer(modifier = Modifier.width(2.dp))
 		},

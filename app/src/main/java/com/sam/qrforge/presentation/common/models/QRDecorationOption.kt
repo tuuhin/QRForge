@@ -5,7 +5,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-@Immutable
 sealed class QRDecorationOption(val templateType: QRTemplateOption) {
 
 	abstract val roundness: Float
@@ -26,8 +25,6 @@ sealed class QRDecorationOption(val templateType: QRTemplateOption) {
 		override val bitsColor: Color? = null,
 		override val findersColor: Color? = null,
 		val showFrame: Boolean = false,
-		val alignmentColor: Color? = null,
-		val timingColor: Color? = null,
 		val frameColor: Color? = null,
 	) : QRDecorationOption(templateType = QRTemplateOption.BASIC)
 
@@ -36,12 +33,16 @@ sealed class QRDecorationOption(val templateType: QRTemplateOption) {
 		override val roundness: Float = 0f,
 		override val bitsSizeMultiplier: Float = 1f,
 		override val contentMargin: Dp = 0.dp,
-		override val backGroundColor: Color? = null,
 		override val isDiamond: Boolean = false,
 		override val bitsColor: Color? = null,
 		override val findersColor: Color? = null,
+		val background: Color? = null,
 		val showBackground: Boolean = false,
-	) : QRDecorationOption(templateType = QRTemplateOption.MINIMALISTIC)
+	) : QRDecorationOption(templateType = QRTemplateOption.MINIMALISTIC) {
+
+		override val backGroundColor: Color?
+			get() = if (showBackground) background else null
+	}
 
 	@Immutable
 	data class QRDecorationOptionColorLayer(
@@ -49,18 +50,13 @@ sealed class QRDecorationOption(val templateType: QRTemplateOption) {
 		override val bitsSizeMultiplier: Float = 1f,
 		override val contentMargin: Dp = 0.dp,
 		override val backGroundColor: Color? = null,
-		val coloredLayers: QRColorLayer = QRColorLayer.PowerRangers,
+		val coloredLayers: () -> QRColorLayer = { QRColorLayer.PowerRangers },
 	) : QRDecorationOption(templateType = QRTemplateOption.COLOR_LAYERED) {
 
-		override val bitsColor: Color?
-			get() = null
-		override val findersColor: Color?
-			get() = null
-
-		override val isDiamond: Boolean
-			get() = false
+		override val bitsColor: Color? get() = null
+		override val findersColor: Color? get() = null
+		override val isDiamond: Boolean get() = false
 	}
-
 
 	val canHaveBackgroundOption: Boolean
 		get() = when (this) {
@@ -73,7 +69,7 @@ sealed class QRDecorationOption(val templateType: QRTemplateOption) {
 		return when (this) {
 			is QRDecorationOptionBasic -> copy(backGroundColor = color)
 			is QRDecorationOptionColorLayer -> copy(backGroundColor = color)
-			is QRDecorationOptionMinimal -> copy(backGroundColor = if (showBackground) color else null)
+			is QRDecorationOptionMinimal -> copy(background = if (showBackground) color else null)
 		}
 	}
 
@@ -138,7 +134,7 @@ sealed class QRDecorationOption(val templateType: QRTemplateOption) {
 				roundness = roundness,
 				contentMargin = contentMargin,
 				bitsSizeMultiplier = bitsSizeMultiplier,
-				backGroundColor = backGroundColor,
+				background = backGroundColor,
 				isDiamond = isDiamond,
 				findersColor = findersColor,
 				bitsColor = bitsColor,
