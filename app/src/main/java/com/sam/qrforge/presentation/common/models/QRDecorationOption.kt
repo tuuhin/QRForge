@@ -50,7 +50,7 @@ sealed class QRDecorationOption(val templateType: QRTemplateOption) {
 		override val bitsSizeMultiplier: Float = 1f,
 		override val contentMargin: Dp = 0.dp,
 		override val backGroundColor: Color? = null,
-		val coloredLayers: () -> QRColorLayer = { QRColorLayer.PowerRangers },
+		val coloredLayers: QRColorLayer = QRColorLayer.PowerRangers,
 	) : QRDecorationOption(templateType = QRTemplateOption.COLOR_LAYERED) {
 
 		override val bitsColor: Color? get() = null

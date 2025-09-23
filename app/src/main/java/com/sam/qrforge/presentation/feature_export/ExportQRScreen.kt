@@ -34,7 +34,7 @@ import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
-import com.sam.qrforge.presentation.feature_export.composable.ExportFormatSelectorDialog
+import com.sam.qrforge.presentation.feature_export.composable.ExportQRBottomSheet
 import com.sam.qrforge.presentation.feature_export.composable.ExportQRScreenContent
 import com.sam.qrforge.presentation.feature_export.composable.ExportRunningBackHandler
 import com.sam.qrforge.presentation.feature_export.composable.ExportScreenTopAppBar
@@ -56,7 +56,7 @@ fun ExportQRScreen(
 ) {
 	val snackBarHostState = LocalSnackBarState.current
 
-	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+	val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 	val graphicsLayer = rememberGraphicsLayer()
 	val scope = rememberCoroutineScope()
 
@@ -65,13 +65,9 @@ fun ExportQRScreen(
 		onCancelExport = { onEvent(ExportQRScreenEvents.OnCancelExport) },
 	)
 
-	ExportFormatSelectorDialog(
-		showDialog = state.verificationState == VerificationState.VERIFIED,
-		onDismiss = { onEvent(ExportQRScreenEvents.OnResetVerify) },
-		onConfirm = { onEvent(ExportQRScreenEvents.OnExportBitmap) },
-		selectedExportType = state.selectedMimeType,
-		isExportRunning = !state.canExport,
-		onExportTypeChange = { onEvent(ExportQRScreenEvents.OnExportMimeTypeChange(it)) }
+	ExportQRBottomSheet(
+		state = state,
+		onEvent = onEvent,
 	)
 
 	Scaffold(
@@ -119,7 +115,6 @@ fun ExportQRScreen(
 					}
 					ExportQRScreenContent(
 						generatedQR = generatedQR,
-						dimensions = state.exportDimensions,
 						showFaultyQRWarning = state.verificationState == VerificationState.FAILED,
 						onEvent = onEvent,
 						graphicsLayer = { graphicsLayer },

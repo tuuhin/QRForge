@@ -8,7 +8,6 @@ import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
-import com.sam.qrforge.presentation.common.models.QRTemplateOption
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import com.sam.qrforge.presentation.common.templates.QRTemplateLayered
 import com.sam.qrforge.presentation.common.templates.QRTemplateMinimalistic
@@ -23,37 +22,27 @@ fun QRMasterTemplate(
 	Box(
 		modifier = modifier.defaultMinSize(minWidth = 120.dp, 120.dp),
 	) {
-		when (decoration.templateType) {
-			QRTemplateOption.BASIC -> {
-				val decor = decoration as? QRDecorationOption.QRDecorationOptionBasic
-				QRTemplateBasic(
-					model = model,
-					decoration = decor ?: QRDecorationOption.QRDecorationOptionBasic(),
-					graphicsLayer = graphicsLayer,
-					modifier = Modifier.matchParentSize()
-				)
-			}
+		when (decoration) {
+			is QRDecorationOption.QRDecorationOptionBasic -> QRTemplateBasic(
+				model = model,
+				decoration = decoration,
+				graphicsLayer = graphicsLayer,
+				modifier = Modifier.matchParentSize()
+			)
 
-			QRTemplateOption.MINIMALISTIC -> {
-				val type = decoration as? QRDecorationOption.QRDecorationOptionMinimal
+			is QRDecorationOption.QRDecorationOptionMinimal -> QRTemplateMinimalistic(
+				model = model,
+				decoration = decoration,
+				graphicsLayer = graphicsLayer,
+				modifier = Modifier.matchParentSize(),
+			)
 
-				QRTemplateMinimalistic(
-					model = model,
-					decoration = type ?: QRDecorationOption.QRDecorationOptionMinimal(),
-					graphicsLayer = graphicsLayer,
-					modifier = Modifier.matchParentSize(),
-				)
-			}
-
-			QRTemplateOption.COLOR_LAYERED -> {
-				val type = decoration as? QRDecorationOption.QRDecorationOptionColorLayer
-				QRTemplateLayered(
-					model = model,
-					decoration = type ?: QRDecorationOption.QRDecorationOptionColorLayer(),
-					graphicsLayer = graphicsLayer,
-					modifier = Modifier.matchParentSize()
-				)
-			}
+			is QRDecorationOption.QRDecorationOptionColorLayer -> QRTemplateLayered(
+				model = model,
+				decoration = decoration,
+				graphicsLayer = graphicsLayer,
+				modifier = Modifier.matchParentSize()
+			)
 		}
 	}
 }

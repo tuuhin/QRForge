@@ -200,7 +200,7 @@ private fun QREditBlockContentMargin(
 private fun QREditBlockBitsSize(
 	onBitsMultiplierChange: (Float) -> Unit,
 	modifier: Modifier = Modifier,
-	range: ClosedRange<Float> = .5f..1.5f,
+	range: OpenEndRange<Float> = .5f..<1.5f,
 	initialBitSize: Float = 1f,
 	sliderColors: SliderColors = SliderDefaults.colors(),
 	titleStyle: TextStyle = MaterialTheme.typography.bodyMedium,
@@ -215,7 +215,7 @@ private fun QREditBlockBitsSize(
 			value = (initialBitSize * 10f).roundToInt() / 10f,
 			onValueChangeFinished = {},
 			steps = 10,
-			valueRange = range.start..range.endInclusive,
+			valueRange = range.start..range.endExclusive,
 		)
 	}
 

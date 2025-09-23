@@ -15,6 +15,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRColorLayer
@@ -30,7 +31,7 @@ private fun QRTemplateLayered(
 	roundness: () -> Float = { 0f },
 	bitsSizeMultiplier: () -> Float = { 1f },
 	isDiamond: Boolean = false,
-	coloredLayers: () -> QRColorLayer = { QRColorLayer.Blocks },
+	coloredLayers: QRColorLayer = QRColorLayer.Blocks,
 	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
 	backgroundColor: Color = MaterialTheme.colorScheme.background,
 	fallbackContentColor: Color = MaterialTheme.colorScheme.onBackground,
@@ -54,8 +55,8 @@ private fun QRTemplateLayered(
 
 				onDrawBehind {
 
-					val layers = coloredLayers().copyEnsureOneExists(fallbackContentColor)
-						.filterValidOverlayColor()
+					val layers = coloredLayers.copyEnsureOneExists(fallbackContentColor)
+						.filterValidOverlayColor
 
 					val limitMarginWidth = contentMargin().coerceIn(0.dp, 20.dp).toPx()
 					val limitedRoundness = roundness().coerceIn(0f..1f)
@@ -67,7 +68,7 @@ private fun QRTemplateLayered(
 						val scaleFactor = 1 - (2 * limitMarginWidth / size.width)
 
 						// draw blocks
-						for (layer in layers) {
+						layers.fastForEach { layer ->
 							drawDataBlocks(
 								blocks = blocks,
 								blockSize,
@@ -125,7 +126,7 @@ private fun QRTemplateLayeredPreview() = QRForgeTheme {
 		model = PreviewFakes.FAKE_GENERATED_UI_MODEL,
 		decoration = QRDecorationOption.QRDecorationOptionColorLayer(
 			backGroundColor = MaterialTheme.colorScheme.background,
-			coloredLayers = { QRColorLayer.PowerRangers },
+			coloredLayers = QRColorLayer.PowerRangers,
 		)
 	)
 }

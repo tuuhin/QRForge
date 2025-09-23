@@ -1,9 +1,11 @@
 package com.sam.qrforge.presentation.feature_export.composable.edit_blocks
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseInBounce
+import androidx.compose.animation.core.EaseOutBounce
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -16,8 +18,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,10 +39,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.models.QRColorLayer
@@ -107,12 +109,11 @@ private fun CanvasColorLayered(
 	layer: QRColorLayer,
 	onClick: () -> Unit,
 	modifier: Modifier = Modifier,
-	selectedBorder: BorderStroke = BorderStroke(
-		2.5.dp,
-		MaterialTheme.colorScheme.onPrimaryContainer
-	),
+	selectedBorderWidth: Dp = 3.dp,
 	shape: Shape = MaterialTheme.shapes.medium,
 	isSelected: Boolean = false,
+	selectedColor: Color = MaterialTheme.colorScheme.primaryContainer,
+	selectedBorderColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
 	interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
 	Box(
@@ -159,15 +160,15 @@ private fun CanvasColorLayered(
 					// border
 					drawOutline(
 						outline = shape.createOutline(size, layoutDirection, this),
-						brush = selectedBorder.brush,
-						style = Stroke(width = selectedBorder.width.toPx()),
+						color = selectedBorderColor,
+						style = Stroke(width = selectedBorderWidth.toPx()),
 					)
 					//draw outline
 					if (isSelected) {
 						drawOutline(
 							outline = shape.createOutline(size, layoutDirection, this),
-							brush = selectedBorder.brush,
-							alpha = .3f,
+							color = selectedColor,
+							alpha = .6f,
 						)
 					}
 				}
@@ -176,11 +177,11 @@ private fun CanvasColorLayered(
 	) {
 		AnimatedVisibility(
 			visible = isSelected,
-			enter = scaleIn(),
-			exit = scaleOut()
+			enter = scaleIn(animationSpec = tween(durationMillis = 400, easing = EaseInBounce)),
+			exit = scaleOut(animationSpec = tween(durationMillis = 400, easing = EaseOutBounce))
 		) {
 			Icon(
-				imageVector = Icons.Default.Check,
+				painter = painterResource(R.drawable.ic_checked),
 				contentDescription = null,
 				modifier = Modifier.size(28.dp),
 			)

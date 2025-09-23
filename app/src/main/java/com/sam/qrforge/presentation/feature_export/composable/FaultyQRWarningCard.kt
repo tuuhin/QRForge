@@ -1,5 +1,10 @@
 package com.sam.qrforge.presentation.feature_export.composable
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,35 +27,42 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @Composable
 fun FaultyQRWarningCard(
+	showFaultyQRWarning: Boolean,
 	modifier: Modifier = Modifier,
 	containerColor: Color = MaterialTheme.colorScheme.tertiary,
 	contentColor: Color = MaterialTheme.colorScheme.onTertiary,
 	shape: Shape = MaterialTheme.shapes.large,
 ) {
-	Surface(
-		color = containerColor,
-		contentColor = contentColor,
-		shape = shape,
-		modifier = modifier
+	AnimatedVisibility(
+		visible = showFaultyQRWarning,
+		enter = expandVertically() + fadeIn(),
+		exit = shrinkVertically() + fadeOut()
 	) {
-		Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(horizontal = 10.dp, vertical = 8.dp),
-			horizontalArrangement = Arrangement.spacedBy(12.dp),
-			verticalAlignment = Alignment.CenterVertically
+		Surface(
+			color = containerColor,
+			contentColor = contentColor,
+			shape = shape,
+			modifier = modifier
 		) {
-			Icon(
-				painter = painterResource(R.drawable.ic_warning_filled),
-				contentDescription = null,
-				tint = MaterialTheme.colorScheme.onTertiary,
-				modifier = Modifier.padding(8.dp)
-			)
-			Text(
-				text = stringResource(R.string.faulty_qr_warning_text),
-				style = MaterialTheme.typography.labelLarge,
-				modifier = Modifier.weight(1f)
-			)
+			Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = 10.dp, vertical = 8.dp),
+				horizontalArrangement = Arrangement.spacedBy(12.dp),
+				verticalAlignment = Alignment.CenterVertically
+			) {
+				Icon(
+					painter = painterResource(R.drawable.ic_warning_filled),
+					contentDescription = null,
+					tint = MaterialTheme.colorScheme.onTertiary,
+					modifier = Modifier.padding(8.dp)
+				)
+				Text(
+					text = stringResource(R.string.faulty_qr_warning_text),
+					style = MaterialTheme.typography.labelLarge,
+					modifier = Modifier.weight(1f)
+				)
+			}
 		}
 	}
 }
@@ -58,5 +70,5 @@ fun FaultyQRWarningCard(
 @PreviewLightDark
 @Composable
 private fun FaultyQRWarningCardPreview() = QRForgeTheme {
-	FaultyQRWarningCard()
+	FaultyQRWarningCard(showFaultyQRWarning = true)
 }

@@ -11,10 +11,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,7 +58,7 @@ fun ExportScreenTopAppBar(
 		onDismissDialog = { showPermissionDialog = false },
 	)
 
-	MediumTopAppBar(
+	TopAppBar(
 		title = { Text(text = stringResource(R.string.qr_editor_title)) },
 		actions = {
 			OutlinedButton(

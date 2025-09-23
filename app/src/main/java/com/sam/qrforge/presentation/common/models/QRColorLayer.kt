@@ -4,6 +4,8 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Stable
 sealed class QRColorLayer(val name: String) {
@@ -12,10 +14,10 @@ sealed class QRColorLayer(val name: String) {
 
 	fun copyEnsureOneExists(backOff: Color) =
 		if (layers.isNotEmpty()) this
-		else Custom(layers = listOf(QROverlayColor(backOff, Offset.Zero)))
+		else Custom(layers = persistentListOf(QROverlayColor(backOff, Offset.Zero)))
 
-	fun filterValidOverlayColor() =
-		layers.filter { (_, offset) -> offset.x in -1f..1f && offset.y in -1f..1f }
+	val filterValidOverlayColor: List<QROverlayColor>
+		get() = layers.filter { (_, offset) -> offset.x in -1f..1f && offset.y in -1f..1f }
 
 	data object PowerRangers : QRColorLayer(name = "POWER RANGERS") {
 		override val layers: List<QROverlayColor>
@@ -61,7 +63,7 @@ sealed class QRColorLayer(val name: String) {
 
 
 	@Stable
-	data class Custom(override val layers: List<QROverlayColor>) : QRColorLayer("Custom")
+	data class Custom(override val layers: ImmutableList<QROverlayColor>) : QRColorLayer("Custom")
 
 	companion object {
 

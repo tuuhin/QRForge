@@ -14,6 +14,10 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEachIndexed
+
+const val ONE_BY_ROOT_TWO = 0.7071067f
 
 fun DrawScope.drawFindersClassic(
 	finders: List<Offset>,
@@ -28,7 +32,7 @@ fun DrawScope.drawFindersClassic(
 	blendMode: BlendMode = BlendMode.SrcOver,
 ) {
 	scale(scaleFactor) {
-		finders.forEach { offset ->
+		finders.fastForEach { offset ->
 			val baseSize = Size(blockSize, blockSize)
 			val innerRectSize = baseSize.times(3f)
 			val rectSize = baseSize.times(5f)
@@ -82,7 +86,7 @@ fun DrawScope.drawFindersClassic(
 						pivot = pivot
 					)
 					scale(
-						scale = if (isDiamond) .7f else 1f,
+						scale = if (isDiamond) ONE_BY_ROOT_TWO else 1f,
 						pivot = pivot
 					)
 					translate(
@@ -123,7 +127,7 @@ fun DrawScope.drawFindersMinimalistic(
 	blendMode: BlendMode = BlendMode.SrcOver,
 ) {
 	scale(scaleFactor) {
-		finders.forEach { offset ->
+		finders.fastForEach { offset ->
 			val baseSize = Size(blockSize, blockSize)
 			val innerRectSize = baseSize.times(3f)
 			val outerRectSize = baseSize.times(7f)
@@ -174,7 +178,7 @@ fun DrawScope.drawFindersMinimalistic(
 						pivot = pivot
 					)
 					scale(
-						scale = if (isDiamond) .7f else 1f,
+						scale = if (isDiamond) ONE_BY_ROOT_TWO else 1f,
 						pivot = pivot
 					)
 					translate(
@@ -203,7 +207,7 @@ fun DrawScope.drawAlignmentBlocks(
 	blendMode: BlendMode = BlendMode.SrcOver,
 ) {
 	scale(scaleFactor) {
-		alignments.forEach { offset ->
+		alignments.fastForEach { offset ->
 			val innerRectSize = Size(blockSize, blockSize)
 			val rectSize = innerRectSize.times(3f)
 			val outerRectSize = innerRectSize.times(5f)
@@ -256,7 +260,7 @@ fun DrawScope.drawAlignmentBlocks(
 						pivot = pivot
 					)
 					scale(
-						scale = if (isDiamond) .7f else 1f,
+						scale = if (isDiamond) ONE_BY_ROOT_TWO else 1f,
 						pivot = pivot
 					)
 					translate(
@@ -300,7 +304,7 @@ fun DrawScope.drawDataBlocks(
 	val halfBlock = blockSize * .5f
 
 	scale(scaleFactor) {
-		blocks.forEach { offset ->
+		blocks.fastForEach { offset ->
 			withTransform(
 				transformBlock = {
 					val pivot = Offset(
@@ -312,7 +316,7 @@ fun DrawScope.drawDataBlocks(
 						pivot = pivot
 					)
 					scale(
-						scale = if (isDiamond) .7f else 1f,
+						scale = if (isDiamond) ONE_BY_ROOT_TWO else 1f,
 						pivot = pivot
 					)
 					translate(
@@ -349,7 +353,7 @@ fun DrawScope.drawTimingBlocks(
 	blendMode: BlendMode = BlendMode.SrcOver,
 ) {
 	scale(scaleFactor) {
-		blocks.forEachIndexed { idx, offset ->
+		blocks.fastForEachIndexed { idx, offset ->
 			val finalSize = Size(
 				blockSize * multiplier,
 				blockSize * multiplier
@@ -365,7 +369,7 @@ fun DrawScope.drawTimingBlocks(
 						pivot = pivot
 					)
 					scale(
-						scale = if (isDiamond) .7f else 1f,
+						scale = if (isDiamond) ONE_BY_ROOT_TWO else 1f,
 						pivot = pivot
 					)
 					translate(
