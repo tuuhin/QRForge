@@ -113,8 +113,8 @@ class CreateNewQRViewModel(
 		val screenState = _saveQRState.value
 		val contentState = _contentModel.value
 		val createModel = CreateNewQRModel(
-			title = screenState.title,
-			desc = screenState.desc.ifBlank { null },
+			title = screenState.title.trim(),
+			desc = screenState.desc.trim().ifBlank { null },
 			content = contentState.toQRString(),
 			format = contentState.type
 		)

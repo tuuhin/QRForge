@@ -6,14 +6,12 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,9 +33,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.SavedQRModel
+import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
 import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
-import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.common.utils.slideUpToReveal
 import com.sam.qrforge.presentation.feature_home.composables.FilterListBottomSheet
@@ -101,8 +99,6 @@ private fun HomeScreen(
 	onNavigateToItemDetailed: (SavedQRModel) -> Unit = {},
 	onNavigateToScanner: () -> Unit = {},
 ) {
-
-	val snackBarHostState = LocalSnackBarState.current
 	val layoutDirection = LocalLayoutDirection.current
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -110,10 +106,15 @@ private fun HomeScreen(
 	val scope = rememberCoroutineScope()
 	var showBottomSheet by remember { mutableStateOf(false) }
 
+	val hasItems by remember(qrHistory) {
+		derivedStateOf { qrHistory.isNotEmpty() }
+	}
+
 	FilterListBottomSheet(
 		showSheet = showBottomSheet,
 		filterState = filterState,
 		sheetState = sheetState,
+		hasItems = hasItems,
 		onEvent = onEvent,
 		onDismissSheet = { showBottomSheet = false },
 	)
@@ -136,17 +137,7 @@ private fun HomeScreen(
 				modifier = Modifier.slideUpToReveal()
 			)
 		},
-		snackbarHost = {
-			SnackbarHost(snackBarHostState) { data ->
-				Snackbar(
-					snackbarData = data,
-					shape = MaterialTheme.shapes.large,
-					containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-					contentColor = MaterialTheme.colorScheme.onBackground,
-					actionContentColor = MaterialTheme.colorScheme.primary,
-				)
-			}
-		},
+		snackbarHost = { AppCustomSnackBar() },
 		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
 	) { scPadding ->
 		HomeScreenContent(

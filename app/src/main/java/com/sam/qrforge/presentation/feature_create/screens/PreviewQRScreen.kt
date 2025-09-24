@@ -15,8 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -30,8 +28,8 @@ import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.domain.models.qr.QRPlainTextModel
+import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
-import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.feature_create.composables.PreviewQRScreenContent
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
@@ -51,10 +49,7 @@ fun PreviewQRScreen(
 	onNavigateToSave: () -> Unit = {},
 	onNavigateToExport: () -> Unit = {},
 ) {
-
-	val snackBarHostState = LocalSnackBarState.current
 	val layoutDirection = LocalLayoutDirection.current
-
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
 	Scaffold(
@@ -74,17 +69,7 @@ fun PreviewQRScreen(
 				},
 			)
 		},
-		snackbarHost = {
-			SnackbarHost(snackBarHostState) { data ->
-				Snackbar(
-					snackbarData = data,
-					shape = MaterialTheme.shapes.large,
-					containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-					contentColor = MaterialTheme.colorScheme.onBackground,
-					actionContentColor = MaterialTheme.colorScheme.primary,
-				)
-			}
-		},
+		snackbarHost = { AppCustomSnackBar() },
 		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
 	) { scPadding ->
 		PreviewQRScreenContent(

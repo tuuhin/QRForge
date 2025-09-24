@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		// set the splash screen
 		val splash = installSplashScreen()
-		splash.animateOnExit()
+		splash.animateOnExit(splashViewDuration = 300)
 
 		super.onCreate(savedInstanceState)
 

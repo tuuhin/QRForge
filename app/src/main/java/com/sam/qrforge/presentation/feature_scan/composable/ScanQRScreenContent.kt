@@ -1,5 +1,6 @@
 package com.sam.qrforge.presentation.feature_scan.composable
 
+import android.util.Log
 import androidx.camera.core.SurfaceRequest
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -44,8 +46,15 @@ fun ScanQRScreenContent(
 	onEvent: (CameraControllerEvents) -> Unit,
 	modifier: Modifier = Modifier,
 ) {
-	val isActionsEnabled by remember(cameraCaptureState.isCapturing, analyzerState.isAnalysing) {
-		derivedStateOf { !(cameraCaptureState.isCapturing && analyzerState.isAnalysing) }
+	val isCapturingOrAnalyzing by remember(
+		cameraCaptureState.isCapturing,
+		analyzerState.isAnalysing
+	) {
+		derivedStateOf { cameraCaptureState.isCapturing || analyzerState.isAnalysing }
+	}
+
+	SideEffect {
+		Log.d("TAG", "$isCapturingOrAnalyzing")
 	}
 
 	val lifecycleOwner = LocalLifecycleOwner.current
@@ -78,13 +87,13 @@ fun ScanQRScreenContent(
 					Image(
 						bitmap = cameraCaptureState.postCapturePreview.asImageBitmap(),
 						contentDescription = "Capture Preview",
-						modifier = Modifier.fillMaxSize()
+						modifier = Modifier.matchParentSize()
 					)
 				} else {
 					CameraContent(
 						surfaceRequest = cameraControlState.surfaceRequest,
 						focusState = cameraControlState.focusState,
-						isActionsEnabled = isActionsEnabled,
+						enabled = !isCapturingOrAnalyzing,
 						onTapToFocus = { focusOffset ->
 							onEvent(CameraControllerEvents.TapToFocus(focusOffset))
 						},
@@ -99,7 +108,7 @@ fun ScanQRScreenContent(
 		cameraControls = cameraControlState,
 		cameraState = cameraCaptureState,
 		analysisState = analyzerState,
-		controlsEnabled = isActionsEnabled,
+		controlsEnabled = !isCapturingOrAnalyzing,
 		onZoomChange = { onEvent(CameraControllerEvents.OnZoomLevelChange(it)) },
 		onToggleFlash = { onEvent(CameraControllerEvents.ToggleFlash) },
 		onCaptureImage = { onEvent(CameraControllerEvents.CaptureImage) },
@@ -115,7 +124,7 @@ private fun CameraContent(
 	onTapToFocus: (Offset) -> Unit,
 	onRelativeZoom: (Float) -> Unit,
 	modifier: Modifier = Modifier,
-	isActionsEnabled: Boolean = true,
+	enabled: Boolean = true,
 	focusState: CameraFocusState = CameraFocusState.Unspecified,
 ) {
 	val isInspectionMode = LocalInspectionMode.current
@@ -123,8 +132,7 @@ private fun CameraContent(
 	if (isInspectionMode) {
 		// content for preview
 		Box(
-			modifier = modifier
-				.background(MaterialTheme.colorScheme.surfaceContainer),
+			modifier = modifier.background(MaterialTheme.colorScheme.surfaceContainer),
 			contentAlignment = Alignment.Center
 		) {
 			Text(
@@ -145,8 +153,8 @@ private fun CameraContent(
 			AndroidCameraView(
 				surfaceRequest = surfaceRequest,
 				focusState = focusState,
-				isZoomEnabled = isActionsEnabled,
-				isFocusEnabled = isActionsEnabled,
+				isZoomEnabled = enabled,
+				isFocusEnabled = enabled,
 				onRelativeScaleChange = onRelativeZoom,
 				tapToFocus = onTapToFocus,
 				modifier = Modifier.fillMaxSize()

@@ -5,13 +5,19 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseInCirc
 import androidx.compose.animation.core.EaseInExpo
 import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.EaseOutCirc
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -77,6 +83,7 @@ fun CameraWithControls(
 
 	Column(
 		modifier = modifier.windowInsetsPadding(WindowInsets.navigationBars),
+		verticalArrangement = Arrangement.spacedBy(2.dp),
 	) {
 		Box(
 			modifier = Modifier
@@ -145,6 +152,19 @@ fun CameraWithControls(
 			AnimatedContent(
 				targetState = analysisState.isAnalysing,
 				contentAlignment = Alignment.Center,
+				transitionSpec = {
+					fadeIn(
+						initialAlpha = .2f,
+						animationSpec = tween(300, delayMillis = 100, easing = EaseInCirc)
+					) + expandVertically(
+						expandFrom = Alignment.CenterVertically,
+						initialHeight = { height -> height / 4 },
+						animationSpec = tween(300, delayMillis = 100)
+					) togetherWith fadeOut(
+						targetAlpha = .2f,
+						animationSpec = tween(120, easing = EaseOutCirc),
+					)
+				},
 			) { isAnalysing ->
 				if (isAnalysing) ShowAnalysisRunningLabel()
 				else CameraCaptureTypePicker(

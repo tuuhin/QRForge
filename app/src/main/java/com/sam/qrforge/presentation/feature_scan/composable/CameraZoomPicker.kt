@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalSharedTransitionApi::class)
-
 package com.sam.qrforge.presentation.feature_scan.composable
 
 import androidx.compose.animation.AnimatedContent
@@ -49,6 +47,7 @@ import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibility
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.feature_scan.state.CameraZoomState
 import com.sam.qrforge.ui.theme.QRForgeTheme
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 private const val ZOOM_PICKER_TRANSITION_KEY = "zoom-picker-shared-bounds"
@@ -62,6 +61,19 @@ fun CameraZoomPicker(
 	enabled: Boolean = true,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 ) {
+	val isZoomRangeAvailable by remember(zoomState) {
+		derivedStateOf { abs(zoomState.maxZoomRatio - zoomState.minZoomRatio) > 0 }
+	}
+//	// don't show the picker is zoom is not available
+	if (!isZoomRangeAvailable) {
+		ZoomValueButton(
+			zoomLevel = zoomState.zoomRatio,
+			enabled = false,
+			onShowPicker = { },
+			isZoomAvailable = false
+		)
+		return
+	}
 
 	var showPicker by remember { mutableStateOf(false) }
 
@@ -110,6 +122,7 @@ private fun ZoomValueButton(
 	modifier: Modifier = Modifier,
 	onShowPicker: () -> Unit = {},
 	enabled: Boolean = true,
+	isZoomAvailable: Boolean = true,
 ) {
 	val zoomLevelReadable by remember(zoomLevel) {
 		derivedStateOf { (zoomLevel() * 100).roundToInt() / 100f }
@@ -119,7 +132,10 @@ private fun ZoomValueButton(
 		positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
 		tooltip = {
 			PlainTooltip {
-				Text(text = stringResource(R.string.camera_action_control_zoom))
+				Text(
+					text = if (isZoomAvailable) stringResource(R.string.camera_action_control_zoom)
+					else stringResource(R.string.camera_action_control_zoom_absent)
+				)
 			}
 		},
 		state = rememberTooltipState(),
@@ -132,6 +148,8 @@ private fun ZoomValueButton(
 			colors = ButtonDefaults.filledTonalButtonColors(
 				containerColor = MaterialTheme.colorScheme.tertiaryContainer,
 				contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+				disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+				disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
 			),
 			contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
 		) {
@@ -140,7 +158,7 @@ private fun ZoomValueButton(
 					R.string.zoom_formated_2_decimal_place,
 					zoomLevelReadable
 				),
-				style = MaterialTheme.typography.labelLarge
+				style = MaterialTheme.typography.labelLarge,
 			)
 		}
 	}
@@ -229,6 +247,7 @@ private fun ZoomPickerSlider(
 
 @Preview
 @Composable
+@OptIn(ExperimentalSharedTransitionApi::class)
 private fun CameraZoomPickerPreview() = QRForgeTheme {
 	SharedTransitionLayout {
 		CompositionLocalProvider(LocalSharedTransitionScopeProvider provides this) {

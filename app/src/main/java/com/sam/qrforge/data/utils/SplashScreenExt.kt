@@ -4,18 +4,18 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.DecelerateInterpolator
+import android.view.animation.AccelerateInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen
 
 fun SplashScreen.animateOnExit(
-	screenViewDuration: Long = 600L,
+	splashViewDuration: Long = 600L,
 	onAnimationEnd: () -> Unit = {}
 ) {
 	setOnExitAnimationListener { screenView ->
 		// do all the animation is a reverse way
 		val iconInterpolator = AccelerateDecelerateInterpolator()
-		val viewInterpolator = DecelerateInterpolator()
+		val viewInterpolator = AccelerateInterpolator()
 
 		val iconScaleXAnimation = ObjectAnimator
 			.ofFloat(screenView.iconView, View.SCALE_X, 1f, 0.5f)
@@ -32,7 +32,7 @@ fun SplashScreen.animateOnExit(
 			}
 
 		val iconTranslateYAnimation = ObjectAnimator
-			.ofFloat(screenView.iconView, View.TRANSLATION_Y, 0.0f, -10.0f)
+			.ofFloat(screenView.iconView, View.TRANSLATION_Y, 0.0f, -8.0f)
 			.apply {
 				this.interpolator = iconInterpolator
 				this.duration = screenView.iconAnimationDurationMillis
@@ -42,7 +42,7 @@ fun SplashScreen.animateOnExit(
 			.ofFloat(screenView.view, View.ALPHA, 1.0f, .3f)
 			.apply {
 				this.interpolator = viewInterpolator
-				this.duration = screenViewDuration
+				this.duration = splashViewDuration
 			}
 
 		val viewTranslateAnimation = ObjectAnimator.ofFloat(
@@ -52,7 +52,7 @@ fun SplashScreen.animateOnExit(
 			screenView.view.height.toFloat()
 		).apply {
 			this.interpolator = viewInterpolator
-			this.duration = screenViewDuration
+			this.duration = splashViewDuration
 		}
 
 		// animations associated with the splash view

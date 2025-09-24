@@ -4,7 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,15 +42,28 @@ private fun FilterBottomSheetContent(
 	onShowOnlyFavChange: (Boolean) -> Unit,
 	modifier: Modifier = Modifier,
 	showOnlyFav: Boolean = false,
+	hasItems: Boolean = true,
 	selectedOrder: SortOrder = SortOrder.ASC,
 	selectedOption: SortOption = SortOption.CREATED,
 	contentPadding: PaddingValues = PaddingValues(12.dp),
-	titleTextStyle: TextStyle = MaterialTheme.typography.titleSmall,
+	titleTextStyle: TextStyle = MaterialTheme.typography.titleMedium,
 ) {
 	Column(
-		modifier = modifier.padding(contentPadding),
+		modifier = modifier
+			.heightIn(64.dp)
+			.padding(contentPadding),
 		verticalArrangement = Arrangement.spacedBy(4.dp)
 	) {
+		Spacer(modifier = Modifier.height(4.dp))
+		if (!hasItems) {
+			Text(
+				text = stringResource(R.string.filter_options_sheet_no_items),
+				style = MaterialTheme.typography.titleLarge,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
+				modifier = Modifier.align(Alignment.CenterHorizontally)
+			)
+			return
+		}
 		Text(
 			text = stringResource(R.string.filter_options_title_sort_options),
 			style = titleTextStyle
@@ -116,6 +132,7 @@ fun FilterListBottomSheet(
 	onDismissSheet: () -> Unit,
 	onEvent: (HomeScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
+	hasItems: Boolean = true,
 	sheetState: SheetState = rememberModalBottomSheetState(),
 	filterState: FilterQRListState = FilterQRListState(),
 ) {
@@ -130,6 +147,7 @@ fun FilterListBottomSheet(
 			selectedOrder = filterState.sortOrder,
 			selectedOption = filterState.sortOption,
 			showOnlyFav = filterState.showOnlyFav,
+			hasItems = hasItems,
 			onShowOnlyFavChange = {
 				val newState = filterState.copy(showOnlyFav = it)
 				onEvent(HomeScreenEvents.OnListFilterChange(newState))
@@ -159,6 +177,7 @@ private fun FilterBottomSheetContentPreview() = QRForgeTheme {
 			onSortOptionChange = {},
 			onSortOrderChange = {},
 			onShowOnlyFavChange = {},
+			contentPadding = PaddingValues(dimensionResource(R.dimen.bottom_sheet_content_padding))
 		)
 	}
 }

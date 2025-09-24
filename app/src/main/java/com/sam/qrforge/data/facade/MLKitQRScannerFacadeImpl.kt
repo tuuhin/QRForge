@@ -12,6 +12,8 @@ import com.sam.qrforge.domain.facade.QRScannerFacade
 import com.sam.qrforge.domain.facade.exception.FileNotFoundException
 import com.sam.qrforge.domain.facade.exception.NoQRCodeFoundException
 import com.sam.qrforge.domain.models.qr.QRContentModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class MLKitQRScannerFacadeImpl(
@@ -21,7 +23,9 @@ class MLKitQRScannerFacadeImpl(
 
 	private suspend fun decodeQR(image: InputImage): Result<QRContentModel> {
 		return try {
-			val barcodes = scanner.process(image).await()
+			val barcodes = withContext(Dispatchers.Main) {
+				scanner.process(image).await()
+			}
 			val result = barcodes.firstOrNull()?.rawValue?.toQRModel()
 				?: return Result.failure(NoQRCodeFoundException())
 			Result.success(result)
@@ -42,14 +46,16 @@ class MLKitQRScannerFacadeImpl(
 		height: Int,
 		rotate: Int,
 	): Result<QRContentModel> {
-		return try {
-			val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-				?: return Result.failure(Exception("Invalid bytes"))
-			val image = InputImage.fromBitmap(bitmap, rotate)
-			decodeQR(image)
-		} catch (e: Exception) {
-			e.printStackTrace()
-			Result.failure(Exception("Unknown Exception"))
+		return withContext(Dispatchers.IO) {
+			try {
+				val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+					?: return@withContext Result.failure(Exception("Invalid bytes"))
+				val image = InputImage.fromBitmap(bitmap, rotate)
+				decodeQR(image)
+			} catch (e: Exception) {
+				e.printStackTrace()
+				Result.failure(Exception("Unknown Exception"))
+			}
 		}
 	}
 
@@ -75,14 +81,16 @@ class MLKitQRScannerFacadeImpl(
 	}
 
 	override suspend fun decodeFromFile(uri: String): Result<QRContentModel> {
-		return try {
-			val image = InputImage.fromFilePath(context, uri.toUri())
-			decodeQR(image)
-		} catch (_: IOException) {
-			Result.failure(FileNotFoundException())
-		} catch (e: Exception) {
-			e.printStackTrace()
-			Result.failure(e)
+		return withContext(Dispatchers.IO) {
+			try {
+				val image = InputImage.fromFilePath(context, uri.toUri())
+				decodeQR(image)
+			} catch (_: IOException) {
+				Result.failure(FileNotFoundException())
+			} catch (e: Exception) {
+				e.printStackTrace()
+				Result.failure(e)
+			}
 		}
 	}
 }

@@ -15,8 +15,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -32,7 +30,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.sam.qrforge.R
 import com.sam.qrforge.data.utils.hasCameraPermission
-import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
+import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.feature_scan.composable.PermissionPlaceHolder
@@ -57,7 +55,6 @@ fun ScanQRScreen(
 	navigation: @Composable () -> Unit = {},
 ) {
 
-	val snackBarHostState = LocalSnackBarState.current
 	val layoutDirection = LocalLayoutDirection.current
 	val context = LocalContext.current
 
@@ -72,17 +69,7 @@ fun ScanQRScreen(
 				else TopAppBarDefaults.topAppBarColors(),
 			)
 		},
-		snackbarHost = {
-			SnackbarHost(snackBarHostState) { data ->
-				Snackbar(
-					snackbarData = data,
-					shape = MaterialTheme.shapes.large,
-					containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-					contentColor = MaterialTheme.colorScheme.onBackground,
-					actionContentColor = MaterialTheme.colorScheme.primary,
-				)
-			}
-		},
+		snackbarHost = { AppCustomSnackBar() },
 		modifier = modifier.sharedBoundsWrapper(
 			key = SharedTransitionKeys.SCAN_BUTTON_TO_SCAN_SCREEN,
 			resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
@@ -105,11 +92,7 @@ fun ScanQRScreen(
 			} else PermissionPlaceHolder(
 				onPermissionChanged = { perms -> hasPermission = perms },
 				onGalleryImageSelected = { uri ->
-					onCameraEvent(
-						CameraControllerEvents.OnSelectImageURI(
-							uri
-						)
-					)
+					onCameraEvent(CameraControllerEvents.OnSelectImageURI(uri))
 				},
 				contentPadding = PaddingValues(
 					top = scPadding.calculateTopPadding(),

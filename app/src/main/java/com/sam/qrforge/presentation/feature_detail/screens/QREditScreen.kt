@@ -6,11 +6,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -21,7 +18,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.sam.qrforge.R
-import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
+import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
 import com.sam.qrforge.presentation.feature_detail.composables.QREditScreenContent
 import com.sam.qrforge.presentation.feature_detail.state.EditQRScreenEvent
 import com.sam.qrforge.presentation.feature_detail.state.EditQRScreenState
@@ -35,7 +32,6 @@ fun QREditScreen(
 	modifier: Modifier = Modifier,
 	navigation: @Composable () -> Unit = {},
 ) {
-	val snackBarHostState = LocalSnackBarState.current
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
 	Scaffold(
@@ -51,17 +47,7 @@ fun QREditScreen(
 				},
 			)
 		},
-		snackbarHost = {
-			SnackbarHost(snackBarHostState) { data ->
-				Snackbar(
-					snackbarData = data,
-					shape = MaterialTheme.shapes.large,
-					containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-					contentColor = MaterialTheme.colorScheme.onBackground,
-					actionContentColor = MaterialTheme.colorScheme.primary,
-				)
-			}
-		},
+		snackbarHost = { AppCustomSnackBar() },
 		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
 	) { scPadding ->
 		QREditScreenContent(

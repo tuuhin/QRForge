@@ -113,12 +113,13 @@
   <string name="qr_edit_property_show_background_text">Show a colored background</string>
   <string name="qr_edit_property_layered_color_selector">Layered Colors</string>
   <string name="qr_edit_property_select_color_text">Tap to select</string>
-  <string name="qr_edit_property_layered_color_selector_text">Color are not overlapped they may have differnt blendmode</string>
+  <string name="qr_edit_property_layered_color_selector_text">Color are not overlapped they may have different blend mode</string>
   <string name="action_verify">Verify</string>
   <string name="export_select_image_format_title">Select Image Format</string>
   <string name="export_qr_bottom_sheet_title">Export QR</string>
   <string name="qr_edit_property_basic_frame_color_title">Frame Color</string>
   <string name="filter_options_sheet_no_items">No save items found</string>
   <string name="export_qr_bottom_sheet_text">Select options regarding image export</string>
-  <string name="export_qr_bottom_sheet_title_running">Exporting...</string>
+  <string name="export_qr_bottom_sheet_title_running">Exporting…</string>
+  <string name="camera_action_control_zoom_absent">Camera zoom not available</string>
 </resources>

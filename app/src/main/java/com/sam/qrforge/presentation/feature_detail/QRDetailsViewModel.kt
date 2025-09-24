@@ -191,14 +191,14 @@ class QRDetailsViewModel(
 		}
 		// check if the content is same
 		if (fieldsState.title == currentQRModel.title && fieldsState.desc == currentQRModel.desc) {
-			viewModelScope.launch { _uiEvents.emit(UIEvent.ShowToast("Content same")) }
+			viewModelScope.launch { _uiEvents.emit(UIEvent.ShowToast("Content Same")) }
 			return
 		}
 		// update the model
 		viewModelScope.launch {
 			val qRModel = currentQRModel.copy(
-				title = fieldsState.title,
-				desc = fieldsState.desc.ifBlank { null },
+				title = fieldsState.title.trim(),
+				desc = fieldsState.desc.trim().ifBlank { null },
 			)
 
 			val result = repository.updateQRModel(qRModel)

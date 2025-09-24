@@ -16,10 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,9 +27,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.sam.qrforge.R
+import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
-import com.sam.qrforge.presentation.common.utils.LocalSnackBarState
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.feature_export.composable.ExportQRBottomSheet
 import com.sam.qrforge.presentation.feature_export.composable.ExportQRScreenContent
@@ -54,8 +51,6 @@ fun ExportQRScreen(
 	generatedQR: GeneratedQRUIModel? = null,
 	navigation: @Composable () -> Unit = {}
 ) {
-	val snackBarHostState = LocalSnackBarState.current
-
 	val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 	val graphicsLayer = rememberGraphicsLayer()
 	val scope = rememberCoroutineScope()
@@ -84,17 +79,7 @@ fun ExportQRScreen(
 				scrollBehavior = scrollBehavior
 			)
 		},
-		snackbarHost = {
-			SnackbarHost(snackBarHostState) { data ->
-				Snackbar(
-					snackbarData = data,
-					shape = MaterialTheme.shapes.large,
-					containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-					contentColor = MaterialTheme.colorScheme.onBackground,
-					actionContentColor = MaterialTheme.colorScheme.primary,
-				)
-			}
-		},
+		snackbarHost = { AppCustomSnackBar() },
 		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
 	) { scPadding ->
 		Crossfade(
