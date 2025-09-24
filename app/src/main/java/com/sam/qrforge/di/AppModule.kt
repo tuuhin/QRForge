@@ -4,7 +4,7 @@ import com.sam.qrforge.data.database.QRForgeAppDatabase
 import com.sam.qrforge.data.database.dao.QRDataDao
 import com.sam.qrforge.data.facade.FileStorageFacadeImpl
 import com.sam.qrforge.data.facade.QRGeneratorFacadeImpl
-import com.sam.qrforge.data.facade.QRValidatorFacadeImpl
+import com.sam.qrforge.data.facade.ZxingQRValidatorFacadeImpl
 import com.sam.qrforge.data.provider.ContactsDataProviderImpl
 import com.sam.qrforge.data.provider.LocationProviderImpl
 import com.sam.qrforge.data.provider.ShortcutsProviderImpl
@@ -33,7 +33,7 @@ val appModule = module {
 	single<QRDataDao> { get<QRForgeAppDatabase>().qrDao() }
 
 	singleOf(::QRGeneratorFacadeImpl).bind<QRGeneratorFacade>()
-	singleOf(::QRValidatorFacadeImpl).bind<QRValidatorFacade>()
+	singleOf(::ZxingQRValidatorFacadeImpl).bind<QRValidatorFacade>()
 	singleOf(::ShortcutsProviderImpl).bind<AppShortcutProvider>()
 	// factory
 	factoryOf(::LocationProviderImpl).bind<LocationProvider>()
