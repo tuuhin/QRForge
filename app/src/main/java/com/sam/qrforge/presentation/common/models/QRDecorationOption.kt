@@ -50,7 +50,7 @@ sealed class QRDecorationOption(val templateType: QRTemplateOption) {
 		override val bitsSizeMultiplier: Float = 1f,
 		override val contentMargin: Dp = 0.dp,
 		override val backGroundColor: Color? = null,
-		val coloredLayers: QRColorLayer = QRColorLayer.PowerRangers,
+		val coloredLayers: LayeredQRColors = LayeredQRColors.PowerRangers,
 	) : QRDecorationOption(templateType = QRTemplateOption.COLOR_LAYERED) {
 
 		override val bitsColor: Color? get() = null
@@ -65,59 +65,6 @@ sealed class QRDecorationOption(val templateType: QRTemplateOption) {
 			is QRDecorationOptionMinimal -> showBackground
 		}
 
-	fun copyBackgroundColor(color: Color?): QRDecorationOption {
-		return when (this) {
-			is QRDecorationOptionBasic -> copy(backGroundColor = color)
-			is QRDecorationOptionColorLayer -> copy(backGroundColor = color)
-			is QRDecorationOptionMinimal -> copy(background = if (showBackground) color else null)
-		}
-	}
-
-	fun copyBitsColor(color: Color?): QRDecorationOption {
-		return when (this) {
-			is QRDecorationOptionBasic -> copy(bitsColor = color)
-			is QRDecorationOptionMinimal -> copy(bitsColor = color)
-			is QRDecorationOptionColorLayer -> this
-		}
-	}
-
-	fun copyFinderColor(color: Color?): QRDecorationOption {
-		return when (this) {
-			is QRDecorationOptionBasic -> copy(findersColor = color)
-			is QRDecorationOptionMinimal -> copy(findersColor = color)
-			is QRDecorationOptionColorLayer -> this
-		}
-	}
-
-	fun copyProperties(
-		roundness: Float? = null,
-		bitsSizeMultiplier: Float? = null,
-		contentMargin: Dp? = null,
-		isDiamond: Boolean? = null,
-	): QRDecorationOption {
-		return when (this) {
-			is QRDecorationOptionBasic -> copy(
-				roundness = roundness ?: this.roundness,
-				bitsSizeMultiplier = bitsSizeMultiplier ?: this.bitsSizeMultiplier,
-				contentMargin = contentMargin ?: this.contentMargin,
-				isDiamond = isDiamond ?: this.isDiamond,
-			)
-
-			is QRDecorationOptionMinimal -> copy(
-				roundness = roundness ?: this.roundness,
-				bitsSizeMultiplier = bitsSizeMultiplier ?: this.bitsSizeMultiplier,
-				contentMargin = contentMargin ?: this.contentMargin,
-				isDiamond = isDiamond ?: this.isDiamond
-			)
-
-			is QRDecorationOptionColorLayer -> copy(
-				roundness = roundness ?: this.roundness,
-				bitsSizeMultiplier = bitsSizeMultiplier ?: this.bitsSizeMultiplier,
-				contentMargin = contentMargin ?: this.contentMargin,
-			)
-		}
-	}
-
 	fun swtichTemplate(template: QRTemplateOption): QRDecorationOption {
 		return when (template) {
 			QRTemplateOption.BASIC -> QRDecorationOptionBasic(
@@ -125,7 +72,6 @@ sealed class QRDecorationOption(val templateType: QRTemplateOption) {
 				contentMargin = contentMargin,
 				bitsSizeMultiplier = bitsSizeMultiplier,
 				backGroundColor = backGroundColor,
-				isDiamond = isDiamond,
 				findersColor = findersColor,
 				bitsColor = bitsColor,
 			)

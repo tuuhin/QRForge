@@ -22,12 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
+import com.sam.qrforge.presentation.common.models.CanvasCaptureLayer
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
@@ -52,8 +52,9 @@ fun ExportQRScreen(
 	navigation: @Composable () -> Unit = {}
 ) {
 	val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-	val graphicsLayer = rememberGraphicsLayer()
 	val scope = rememberCoroutineScope()
+
+	val captureLayer = CanvasCaptureLayer.rememberCaptureLayer()
 
 	ExportRunningBackHandler(
 		isExportRunning = state.verificationState == VerificationState.VERIFYING,
@@ -70,7 +71,8 @@ fun ExportQRScreen(
 			ExportScreenTopAppBar(
 				onBeginExport = {
 					scope.launch {
-						val bitmap = graphicsLayer.toImageBitmap()
+						val bitmap = captureLayer.captureBitmap()
+						if (bitmap == null) return@launch
 						onEvent(ExportQRScreenEvents.OnVerifyBitmap(bitmap))
 					}
 				},
@@ -102,7 +104,7 @@ fun ExportQRScreen(
 						generatedQR = generatedQR,
 						showFaultyQRWarning = state.verificationState == VerificationState.FAILED,
 						onEvent = onEvent,
-						graphicsLayer = { graphicsLayer },
+						captureLayer = captureLayer,
 						contentPadding = PaddingValues(all = dimensionResource(R.dimen.sc_padding)),
 						decoration = decoration,
 						modifier = Modifier.weight(1f)

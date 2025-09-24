@@ -8,29 +8,31 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 @Stable
-sealed class QRColorLayer(val name: String) {
+sealed class LayeredQRColors(val name: String) {
 
 	abstract val layers: List<QROverlayColor>
 
-	fun copyEnsureOneExists(backOff: Color) =
-		if (layers.isNotEmpty()) this
+	fun copyEnsureOneExists(backOff: Color): LayeredQRColors {
+		return if (layers.isNotEmpty()) this
 		else Custom(layers = persistentListOf(QROverlayColor(backOff, Offset.Zero)))
+	}
 
 	val filterValidOverlayColor: List<QROverlayColor>
 		get() = layers.filter { (_, offset) -> offset.x in -1f..1f && offset.y in -1f..1f }
 
-	data object PowerRangers : QRColorLayer(name = "POWER RANGERS") {
+	data object PowerRangers : LayeredQRColors(name = "POWER RANGERS") {
 		override val layers: List<QROverlayColor>
 			get() = listOf(
-				QROverlayColor(Color.Red, Offset(.14f, .14f)),
-				QROverlayColor(Color.Blue, Offset(-.12f, .2f)),
-				QROverlayColor(Color.Yellow, Offset(-.2f, .1f)),
-				QROverlayColor(Color.Green, Offset(-.16f, .1f)),
+				QROverlayColor(Color.Red, Offset(.1f, .7f)),
+				QROverlayColor(Color.Blue, Offset(-.4f, .1f)),
+				QROverlayColor(Color.Yellow, Offset(-.2f, .45f)),
+				QROverlayColor(Color.Green, Offset(-.3f, .6f)),
 				QROverlayColor(Color.White, Offset.Zero),
 			)
+
 	}
 
-	data object Blocks : QRColorLayer(name = "BLOCKS") {
+	data object Blocks : LayeredQRColors(name = "BLOCKS") {
 		override val layers: List<QROverlayColor>
 			get() = listOf(
 				QROverlayColor(
@@ -63,11 +65,12 @@ sealed class QRColorLayer(val name: String) {
 
 
 	@Stable
-	data class Custom(override val layers: ImmutableList<QROverlayColor>) : QRColorLayer("Custom")
+	data class Custom(override val layers: ImmutableList<QROverlayColor>) :
+		LayeredQRColors("Custom")
 
 	companion object {
 
-		val DEFAULT_OPTIONS: List<QRColorLayer>
+		val DEFAULT_OPTIONS: List<LayeredQRColors>
 			get() = listOf(PowerRangers, Blocks)
 	}
 }

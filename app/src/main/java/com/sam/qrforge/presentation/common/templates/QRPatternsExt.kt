@@ -1,6 +1,9 @@
 package com.sam.qrforge.presentation.common.templates
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.util.fastFilter
+import androidx.compose.ui.util.fastMap
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 
 private val ALIGNMENT_PATTERN_CENTERS = mapOf(
@@ -58,37 +61,37 @@ private fun GeneratedQRUIModel.isNotFinderPatternOrMargin(posX: Int, posY: Int):
 	return !inTopLeft && !inTopRight && !inBottomLeft
 }
 
-fun GeneratedQRUIModel.finderOffsets(blockSize: Float): List<Offset> {
+fun GeneratedQRUIModel.finderOffsets(): List<IntOffset> {
 	return buildList {
-		add(Offset(margin * blockSize, margin * blockSize))
-		add(Offset((widthInBlocks - 7 - margin) * blockSize, margin * blockSize))
-		add(Offset(margin * blockSize, (widthInBlocks - 7 - margin) * blockSize))
+		add(IntOffset(margin, margin))
+		add(IntOffset((widthInBlocks - 7 - margin), margin))
+		add(IntOffset(margin, (widthInBlocks - 7 - margin)))
 	}
 }
 
-fun GeneratedQRUIModel.timingPatternOffsets(blockSize: Float): List<Offset> {
+fun GeneratedQRUIModel.timingPatternOffsets(): List<IntOffset> {
 	return buildList {
 		// width line
 		for (x in margin + 8..<widthInBlocks - (margin + 8))
-			add(Offset(x * blockSize, (margin + 6) * blockSize))
+			add(IntOffset(x, (margin + 6)))
 		// height line
 		for (x in margin + 7..<heightInBlocks - (margin + 8))
-			add(Offset((margin + 6) * blockSize, x * blockSize))
+			add(IntOffset((margin + 6), x))
 	}
 }
 
 
-fun GeneratedQRUIModel.alignmentPatternOffsets(blockSize: Float): List<Offset> {
+fun GeneratedQRUIModel.alignmentPatternOffsets(): List<IntOffset> {
 
 	val centers = ALIGNMENT_PATTERN_CENTERS.getOrDefault(version, null)
 		?: return emptyList()
 
 	return centers.zip(centers)
-		.filter { isNotFinderPatternOrMargin(it.first, it.second) }
-		.map { Offset(it.first * blockSize, it.second * blockSize) }
+		.fastFilter { isNotFinderPatternOrMargin(it.first, it.second) }
+		.fastMap { IntOffset(it.first, it.second) }
 }
 
-fun GeneratedQRUIModel.dataBitsOffset(blockSize: Float): List<Offset> {
+fun GeneratedQRUIModel.dataBitsOffset(): List<IntOffset> {
 	return buildList {
 		for ((colIdx, column) in qrMatrix.matrix.withIndex()) {
 			for ((rowIdx, blockIsBlack) in column.withIndex()) {
@@ -96,10 +99,12 @@ fun GeneratedQRUIModel.dataBitsOffset(blockSize: Float): List<Offset> {
 				if (rowIdx !in enclosingRect.left..<enclosingRect.right) continue
 				// ensure position inside the bounding rect
 				val isNotFinder = isNotFinderPatternOrMargin(rowIdx, colIdx)
-				if (blockIsBlack &&isNotFinder) {
-					add(Offset(rowIdx * blockSize, colIdx * blockSize))
+				if (blockIsBlack && isNotFinder) {
+					add(IntOffset(rowIdx, colIdx))
 				}
 			}
 		}
 	}
 }
+
+fun IntOffset.multiply(times: Float) = Offset(x * times, y * times)

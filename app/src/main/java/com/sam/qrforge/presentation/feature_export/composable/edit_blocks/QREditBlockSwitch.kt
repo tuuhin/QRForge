@@ -25,6 +25,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
+import com.sam.qrforge.presentation.common.models.copyBlockShape
 
 @Composable
 private fun QREditBlockSwitch(
@@ -108,7 +109,7 @@ fun EditDecorationBooleanOptions(
 					description = stringResource(R.string.qr_edit_property_finder_shape_diamond_text),
 					isChecked = decoration.isDiamond,
 					onCheckedChange = { isDiamond ->
-						val modified = decoration.copyProperties(isDiamond = isDiamond)
+						val modified = decoration.copyBlockShape(isDiamond = isDiamond)
 						onDecorationChange(modified)
 					},
 				)

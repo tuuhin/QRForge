@@ -29,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +41,7 @@ import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.presentation.common.composables.AnimatedBasicQRContent
 import com.sam.qrforge.presentation.common.composables.QRContentStringCard
 import com.sam.qrforge.presentation.common.composables.QRContentTypeChip
+import com.sam.qrforge.presentation.common.models.CanvasCaptureLayer
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.utils.PLAIN_DATE_TIME
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
@@ -61,7 +61,7 @@ fun QRDetailsScreenContent(
 	generatedModel: GeneratedQRUIModel? = null,
 	scrollState: ScrollState = rememberScrollState()
 ) {
-	val graphicsLayer = rememberGraphicsLayer()
+	val captureLayer = CanvasCaptureLayer.rememberCaptureLayer()
 	val scope = rememberCoroutineScope()
 
 	val context = LocalContext.current
@@ -84,7 +84,7 @@ fun QRDetailsScreenContent(
 		)
 		AnimatedBasicQRContent(
 			generated = generatedModel,
-			graphicsLayer = { graphicsLayer },
+			captureLayer = captureLayer,
 			shape = MaterialTheme.shapes.medium,
 			modifier = Modifier.sharedElementWrapper(
 				key = SharedTransitionKeys.sharedElementQRCodeItemToDetail(savedContent.id),
@@ -98,7 +98,8 @@ fun QRDetailsScreenContent(
 			hasAssociatedAction = savedContent.format != QRDataType.TYPE_TEXT,
 			onShare = {
 				scope.launch {
-					val bitmap = graphicsLayer.toImageBitmap()
+					val bitmap = captureLayer.captureBitmap()
+					if (bitmap == null) return@launch
 					onShare(bitmap)
 				}
 			},

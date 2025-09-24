@@ -12,12 +12,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.layer.GraphicsLayer
-import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
+import com.sam.qrforge.presentation.common.models.CanvasCaptureLayer
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenEvents
@@ -29,11 +28,9 @@ fun ExportQRScreenContent(
 	modifier: Modifier = Modifier,
 	decoration: QRDecorationOption = QRDecorationOption.QRDecorationOptionBasic(),
 	showFaultyQRWarning: Boolean = false,
-	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
+	captureLayer: CanvasCaptureLayer = CanvasCaptureLayer(),
 	contentPadding: PaddingValues = PaddingValues(12.dp),
 ) {
-	val layer = graphicsLayer?.invoke() ?: rememberGraphicsLayer()
-
 	Column(
 		modifier = modifier.padding(contentPadding),
 		verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -50,7 +47,7 @@ fun ExportQRScreenContent(
 			QRMasterTemplate(
 				model = generatedQR,
 				decoration = decoration,
-				graphicsLayer = { layer },
+				captureLayer = captureLayer,
 				modifier = Modifier.size(260.dp)
 			)
 		}

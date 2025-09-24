@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.unit.dp
+import com.sam.qrforge.presentation.common.models.CanvasCaptureLayer
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
@@ -16,7 +16,7 @@ import com.sam.qrforge.presentation.common.templates.QRTemplateMinimalistic
 fun QRMasterTemplate(
 	model: GeneratedQRUIModel,
 	modifier: Modifier = Modifier,
-	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
+	captureLayer: CanvasCaptureLayer = CanvasCaptureLayer(),
 	decoration: QRDecorationOption = QRDecorationOption.QRDecorationOptionBasic(),
 ) {
 	Box(
@@ -26,21 +26,21 @@ fun QRMasterTemplate(
 			is QRDecorationOption.QRDecorationOptionBasic -> QRTemplateBasic(
 				model = model,
 				decoration = decoration,
-				graphicsLayer = graphicsLayer,
+				captureLayer = captureLayer,
 				modifier = Modifier.matchParentSize()
 			)
 
 			is QRDecorationOption.QRDecorationOptionMinimal -> QRTemplateMinimalistic(
 				model = model,
 				decoration = decoration,
-				graphicsLayer = graphicsLayer,
+				captureLayer = captureLayer,
 				modifier = Modifier.matchParentSize(),
 			)
 
 			is QRDecorationOption.QRDecorationOptionColorLayer -> QRTemplateLayered(
 				model = model,
 				decoration = decoration,
-				graphicsLayer = graphicsLayer,
+				captureLayer = captureLayer,
 				modifier = Modifier.matchParentSize()
 			)
 		}

@@ -47,14 +47,14 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
-import com.sam.qrforge.presentation.common.models.QRColorLayer
+import com.sam.qrforge.presentation.common.models.LayeredQRColors
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @Composable
 fun QREditBlockSelectColorLayer(
-	onSelectLayer: (QRColorLayer) -> Unit,
+	onSelectLayer: (LayeredQRColors) -> Unit,
 	modifier: Modifier = Modifier,
-	selected: QRColorLayer = QRColorLayer.PowerRangers,
+	selected: LayeredQRColors = LayeredQRColors.PowerRangers,
 	titleStyle: TextStyle = MaterialTheme.typography.bodyMedium,
 	titleColor: Color = MaterialTheme.colorScheme.onSurface,
 	bodyStyle: TextStyle = MaterialTheme.typography.labelMedium,
@@ -64,7 +64,7 @@ fun QREditBlockSelectColorLayer(
 	contentPadding: PaddingValues = PaddingValues(12.dp),
 ) {
 
-	val colorLayers = remember { QRColorLayer.DEFAULT_OPTIONS }
+	val colorLayers = remember { LayeredQRColors.DEFAULT_OPTIONS }
 
 	Surface(
 		shape = shape,
@@ -106,7 +106,7 @@ fun QREditBlockSelectColorLayer(
 
 @Composable
 private fun CanvasColorLayered(
-	layer: QRColorLayer,
+	layer: LayeredQRColors,
 	onClick: () -> Unit,
 	modifier: Modifier = Modifier,
 	selectedBorderWidth: Dp = 3.dp,
@@ -193,7 +193,7 @@ private fun CanvasColorLayered(
 @Composable
 private fun QREditBlockSelectColorLayerPreview() = QRForgeTheme {
 
-	var selected by remember { mutableStateOf<QRColorLayer>(QRColorLayer.PowerRangers) }
+	var selected by remember { mutableStateOf<LayeredQRColors>(LayeredQRColors.PowerRangers) }
 
 	Surface {
 		QREditBlockSelectColorLayer(

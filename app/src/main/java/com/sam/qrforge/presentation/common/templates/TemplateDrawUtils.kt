@@ -7,15 +7,18 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
+import com.sam.qrforge.presentation.common.models.QROverlayColor
 
 const val ONE_BY_ROOT_TWO = 0.7071067f
 
@@ -45,7 +48,7 @@ fun DrawScope.drawFindersClassic(
 						Rect(offset = offset, size = outerRectSize),
 						cornerRadius = CornerRadius(
 							outerRectSize.width * .5f * roundness,
-							outerRectSize.height * .5f * roundness
+							outerRectSize.height * .5f * roundness,
 						),
 					)
 				)
@@ -58,7 +61,7 @@ fun DrawScope.drawFindersClassic(
 						Rect(offset + Offset(blockSize, blockSize), rectSize),
 						cornerRadius = CornerRadius(
 							rectSize.width * .5f * roundness,
-							rectSize.height * .5f * roundness
+							rectSize.height * .5f * roundness,
 						),
 					)
 				)
@@ -69,7 +72,7 @@ fun DrawScope.drawFindersClassic(
 						Rect(offset + Offset(blockSize * 2f, blockSize * 2f), innerRectSize),
 						cornerRadius = CornerRadius(
 							innerRectSize.width * .5f * roundness,
-							innerRectSize.height * .5f * roundness
+							innerRectSize.height * .5f * roundness,
 						),
 					)
 				)
@@ -79,15 +82,15 @@ fun DrawScope.drawFindersClassic(
 				transformBlock = {
 					val pivot = Offset(
 						offset.x + outerRectSize.width * .5f,
-						offset.y + outerRectSize.height * .5f
+						offset.y + outerRectSize.height * .5f,
 					)
 					rotate(
 						degrees = if (isDiamond) 45f else 0f,
-						pivot = pivot
+						pivot = pivot,
 					)
 					scale(
 						scale = if (isDiamond) ONE_BY_ROOT_TWO else 1f,
-						pivot = pivot
+						pivot = pivot,
 					)
 					translate(
 						left = blockSize * .5f * fractionOffset.x,
@@ -110,7 +113,6 @@ fun DrawScope.drawFindersClassic(
 					drawPath(path = path2, color = backgroundColor)
 					drawPath(path = path3, color = color)
 				}
-
 			}
 		}
 	}
@@ -149,7 +151,7 @@ fun DrawScope.drawFindersMinimalistic(
 							rect = Rect(currentOffset, baseSize),
 							cornerRadius = CornerRadius(
 								baseSize.width * .5f * roundness,
-								baseSize.height * .5f * roundness
+								baseSize.height * .5f * roundness,
 							),
 						)
 					)
@@ -171,15 +173,15 @@ fun DrawScope.drawFindersMinimalistic(
 				transformBlock = {
 					val pivot = Offset(
 						offset.x + outerRectSize.width * .5f,
-						offset.y + outerRectSize.height * .5f
+						offset.y + outerRectSize.height * .5f,
 					)
 					rotate(
 						degrees = if (isDiamond) 45f else 0f,
-						pivot = pivot
+						pivot = pivot,
 					)
 					scale(
 						scale = if (isDiamond) ONE_BY_ROOT_TWO else 1f,
-						pivot = pivot
+						pivot = pivot,
 					)
 					translate(
 						left = outerRectSize.width * .25f * fractionOffset.x,
@@ -232,7 +234,7 @@ fun DrawScope.drawAlignmentBlocks(
 						Rect(offset + Offset(blockSize, blockSize), rectSize),
 						cornerRadius = CornerRadius(
 							rectSize.width * .5f * roundness,
-							rectSize.height * .5f * roundness
+							rectSize.height * .5f * roundness,
 						),
 					)
 				)
@@ -253,15 +255,15 @@ fun DrawScope.drawAlignmentBlocks(
 				transformBlock = {
 					val pivot = Offset(
 						offset.x + outerRectSize.width * .5f,
-						offset.y + outerRectSize.height * .5f
+						offset.y + outerRectSize.height * .5f,
 					)
 					rotate(
 						degrees = if (isDiamond) 45f else 0f,
-						pivot = pivot
+						pivot = pivot,
 					)
 					scale(
 						scale = if (isDiamond) ONE_BY_ROOT_TWO else 1f,
-						pivot = pivot
+						pivot = pivot,
 					)
 					translate(
 						left = outerRectSize.width * .25f * fractionOffset.x,
@@ -302,43 +304,92 @@ fun DrawScope.drawDataBlocks(
 ) {
 	val finalSize = Size(blockSize * multiplier, blockSize * multiplier)
 	val halfBlock = blockSize * .5f
+	val radius = halfBlock * multiplier * roundness
+	val cornerRadius = CornerRadius(radius, radius)
+	val translationX = halfBlock * fractionOffset.x
+	val translationY = halfBlock * fractionOffset.y
+	val effectiveScale = if (isDiamond) ONE_BY_ROOT_TWO else 1f
+
 
 	scale(scaleFactor) {
-		blocks.fastForEach { offset ->
+		for (offset in blocks) {
 			withTransform(
 				transformBlock = {
 					val pivot = Offset(
 						offset.x + finalSize.width * .5f,
 						offset.y + finalSize.height * .5f
 					)
-					rotate(
-						degrees = if (isDiamond) 45f else 0f,
-						pivot = pivot
-					)
-					scale(
-						scale = if (isDiamond) ONE_BY_ROOT_TWO else 1f,
-						pivot = pivot
-					)
-					translate(
-						left = halfBlock * fractionOffset.x,
-						top = halfBlock * fractionOffset.y,
-					)
+					if (isDiamond) rotate(45f, pivot)
+					scale(scale = effectiveScale, pivot = pivot)
+					translate(left = translationX, top = translationY)
 				},
 			) {
-				drawRoundRect(
+				if (roundness == 0f) drawRect(
 					color = bitsColor,
 					topLeft = offset,
-					cornerRadius = CornerRadius(
-						halfBlock * multiplier * roundness,
-						halfBlock * multiplier * roundness
-					),
 					size = finalSize,
 					blendMode = blendMode,
+				)
+				else drawRoundRect(
+					color = bitsColor,
+					topLeft = offset,
+					size = finalSize,
+					cornerRadius = cornerRadius,
+					blendMode = blendMode
 				)
 			}
 		}
 	}
 }
+
+fun DrawScope.drawLayeredDataBlocks(
+	baseOffset: List<Offset>,
+	layers: List<QROverlayColor>,
+	blockSize: Float,
+	scaleFactor: Float = 1f,
+	roundness: Float = 0f,
+	multiplier: Float = 1f,
+	fallbackBlendMode: BlendMode = BlendMode.SrcOver,
+) {
+	val finalSize = Size(blockSize * multiplier, blockSize * multiplier)
+	val halfBlock = blockSize * .5f
+	val radius = halfBlock * multiplier * roundness
+	val cornerRadius = CornerRadius(radius, radius)
+	val paint = Paint()
+
+	scale(scaleFactor) {
+		drawIntoCanvas { canvas ->
+			baseOffset.forEach { offset ->
+				for (colorLayer in layers) {
+					paint.blendMode = colorLayer.blendMode ?: fallbackBlendMode
+					paint.color = colorLayer.color
+
+					val left = offset.x + halfBlock * colorLayer.offset.x
+					val top = offset.y + halfBlock * colorLayer.offset.y
+
+					if (roundness == 0f) canvas.drawRect(
+						left = left,
+						top = top,
+						right = left + finalSize.width,
+						bottom = top + finalSize.height,
+						paint = paint
+					)
+					else canvas.drawRoundRect(
+						left = left,
+						top = top,
+						right = left + finalSize.width,
+						bottom = top + finalSize.height,
+						radiusX = cornerRadius.x,
+						radiusY = cornerRadius.y,
+						paint = paint
+					)
+				}
+			}
+		}
+	}
+
+}
+
 
 fun DrawScope.drawTimingBlocks(
 	blocks: List<Offset>,
@@ -352,12 +403,12 @@ fun DrawScope.drawTimingBlocks(
 	oddBitsColor: Color = Color.White,
 	blendMode: BlendMode = BlendMode.SrcOver,
 ) {
+	val finalSize = Size(
+		width = blockSize * multiplier,
+		height = blockSize * multiplier
+	)
 	scale(scaleFactor) {
 		blocks.fastForEachIndexed { idx, offset ->
-			val finalSize = Size(
-				blockSize * multiplier,
-				blockSize * multiplier
-			)
 			withTransform(
 				transformBlock = {
 					val pivot = Offset(
@@ -366,11 +417,11 @@ fun DrawScope.drawTimingBlocks(
 					)
 					rotate(
 						degrees = if (isDiamond) 45f else 0f,
-						pivot = pivot
+						pivot = pivot,
 					)
 					scale(
 						scale = if (isDiamond) ONE_BY_ROOT_TWO else 1f,
-						pivot = pivot
+						pivot = pivot,
 					)
 					translate(
 						left = blockSize * .5f * fractionOffset.x,
@@ -412,16 +463,16 @@ fun DrawScope.drawFrame(
 		)
 		lineTo(
 			size.width * .5f - blockSize * 5f,
-			totalMargin * .5f
+			totalMargin * .5f,
 		)
 		// top right
 		moveTo(
 			size.width * .5f + blockSize * 5f,
-			totalMargin * .5f
+			totalMargin * .5f,
 		)
 		lineTo(
 			size.width - (totalMargin * .5f + blockSize * 2f),
-			totalMargin * .5f
+			totalMargin * .5f,
 		)
 		quadraticTo(
 			size.width - totalMargin * .5f,
@@ -431,16 +482,16 @@ fun DrawScope.drawFrame(
 		)
 		lineTo(
 			size.width - totalMargin * .5f,
-			size.height * .5f - blockSize * 5f
+			size.height * .5f - blockSize * 5f,
 		)
 		//bottom right
 		moveTo(
 			size.width - totalMargin * .5f,
-			size.height * .5f + blockSize * 5f
+			size.height * .5f + blockSize * 5f,
 		)
 		lineTo(
 			size.width - totalMargin * .5f,
-			size.height - (totalMargin * .5f + blockSize * 2f)
+			size.height - (totalMargin * .5f + blockSize * 2f),
 		)
 		quadraticTo(
 			size.width - totalMargin * .5f,
@@ -450,16 +501,16 @@ fun DrawScope.drawFrame(
 		)
 		lineTo(
 			size.width * .5f + blockSize * 5f,
-			size.height - totalMargin * .5f
+			size.height - totalMargin * .5f,
 		)
 		// bottom left
 		moveTo(
 			size.width * .5f - blockSize * 5f,
-			size.height - totalMargin * .5f
+			size.height - totalMargin * .5f,
 		)
 		lineTo(
 			totalMargin * .5f + blockSize * 2f,
-			size.height - totalMargin * .5f
+			size.height - totalMargin * .5f,
 		)
 		quadraticTo(
 			totalMargin * .5f,
@@ -477,7 +528,8 @@ fun DrawScope.drawFrame(
 		color = frameColor,
 		style = Stroke(
 			width = blockSize,
-			cap = if (roundness == 0f) StrokeCap.Butt else StrokeCap.Round
-		)
+			cap = if (roundness == 0f) StrokeCap.Butt
+			else StrokeCap.Round,
+		),
 	)
 }

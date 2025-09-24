@@ -41,6 +41,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
+import com.sam.qrforge.presentation.common.models.copyBackgroundColor
+import com.sam.qrforge.presentation.common.models.copyBitsColor
+import com.sam.qrforge.presentation.common.models.copyFinderColor
 import com.sam.qrforge.presentation.feature_export.composable.ColorOptionSelector
 import kotlinx.coroutines.launch
 
@@ -166,6 +169,10 @@ fun QREditDecorationColorOptions(
 		derivedStateOf { decoration is QRDecorationOption.QRDecorationOptionBasic && decoration.showFrame }
 	}
 
+	val isLayerOption by remember(decoration) {
+		derivedStateOf { decoration is QRDecorationOption.QRDecorationOptionColorLayer }
+	}
+
 	Surface(
 		shape = shape,
 		color = containerColor,
@@ -198,22 +205,27 @@ fun QREditDecorationColorOptions(
 					},
 				)
 			}
-			QREditBlockColorSelector(
-				title = stringResource(R.string.qr_edit_property_bits_color_title),
-				selectedColor = decoration.bitsColor ?: MaterialTheme.colorScheme.onBackground,
-				onSelectColor = {
-					val modified = decoration.copyBitsColor(it)
-					onDecorationChange(modified)
-				},
-			)
-			QREditBlockColorSelector(
-				title = stringResource(R.string.qr_edit_property_finders_color_title),
-				selectedColor = decoration.findersColor ?: MaterialTheme.colorScheme.onBackground,
-				onSelectColor = {
-					val modified = decoration.copyFinderColor(it)
-					onDecorationChange(modified)
-				},
-			)
+			AnimatedVisibility(visible = !isLayerOption) {
+				QREditBlockColorSelector(
+					title = stringResource(R.string.qr_edit_property_bits_color_title),
+					selectedColor = decoration.bitsColor ?: MaterialTheme.colorScheme.onBackground,
+					onSelectColor = {
+						val modified = decoration.copyBitsColor(it)
+						onDecorationChange(modified)
+					},
+				)
+			}
+			AnimatedVisibility(visible = !isLayerOption) {
+				QREditBlockColorSelector(
+					title = stringResource(R.string.qr_edit_property_finders_color_title),
+					selectedColor = decoration.findersColor
+						?: MaterialTheme.colorScheme.onBackground,
+					onSelectColor = {
+						val modified = decoration.copyFinderColor(it)
+						onDecorationChange(modified)
+					},
+				)
+			}
 		}
 	}
 }

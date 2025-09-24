@@ -12,7 +12,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.data.contracts.QRIntentActionContracts
@@ -21,6 +20,7 @@ import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.presentation.common.composables.AnimatedBasicQRContent
 import com.sam.qrforge.presentation.common.composables.QRContentStringCard
 import com.sam.qrforge.presentation.common.composables.QRContentTypeChip
+import com.sam.qrforge.presentation.common.models.CanvasCaptureLayer
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import kotlinx.coroutines.launch
 
@@ -33,7 +33,7 @@ fun ScanResultsScreenContent(
 	generatedModel: GeneratedQRUIModel? = null,
 	scrollState: ScrollState = rememberScrollState()
 ) {
-	val graphicsLayer = rememberGraphicsLayer()
+	val captureLayer = CanvasCaptureLayer.rememberCaptureLayer()
 	val scope = rememberCoroutineScope()
 
 	val context = LocalContext.current
@@ -51,14 +51,15 @@ fun ScanResultsScreenContent(
 		QRContentTypeChip(type = content.type)
 		AnimatedBasicQRContent(
 			generated = generatedModel,
-			graphicsLayer = { graphicsLayer },
+			captureLayer = captureLayer,
 		)
 		ScanQRActions(
 			type = content.type,
 			hasAssociatedAction = content.type != QRDataType.TYPE_TEXT,
 			onShare = {
 				scope.launch {
-					val bitmap = graphicsLayer.toImageBitmap()
+					val bitmap = captureLayer.captureBitmap()
+					if (bitmap == null) return@launch
 					onShare(bitmap)
 				}
 			},

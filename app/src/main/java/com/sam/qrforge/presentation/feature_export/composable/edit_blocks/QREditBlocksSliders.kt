@@ -270,11 +270,11 @@ private fun QREditBlockBitsSize(
 
 @Composable
 fun EditDecorationSliderOptions(
-	initialValue: QRDecorationOption,
 	onRoundnessChange: (Float) -> Unit,
 	onMarginChange: (Dp) -> Unit,
 	onBitsMultiplierChange: (Float) -> Unit,
 	modifier: Modifier = Modifier,
+	initialValue: QRDecorationOption = QRDecorationOption.QRDecorationOptionBasic(),
 	contentPadding: PaddingValues = PaddingValues(12.dp),
 	shape: Shape = MaterialTheme.shapes.large,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,

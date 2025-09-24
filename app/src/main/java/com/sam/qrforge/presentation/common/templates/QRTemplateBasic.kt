@@ -6,17 +6,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastMap
 import com.sam.qrforge.R
+import com.sam.qrforge.presentation.common.models.CanvasCaptureLayer
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
@@ -25,19 +29,27 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 @Composable
 private fun QRTemplateBasic(
 	model: GeneratedQRUIModel,
+	captureLayer: CanvasCaptureLayer,
 	modifier: Modifier = Modifier,
 	roundness: () -> Float = { 0f },
 	bitsSizeMultiplier: () -> Float = { 1f },
 	contentMargin: () -> Dp = { 0.dp },
 	showFrame: Boolean = false,
 	isDiamond: Boolean = false,
-	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
 	backgroundColor: Color = MaterialTheme.colorScheme.background,
 	bitsColor: Color = MaterialTheme.colorScheme.onBackground,
 	finderColor: Color = MaterialTheme.colorScheme.onBackground,
 	frameColor: Color = MaterialTheme.colorScheme.primary,
 ) {
-	val layer = graphicsLayer?.invoke() ?: rememberGraphicsLayer()
+
+	val layer = captureLayer.layer ?: rememberGraphicsLayer()
+
+	val finderOffsets = remember(model) { model.finderOffsets() }
+	val dataOffsets = remember(model) { model.dataBitsOffset() }
+
+	val coercedRoundness = { roundness().coerceIn(0f..1f) }
+	val coercedBitsMultiplier = { bitsSizeMultiplier().coerceIn(.2f..1.5f) }
+	val coercedMarginWidth = { contentMargin().coerceIn(0.dp, 20.dp) }
 
 	Spacer(
 		modifier = modifier
@@ -48,22 +60,27 @@ private fun QRTemplateBasic(
 			.drawWithCache {
 				val blockSize = size.width / model.widthInBlocks
 
-				val finders = model.finderOffsets(blockSize)
-				val blocks = model.dataBitsOffset(blockSize)
+				val finders = finderOffsets.fastMap { off -> off.multiply(blockSize) }
+				val blocks = dataOffsets.fastMap { off -> off.multiply(blockSize) }
 
 				onDrawBehind {
-					val limitRoundness = roundness().coerceIn(0f..1f)
-					val bitsMultiplier = bitsSizeMultiplier().coerceIn(.2f..1.5f)
-					val limitMarginWidth = contentMargin().coerceIn(0.dp, 20.dp).toPx()
+					val limitedRoundness = coercedRoundness()
+					val bitsMultiplier = coercedBitsMultiplier()
+					val limitMarginWidth = coercedMarginWidth().toPx()
 
+					val totalMargin = limitMarginWidth + (model.margin * blockSize)
+					val scaleFactor = 1 - (2 * limitMarginWidth / size.width)
 
-					layer.record {    // draw background
+					layer.record {
+						// draw background
 						drawRect(color = backgroundColor)
 
-						val totalMargin = limitMarginWidth + (model.margin * blockSize)
-						val scaleFactor = 1 - (2 * limitMarginWidth / size.width)
-
-						if (showFrame) drawFrame(totalMargin, blockSize, frameColor, limitRoundness)
+						if (showFrame) drawFrame(
+							totalMargin = totalMargin,
+							blockSize = blockSize,
+							frameColor = frameColor,
+							roundness = limitedRoundness
+						)
 
 						// blocks
 						drawDataBlocks(
@@ -71,7 +88,7 @@ private fun QRTemplateBasic(
 							blockSize = blockSize,
 							scaleFactor = scaleFactor,
 							bitsColor = bitsColor,
-							roundness = limitRoundness,
+							roundness = limitedRoundness,
 							multiplier = bitsMultiplier,
 							isDiamond = isDiamond,
 						)
@@ -82,7 +99,7 @@ private fun QRTemplateBasic(
 							blockSize = blockSize,
 							color = finderColor,
 							isDiamond = isDiamond,
-							roundness = limitRoundness,
+							roundness = limitedRoundness,
 							scaleFactor = scaleFactor
 						)
 					}
@@ -97,21 +114,25 @@ private fun QRTemplateBasic(
 fun QRTemplateBasic(
 	model: GeneratedQRUIModel,
 	modifier: Modifier = Modifier,
+	captureLayer: CanvasCaptureLayer = CanvasCaptureLayer(),
 	decoration: QRDecorationOption.QRDecorationOptionBasic = QRDecorationOption.QRDecorationOptionBasic(),
-	graphicsLayer: (@Composable () -> GraphicsLayer)? = null,
 ) {
+	val currentRoundness by rememberUpdatedState(decoration.roundness)
+	val currentBitsSizeMultiplier by rememberUpdatedState(decoration.bitsSizeMultiplier)
+	val currentContentMargin by rememberUpdatedState(decoration.contentMargin)
+
 	QRTemplateBasic(
 		model = model,
-		roundness = { decoration.roundness },
-		bitsSizeMultiplier = { decoration.bitsSizeMultiplier },
-		contentMargin = { decoration.contentMargin },
+		roundness = { currentRoundness },
+		bitsSizeMultiplier = { currentBitsSizeMultiplier },
+		contentMargin = { currentContentMargin },
 		isDiamond = decoration.isDiamond,
 		showFrame = decoration.showFrame,
 		finderColor = decoration.findersColor ?: MaterialTheme.colorScheme.onBackground,
 		bitsColor = decoration.bitsColor ?: MaterialTheme.colorScheme.onBackground,
 		backgroundColor = decoration.backGroundColor ?: Color.Transparent,
 		frameColor = decoration.frameColor ?: MaterialTheme.colorScheme.onBackground,
-		graphicsLayer = graphicsLayer,
+		captureLayer = captureLayer,
 		modifier = modifier,
 	)
 }

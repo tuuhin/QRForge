@@ -12,12 +12,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.presentation.common.composables.AnimatedBasicQRContent
 import com.sam.qrforge.presentation.common.composables.QRContentStringCard
 import com.sam.qrforge.presentation.common.composables.QRContentTypeChip
+import com.sam.qrforge.presentation.common.models.CanvasCaptureLayer
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import kotlinx.coroutines.launch
 
@@ -31,7 +31,7 @@ fun PreviewQRScreenContent(
 	contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
 
-	val graphicsLayer = rememberGraphicsLayer()
+	val captureLayer = CanvasCaptureLayer.rememberCaptureLayer()
 	val scope = rememberCoroutineScope()
 
 	Column(
@@ -43,11 +43,17 @@ fun PreviewQRScreenContent(
 		QRContentTypeChip(content.type)
 		AnimatedBasicQRContent(
 			generated = generated,
-			graphicsLayer = { graphicsLayer },
+			captureLayer = captureLayer,
 		)
 		ExportShareActions(
 			enabled = generated != null,
-			onShare = { scope.launch { onShareContent(graphicsLayer.toImageBitmap()) } },
+			onShare = {
+				scope.launch {
+					val capture = captureLayer.captureBitmap()
+					if (capture == null) return@launch
+					onShareContent(capture)
+				}
+			},
 			onExport = onExportContent,
 		)
 		Spacer(modifier = Modifier.height(6.dp))

@@ -29,12 +29,11 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.layer.GraphicsLayer
-import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
+import com.sam.qrforge.presentation.common.models.CanvasCaptureLayer
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption.QRDecorationOptionBasic
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
@@ -43,13 +42,10 @@ import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 fun AnimatedBasicQRContent(
 	modifier: Modifier = Modifier,
 	generated: GeneratedQRUIModel? = null,
-	graphicsLayer: @Composable () -> GraphicsLayer = { rememberGraphicsLayer() },
+	captureLayer: CanvasCaptureLayer = CanvasCaptureLayer(),
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 	shape: Shape = MaterialTheme.shapes.extraLarge,
-	decoration: QRDecorationOptionBasic = QRDecorationOptionBasic(
-		roundness = .5f,
-		contentMargin = 0.dp
-	)
+	decoration: QRDecorationOptionBasic = QRDecorationOptionBasic(roundness = .5f)
 ) {
 
 	Surface(
@@ -73,7 +69,7 @@ fun AnimatedBasicQRContent(
 			if (isReady && generated != null)
 				QRTemplateBasic(
 					model = generated,
-					graphicsLayer = graphicsLayer,
+					captureLayer = captureLayer,
 					decoration = decoration,
 					modifier = Modifier.fillMaxSize()
 				)
