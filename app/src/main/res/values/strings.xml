@@ -56,7 +56,7 @@
   <string name="last_updated_text">Last Updated:</string>
   <string name="select_template_title">Template</string>
   <string name="template_option_basic">Basic</string>
-  <string name="template_option_minimalistic">Minimalistic</string>
+  <string name="template_option_minimalistic">Minimal</string>
   <string name="template_option_color_layered">Layered</string>
   <string name="generate_qr">Generate</string>
   <string name="scan_qr">Scan</string>
