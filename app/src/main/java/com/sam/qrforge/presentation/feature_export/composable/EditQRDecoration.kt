@@ -1,8 +1,10 @@
 package com.sam.qrforge.presentation.feature_export.composable
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -23,6 +25,7 @@ import com.sam.qrforge.presentation.feature_export.composable.edit_blocks.QREdit
 import com.sam.qrforge.presentation.feature_export.composable.edit_blocks.QREditDecorationColorOptions
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EditQRDecorationOptions(
 	onDecorationChange: (QRDecorationOption) -> Unit,
@@ -30,9 +33,12 @@ fun EditQRDecorationOptions(
 	decoration: QRDecorationOption = QRDecorationOption.QRDecorationOptionBasic(),
 ) {
 
-	val scrollState = rememberLazyListState()
-	// save the first initial value
-	val initialValue = remember { decoration }
+	val scrollState = rememberLazyListState(
+		cacheWindow = LazyLayoutCacheWindow(
+			aheadFraction = .2f,
+			behindFraction = .2f
+		)
+	)
 
 	LazyColumn(
 		state = scrollState,
@@ -40,6 +46,9 @@ fun EditQRDecorationOptions(
 		modifier = modifier.clip(MaterialTheme.shapes.large),
 	) {
 		item(key = LazyContentKeys.OPTION_QR_EDIT_SLIDERS) {
+
+			// save the first initial value before composing
+			val initialValue = remember { decoration }
 
 			EditDecorationSliderOptions(
 				initialValue = initialValue,

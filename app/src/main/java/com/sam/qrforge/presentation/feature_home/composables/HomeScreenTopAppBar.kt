@@ -26,7 +26,7 @@ import com.sam.qrforge.R
 @Composable
 fun HomeScreenTopAppBar(
 	modifier: Modifier = Modifier,
-	onSettings: () -> Unit = {},
+	onSettings: (() -> Unit)? = null,
 	onFilter: () -> Unit = {},
 	scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
@@ -56,27 +56,29 @@ fun HomeScreenTopAppBar(
 				}
 			}
 			Spacer(modifier = Modifier.width(8.dp))
-			TooltipBox(
-				positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-				tooltip = {
-					PlainTooltip {
-						Text(text = stringResource(R.string.settings_options))
-					}
-				},
-				state = rememberTooltipState()
-			) {
-				OutlinedButton(
-					onClick = onSettings,
-					shape = MaterialTheme.shapes.extraLarge,
-					contentPadding = PaddingValues(),
+			onSettings?.let { lambda ->
+				TooltipBox(
+					positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+					tooltip = {
+						PlainTooltip {
+							Text(text = stringResource(R.string.settings_options))
+						}
+					},
+					state = rememberTooltipState()
 				) {
-					Icon(
-						painter = painterResource(R.drawable.ic_settings),
-						contentDescription = "Settings"
-					)
+					OutlinedButton(
+						onClick = lambda,
+						shape = MaterialTheme.shapes.extraLarge,
+						contentPadding = PaddingValues(),
+					) {
+						Icon(
+							painter = painterResource(R.drawable.ic_settings),
+							contentDescription = "Settings"
+						)
+					}
 				}
+				Spacer(modifier = Modifier.width(8.dp))
 			}
-			Spacer(modifier = Modifier.width(8.dp))
 		},
 	)
 }

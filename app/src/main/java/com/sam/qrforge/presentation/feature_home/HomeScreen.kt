@@ -126,7 +126,6 @@ private fun HomeScreen(
 					scope.launch { sheetState.show() }
 						.invokeOnCompletion { showBottomSheet = true }
 				},
-				onSettings = {},
 				scrollBehavior = scrollBehavior
 			)
 		},
