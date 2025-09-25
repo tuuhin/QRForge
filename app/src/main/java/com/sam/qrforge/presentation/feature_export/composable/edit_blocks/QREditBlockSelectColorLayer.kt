@@ -32,13 +32,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.models.LayeredQRColors
+import com.sam.qrforge.presentation.common.templates.drawFindersClassic
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @Composable
@@ -127,34 +128,30 @@ private fun CanvasColorLayered(
 				indication = ripple()
 			)
 			.drawWithCache {
-				val lastColors = with(layer.layers) {
+				val layeredColors = with(layer.layers) {
 					if (size > 4) this.takeLast(4)
 					else this
 				}
 
-				val boxSize = size.times(.5f)
-				val topLeftPosition = Offset(
-					(size.width - boxSize.width) * .5f,
-					(size.height - boxSize.width) * .5f,
-				)
-
-				val xAxisRange = 0f..(topLeftPosition.x + boxSize.width)
-				val yAxisRange = 0f..(topLeftPosition.y + boxSize.height)
+				val itemWidth = size.width / 9f
 
 				onDrawBehind {
 
-					lastColors.forEach { color ->
-						drawRoundRect(
-							color = color.color,
-							cornerRadius = CornerRadius(10f, 10f),
-							topLeft = Offset(
-								(topLeftPosition.x * (1 + color.offset.x)).coerceIn(xAxisRange),
-								(topLeftPosition.y * (1 + color.offset.y)).coerceIn(yAxisRange)
-							),
-							size = boxSize,
-							blendMode = BlendMode.Difference,
-							style = Stroke(width = 10.dp.toPx())
-						)
+					withTransform(
+						transformBlock = {
+							scale(.9f, pivot = center)
+						},
+					) {
+						layeredColors.forEach { layerColor ->
+							drawFindersClassic(
+								finders = listOf(Offset(itemWidth, itemWidth)),
+								blockSize = itemWidth,
+								roundness = .5f,
+								color = layerColor.color,
+								fractionOffset = layerColor.offset,
+								blendMode = layerColor.blendMode
+							)
+						}
 					}
 
 					// border

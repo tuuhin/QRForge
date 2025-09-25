@@ -7,5 +7,5 @@ import androidx.compose.ui.graphics.Color
 data class QROverlayColor(
 	val color: Color,
 	val offset: Offset = Offset.Zero,
-	val blendMode: BlendMode? = null
+	val blendMode: BlendMode = BlendMode.SrcIn,
 )

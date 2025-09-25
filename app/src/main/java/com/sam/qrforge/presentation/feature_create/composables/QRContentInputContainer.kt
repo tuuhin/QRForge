@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +54,8 @@ fun QRContentInputContainer(
 ) {
 	val context = LocalContext.current
 
+	val currentOnReadContactsDetails by rememberUpdatedState(onReadContactsDetails)
+
 	var hasContactsPermission by remember { mutableStateOf(context.hasReadContactsPermission) }
 	var hasLocationPermission by remember { mutableStateOf(context.hasLocationPermission) }
 
@@ -72,7 +75,10 @@ fun QRContentInputContainer(
 
 	val readContactsLauncher = rememberLauncherForActivityResult(
 		contract = PickContactsContract(),
-		onResult = { uri -> onReadContactsDetails(uri.toString()) },
+		onResult = { uri ->
+			val uriString = uri?.toString() ?: return@rememberLauncherForActivityResult
+			currentOnReadContactsDetails(uriString)
+		},
 	)
 
 	Column(

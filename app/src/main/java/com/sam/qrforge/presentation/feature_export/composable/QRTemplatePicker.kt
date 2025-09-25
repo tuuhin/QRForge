@@ -1,5 +1,8 @@
 package com.sam.qrforge.presentation.feature_export.composable
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -83,22 +87,28 @@ private fun QRTemplateOption(
 	templateTextColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
 	shape: Shape = MaterialTheme.shapes.medium,
 ) {
+	val containerColorAnimation by animateColorAsState(
+		targetValue = if (isSelected) selectedContainerColor.copy(alpha = .85f)
+		else MaterialTheme.colorScheme.surfaceContainerHigh,
+		animationSpec = tween(durationMillis = 400, easing = EaseInOut)
+	)
+
 	Surface(
 		shape = shape,
-		color = MaterialTheme.colorScheme.surfaceContainerHigh,
 		onClick = onTemplateChange,
 		modifier = modifier,
 	) {
 		Column(
 			horizontalAlignment = Alignment.CenterHorizontally,
 			modifier = Modifier.drawWithContent {
+				// overlay
+				drawOutline(
+					outline = shape.createOutline(size, layoutDirection, this),
+					color = containerColorAnimation,
+					alpha = .55f
+				)
+				// border
 				if (isSelected) {
-					// overlay
-					drawOutline(
-						outline = shape.createOutline(size, layoutDirection, this),
-						color = selectedContainerColor,
-					)
-					// border
 					drawOutline(
 						outline = shape.createOutline(size, layoutDirection, this),
 						brush = borderStroke.brush,

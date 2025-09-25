@@ -25,9 +25,9 @@ sealed class LayeredQRColors(val name: String) {
 			get() = listOf(
 				QROverlayColor(Color.Red, Offset(.1f, .7f)),
 				QROverlayColor(Color.Blue, Offset(-.4f, .1f)),
-				QROverlayColor(Color.Yellow, Offset(-.2f, .45f)),
-				QROverlayColor(Color.Green, Offset(-.3f, .6f)),
-				QROverlayColor(Color.White, Offset.Zero),
+				QROverlayColor(Color.Yellow, Offset(-.2f, .45f), blendMode = BlendMode.Difference),
+				QROverlayColor(Color(0xFF516526), Offset(-.3f, .6f)),
+				QROverlayColor(Color(0xFF515B92), Offset.Zero),
 			)
 
 	}
