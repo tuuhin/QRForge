@@ -66,13 +66,8 @@ fun ExportShareActions(
 				containerColor = MaterialTheme.colorScheme.primaryContainer,
 				contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
 			) {
-				Icon(
-					painter = painterResource(R.drawable.ic_export),
-					contentDescription = "Export",
-				)
-				Spacer(modifier = Modifier.width(4.dp))
 				Text(
-					text = stringResource(R.string.action_export),
+					text = stringResource(R.string.action_edit_and_export),
 					style = MaterialTheme.typography.titleMedium
 				)
 			}

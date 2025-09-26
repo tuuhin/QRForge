@@ -1,5 +1,6 @@
 package com.sam.qrforge.presentation.feature_home.composables
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -43,6 +44,7 @@ private fun FilterBottomSheetContent(
 	modifier: Modifier = Modifier,
 	showOnlyFav: Boolean = false,
 	hasItems: Boolean = true,
+	showToggleFavOption: Boolean = true,
 	selectedOrder: SortOrder = SortOrder.ASC,
 	selectedOption: SortOption = SortOption.CREATED,
 	contentPadding: PaddingValues = PaddingValues(12.dp),
@@ -54,13 +56,16 @@ private fun FilterBottomSheetContent(
 			.padding(contentPadding),
 		verticalArrangement = Arrangement.spacedBy(4.dp)
 	) {
-		Spacer(modifier = Modifier.height(4.dp))
 		if (!hasItems) {
+			Spacer(modifier = Modifier.height(4.dp))
 			Text(
 				text = stringResource(R.string.filter_options_sheet_no_items),
 				style = MaterialTheme.typography.titleLarge,
+			)
+			Text(
+				text = stringResource(R.string.filter_options_sheet_no_items_text),
+				style = MaterialTheme.typography.bodyMedium,
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
-				modifier = Modifier.align(Alignment.CenterHorizontally)
 			)
 			return
 		}
@@ -103,23 +108,25 @@ private fun FilterBottomSheetContent(
 				)
 			}
 		}
-		Row(
-			verticalAlignment = Alignment.CenterVertically,
-			modifier = Modifier.fillMaxWidth()
-		) {
-			Text(
-				text = stringResource(R.string.filter_options_title_only_fav),
-				style = titleTextStyle,
-				modifier = Modifier.weight(1f)
-			)
-			Switch(
-				checked = showOnlyFav,
-				onCheckedChange = onShowOnlyFavChange,
-				colors = SwitchDefaults.colors(
-					checkedTrackColor = MaterialTheme.colorScheme.secondary,
-					checkedThumbColor = MaterialTheme.colorScheme.onSecondary
+		AnimatedVisibility(visible = showToggleFavOption) {
+			Row(
+				verticalAlignment = Alignment.CenterVertically,
+				modifier = Modifier.fillMaxWidth()
+			) {
+				Text(
+					text = stringResource(R.string.filter_options_title_only_fav),
+					style = titleTextStyle,
+					modifier = Modifier.weight(1f)
 				)
-			)
+				Switch(
+					checked = showOnlyFav,
+					onCheckedChange = onShowOnlyFavChange,
+					colors = SwitchDefaults.colors(
+						checkedTrackColor = MaterialTheme.colorScheme.secondary,
+						checkedThumbColor = MaterialTheme.colorScheme.onSecondary
+					)
+				)
+			}
 		}
 	}
 }
@@ -133,6 +140,7 @@ fun FilterListBottomSheet(
 	onEvent: (HomeScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
 	hasItems: Boolean = true,
+	showToggleFavOption: Boolean = true,
 	sheetState: SheetState = rememberModalBottomSheetState(),
 	filterState: FilterQRListState = FilterQRListState(),
 ) {
@@ -148,6 +156,7 @@ fun FilterListBottomSheet(
 			selectedOption = filterState.sortOption,
 			showOnlyFav = filterState.showOnlyFav,
 			hasItems = hasItems,
+			showToggleFavOption = showToggleFavOption,
 			onShowOnlyFavChange = {
 				val newState = filterState.copy(showOnlyFav = it)
 				onEvent(HomeScreenEvents.OnListFilterChange(newState))

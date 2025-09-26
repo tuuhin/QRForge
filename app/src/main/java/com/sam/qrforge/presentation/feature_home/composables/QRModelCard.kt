@@ -29,13 +29,13 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onFirstVisible
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
+import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.presentation.common.composables.QRContentTypeChip
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.models.QRDecorationOption
@@ -45,7 +45,6 @@ import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedElementWrapper
 import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildSize
-import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
@@ -53,25 +52,23 @@ import kotlinx.datetime.format
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun QRModelCard(
-	model: SavedAndGeneratedQRModel,
+	model: SavedQRModel,
 	onDeleteItem: () -> Unit,
 	onSelectItem: () -> Unit,
 	modifier: Modifier = Modifier,
+	uiModel: GeneratedQRUIModel? = null,
 	onGenerateQR: () -> Unit = {},
 	shape: Shape = MaterialTheme.shapes.large,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 	contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-	val state = rememberSwipeToDismissBoxState(
-		confirmValueChange = { value ->
-			val isStartToEnd = value == SwipeToDismissBoxValue.StartToEnd
-			if (isStartToEnd) onDeleteItem()
-			isStartToEnd
-		},
-	)
+
+	val state = rememberSwipeToDismissBoxState()
 
 	SwipeToDismissBox(
-		state = state, enableDismissFromEndToStart = false, backgroundContent = {
+		state = state,
+		enableDismissFromEndToStart = false,
+		backgroundContent = {
 			when (state.dismissDirection) {
 				SwipeToDismissBoxValue.StartToEnd -> {
 					SwipeToDeleteContent(
@@ -83,7 +80,18 @@ fun QRModelCard(
 
 				else -> {}
 			}
-		}, modifier = modifier
+		},
+		onDismiss = { value ->
+			when (value) {
+				SwipeToDismissBoxValue.StartToEnd -> {
+					onDeleteItem()
+					true
+				}
+
+				else -> false
+			}
+		},
+		modifier = modifier,
 	) {
 		Card(
 			onClick = onSelectItem,
@@ -99,9 +107,9 @@ fun QRModelCard(
 				verticalAlignment = Alignment.CenterVertically,
 			) {
 				AnimatedQRContent(
-					uiModel = model.uiModel,
+					uiModel = uiModel,
 					modifier = Modifier.sharedElementWrapper(
-						key = SharedTransitionKeys.sharedElementQRCodeItemToDetail(model.qrModel.id),
+						key = SharedTransitionKeys.sharedElementQRCodeItemToDetail(model.id),
 						clipShape = MaterialTheme.shapes.medium,
 					)
 				)
@@ -114,15 +122,18 @@ fun QRModelCard(
 						horizontalArrangement = Arrangement.SpaceBetween,
 						verticalAlignment = Alignment.CenterVertically
 					) {
-						Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+						Column(
+							verticalArrangement = Arrangement.spacedBy(4.dp),
+							modifier = Modifier.weight(1f)
+						) {
 							Text(
-								text = model.qrModel.title,
+								text = model.title,
 								style = MaterialTheme.typography.titleMedium,
 								color = MaterialTheme.colorScheme.primary,
-								fontWeight = FontWeight.SemiBold,
+								maxLines = 2,
 								modifier = Modifier.sharedTransitionSkipChildSize()
 							)
-							model.qrModel.desc?.let { desc ->
+							model.desc?.let { desc ->
 								Text(
 									text = desc,
 									style = MaterialTheme.typography.bodyMedium,
@@ -132,7 +143,7 @@ fun QRModelCard(
 								)
 							}
 						}
-						if (model.qrModel.isFav) {
+						if (model.isFav) {
 							Icon(
 								painter = painterResource(R.drawable.ic_heart),
 								contentDescription = "Favourites",
@@ -146,13 +157,13 @@ fun QRModelCard(
 						verticalAlignment = Alignment.CenterVertically
 					) {
 						QRContentTypeChip(
-							type = model.qrModel.format,
+							type = model.format,
 							modifier = Modifier.sharedElementWrapper(
-								SharedTransitionKeys.sharedElementContentTypeCard(model.qrModel.id)
+								SharedTransitionKeys.sharedElementContentTypeCard(model.id)
 							)
 						)
 						Text(
-							text = model.qrModel.modifiedAt.format(LocalDateTime.Formats.PLAIN_DATE),
+							text = model.modifiedAt.format(LocalDateTime.Formats.PLAIN_DATE),
 							style = MaterialTheme.typography.labelMedium,
 							color = MaterialTheme.colorScheme.onSurfaceVariant,
 						)
@@ -205,10 +216,8 @@ private fun AnimatedQRContent(
 @Composable
 private fun SelectableQRModelCardPreview() = QRForgeTheme {
 	QRModelCard(
-		model = SavedAndGeneratedQRModel(
-			qrModel = PreviewFakes.FAKE_QR_MODEL,
-			uiModel = PreviewFakes.FAKE_GENERATED_UI_MODEL_SMALL
-		),
+		model = PreviewFakes.FAKE_QR_MODEL,
+		uiModel = PreviewFakes.FAKE_GENERATED_UI_MODEL_SMALL,
 		onDeleteItem = {},
 		onSelectItem = {},
 	)

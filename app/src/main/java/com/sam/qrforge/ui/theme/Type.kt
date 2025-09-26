@@ -14,8 +14,21 @@ private val provider = GoogleFont.Provider(
 
 val displayFontFamily = FontFamily(
 	Font(
-		googleFont = GoogleFont("Montserrat Alternates"),
+		googleFont = GoogleFont("Lexend"),
 		fontProvider = provider,
+	)
+)
+
+val bodyFontFamily = FontFamily(
+	Font(
+		googleFont = GoogleFont("Inter"),
+		fontProvider = provider
+	)
+)
+val labelFontFamily = FontFamily(
+	Font(
+		googleFont = GoogleFont("Work Sans"),
+		fontProvider = provider
 	)
 )
 
@@ -32,4 +45,10 @@ val AppTypography = Typography(
 	titleLarge = baseline.titleLarge.copy(fontFamily = displayFontFamily),
 	titleMedium = baseline.titleMedium.copy(fontFamily = displayFontFamily),
 	titleSmall = baseline.titleSmall.copy(fontFamily = displayFontFamily),
+	bodyLarge = baseline.bodyLarge.copy(fontFamily = bodyFontFamily),
+	bodyMedium = baseline.bodyMedium.copy(fontFamily = bodyFontFamily),
+	bodySmall = baseline.bodySmall.copy(fontFamily = bodyFontFamily),
+	labelLarge = baseline.labelLarge.copy(fontFamily = labelFontFamily),
+	labelMedium = baseline.labelMedium.copy(fontFamily = labelFontFamily),
+	labelSmall = baseline.labelSmall.copy(fontFamily = labelFontFamily)
 )

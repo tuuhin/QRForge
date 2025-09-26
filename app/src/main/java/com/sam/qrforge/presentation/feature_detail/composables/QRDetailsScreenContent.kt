@@ -16,7 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -114,8 +115,8 @@ fun QRDetailsScreenContent(
 				}
 			},
 		)
-		Spacer(modifier = Modifier.height(2.dp))
 		savedContent.desc?.let { desc ->
+			Spacer(modifier = Modifier.height(2.dp))
 			QRDescriptionCard(
 				text = desc,
 				modifier = Modifier.fillMaxWidth()
@@ -143,12 +144,13 @@ private fun QRDescriptionCard(
 ) {
 	var isExpanded by remember { mutableStateOf(false) }
 
-	ElevatedCard(
+	Card(
 		shape = shape,
 		onClick = { isExpanded = !isExpanded },
 		modifier = modifier.animateContentSize(
 			animationSpec = tween(durationMillis = 100, easing = EaseInOutBack)
 		),
+		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
 	) {
 		Column(
 			modifier = Modifier.padding(12.dp),

@@ -11,6 +11,7 @@ import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -36,7 +37,9 @@ fun HomeScreenTopAppBar(
 		modifier = modifier,
 		actions = {
 			TooltipBox(
-				positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+				positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+					TooltipAnchorPosition.Below
+				),
 				tooltip = {
 					PlainTooltip {
 						Text(text = stringResource(R.string.filter_options))
@@ -58,7 +61,9 @@ fun HomeScreenTopAppBar(
 			Spacer(modifier = Modifier.width(8.dp))
 			onSettings?.let { lambda ->
 				TooltipBox(
-					positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+					positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+						TooltipAnchorPosition.Below
+					),
 					tooltip = {
 						PlainTooltip {
 							Text(text = stringResource(R.string.settings_options))

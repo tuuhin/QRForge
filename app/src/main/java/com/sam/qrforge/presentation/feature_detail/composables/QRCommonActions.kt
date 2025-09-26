@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
@@ -73,7 +74,9 @@ fun QRCommonActions(
 			horizontalArrangement = Arrangement.spacedBy(12.dp)
 		) {
 			TooltipBox(
-				positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+				positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+					TooltipAnchorPosition.Above
+				),
 				tooltip = {
 					PlainTooltip {
 						Text(text = stringResource(R.string.action_share))
@@ -104,15 +107,17 @@ fun QRCommonActions(
 					Spacer(modifier = Modifier.width(6.dp))
 					Text(
 						text = type.toActionText ?: "",
-						style = MaterialTheme.typography.bodyMedium
+						style = MaterialTheme.typography.titleMedium
 					)
 				}
 			}
 			TooltipBox(
-				positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+				positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+					TooltipAnchorPosition.Above
+				),
 				tooltip = {
 					PlainTooltip {
-						Text(text = stringResource(R.string.action_export))
+						Text(text = stringResource(R.string.action_edit_and_export))
 					}
 				},
 				state = rememberTooltipState()
@@ -125,8 +130,8 @@ fun QRCommonActions(
 					contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
 				) {
 					Icon(
-						painter = painterResource(R.drawable.ic_export),
-						contentDescription = "Export",
+						painter = painterResource(R.drawable.ic_drawing),
+						contentDescription = "Edit and export",
 					)
 				}
 			}

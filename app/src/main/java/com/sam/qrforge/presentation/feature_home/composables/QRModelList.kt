@@ -58,7 +58,8 @@ fun QRModelList(
 			contentType = itemsContentType
 		) { idx, item ->
 			QRModelCard(
-				model = item,
+				model = item.qrModel,
+				uiModel = item.uiModel,
 				onDeleteItem = { onDeleteItem(item.qrModel) },
 				onSelectItem = { onSelectItem(item.qrModel) },
 				onGenerateQR = { onGenerateQR(item.qrModel) },

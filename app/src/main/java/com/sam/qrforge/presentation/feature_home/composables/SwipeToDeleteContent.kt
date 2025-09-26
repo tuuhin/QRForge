@@ -25,10 +25,12 @@ fun SwipeToDeleteContent(
 	contentColor: Color = contentColorFor(containerColor),
 	shape: Shape = MaterialTheme.shapes.medium,
 ) {
+	val coercedRatio = { (progress() - .01f).coerceIn(0f..1f) }
+
 	Box(
 		modifier = modifier
 			.drawWithContent {
-				val ratio = (progress() - .01f).coerceIn(0f..1f)
+				val ratio = coercedRatio()
 				val size = Size(size.width * ratio, size.height)
 				val outline = shape.createOutline(size, layoutDirection, this)
 				drawOutline(outline = outline, color = containerColor)
