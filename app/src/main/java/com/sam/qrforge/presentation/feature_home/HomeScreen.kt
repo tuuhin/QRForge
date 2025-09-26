@@ -42,14 +42,11 @@ import com.sam.qrforge.presentation.feature_home.composables.FilterListBottomShe
 import com.sam.qrforge.presentation.feature_home.composables.GenerateORScanActions
 import com.sam.qrforge.presentation.feature_home.composables.HomeScreenContent
 import com.sam.qrforge.presentation.feature_home.composables.HomeScreenTopAppBar
-import com.sam.qrforge.presentation.feature_home.state.FilterQRListState
 import com.sam.qrforge.presentation.feature_home.state.HomeScreenEvents
-import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
+import com.sam.qrforge.presentation.feature_home.state.HomeScreenState
 import com.sam.qrforge.presentation.navigation.fadeAnimatedComposable
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import com.sam.qrforge.ui.theme.QRForgeTheme
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -58,9 +55,7 @@ fun NavGraphBuilder.homeRoute(
 ) = fadeAnimatedComposable<NavRoutes.HomeRoute> {
 
 	val viewModel = koinViewModel<HomeViewModel>()
-	val qrHistory by viewModel.savedQR.collectAsStateWithLifecycle()
-	val filterState by viewModel.filterState.collectAsStateWithLifecycle()
-	val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+	val state by viewModel.homeScreenState.collectAsStateWithLifecycle()
 
 	UIEventsSideEffect(events = viewModel::uiEvents)
 
@@ -69,9 +64,7 @@ fun NavGraphBuilder.homeRoute(
 
 	CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 		HomeScreen(
-			qrHistory = qrHistory,
-			filterState = filterState,
-			isContentReady = !isLoading,
+			state = state,
 			onEvent = viewModel::onEvent,
 			onNavigateToCreateNew = dropUnlessResumed { controller.navigate(NavRoutes.CreateRoute) },
 			onNavigateToScanner = dropUnlessResumed { controller.navigate(NavRoutes.ScanRoute) },
@@ -90,11 +83,9 @@ fun NavGraphBuilder.homeRoute(
 )
 @Composable
 private fun HomeScreen(
-	qrHistory: ImmutableList<SavedAndGeneratedQRModel>,
+	state: HomeScreenState,
 	onEvent: (HomeScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
-	filterState: FilterQRListState = FilterQRListState(),
-	isContentReady: Boolean = true,
 	onNavigateToCreateNew: () -> Unit = {},
 	onNavigateToItemDetailed: (SavedQRModel) -> Unit = {},
 	onNavigateToScanner: () -> Unit = {},
@@ -106,17 +97,22 @@ private fun HomeScreen(
 	val scope = rememberCoroutineScope()
 	var showBottomSheet by remember { mutableStateOf(false) }
 
-	val hasItems by remember(qrHistory) {
-		derivedStateOf { qrHistory.isNotEmpty() }
+	val showToggleFavouriteOption by remember(state.filteredQRList) {
+		derivedStateOf { state.hasFavouriteItem }
+	}
+
+	val showFilterOptions by remember(state) {
+		derivedStateOf { state.showFilterOption }
 	}
 
 	FilterListBottomSheet(
 		showSheet = showBottomSheet,
-		filterState = filterState,
-		sheetState = sheetState,
-		hasItems = hasItems,
-		onEvent = onEvent,
 		onDismissSheet = { showBottomSheet = false },
+		filterState = state.filterState,
+		hasItems = showFilterOptions,
+		showToggleFavOption = showToggleFavouriteOption,
+		sheetState = sheetState,
+		onEvent = onEvent,
 	)
 
 	Scaffold(
@@ -140,9 +136,9 @@ private fun HomeScreen(
 		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
 	) { scPadding ->
 		HomeScreenContent(
-			generatedQR = qrHistory,
-			filterState = filterState,
-			isContentReady = isContentReady,
+			generatedQR = state.filteredQRList,
+			filterState = state.filterState,
+			isContentReady = state.isContentLoaded,
 			onEvent = onEvent,
 			onSelectItem = onNavigateToItemDetailed,
 			contentPadding = PaddingValues(
@@ -156,22 +152,21 @@ private fun HomeScreen(
 	}
 }
 
-private class QRHistoryListPreviewParams
-	: CollectionPreviewParameterProvider<ImmutableList<SavedAndGeneratedQRModel>>(
+private class HomeScreenPreviewParams : CollectionPreviewParameterProvider<HomeScreenState>(
 	listOf(
-		PreviewFakes.FAKE_IMMUTABLE_LIST_QR_MODEL,
-		persistentListOf()
+		HomeScreenState(savedQRList = PreviewFakes.FAKE_IMMUTABLE_LIST_QR_MODEL),
+		HomeScreenState()
 	)
 )
 
 @PreviewLightDark
 @Composable
 private fun HomeScreenPreview(
-	@PreviewParameter(QRHistoryListPreviewParams::class)
-	qrHistory: ImmutableList<SavedAndGeneratedQRModel>,
+	@PreviewParameter(HomeScreenPreviewParams::class)
+	state: HomeScreenState,
 ) = QRForgeTheme {
 	HomeScreen(
-		qrHistory = qrHistory,
-		onEvent = {},
+		state = state,
+		onEvent = {}
 	)
 }

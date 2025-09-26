@@ -66,7 +66,7 @@
   <string name="sort_option_date_created">Date Created</string>
   <string name="filter_options">Filter Options</string>
   <string name="settings_options">Settings</string>
-  <string name="filter_options_title_only_fav">Only Favourite</string>
+  <string name="filter_options_title_only_fav">Show only Favourite</string>
   <string name="filter_options_title_sort_order">Sort Order</string>
   <string name="filter_options_title_sort_options">Sort Options</string>
   <string name="dimension_option_small">Small</string>
@@ -118,7 +118,8 @@
   <string name="export_select_image_format_title">Select Image Format</string>
   <string name="export_qr_bottom_sheet_title">Export QR</string>
   <string name="qr_edit_property_basic_frame_color_title">Frame Color</string>
-  <string name="filter_options_sheet_no_items">No save items found</string>
+  <string name="filter_options_sheet_no_items">Nothing to show</string>
+  <string name="filter_options_sheet_no_items_text">Looks like there’s nothing here to filter right now</string>
   <string name="export_qr_bottom_sheet_text">Select options regarding image export</string>
   <string name="export_qr_bottom_sheet_title_running">Exporting…</string>
   <string name="camera_action_control_zoom_absent">Camera zoom not available</string>

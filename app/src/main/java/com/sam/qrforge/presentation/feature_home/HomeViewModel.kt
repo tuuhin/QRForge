@@ -10,18 +10,15 @@ import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.UIEvent
 import com.sam.qrforge.presentation.feature_home.state.FilterQRListState
 import com.sam.qrforge.presentation.feature_home.state.HomeScreenEvents
+import com.sam.qrforge.presentation.feature_home.state.HomeScreenState
 import com.sam.qrforge.presentation.feature_home.state.SavedAndGeneratedQRModel
-import com.sam.qrforge.presentation.feature_home.state.filteredResults
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -34,22 +31,23 @@ class HomeViewModel(
 ) : AppViewModel() {
 
 	private val _filterState = MutableStateFlow(FilterQRListState())
-	val filterState = _filterState.asStateFlow()
-
 	private val _savedQR = MutableStateFlow<List<SavedAndGeneratedQRModel>>(emptyList())
-
 	private val _isLoading = MutableStateFlow(true)
-	val isLoading = _isLoading.asStateFlow()
 
-	val savedQR = combine(_savedQR, _filterState) { savedQR, filter ->
-		savedQR.filteredResults(filter)
-	}
-		.onStart { loadQR() }
-		.map { models -> models.toImmutableList() }
+	val homeScreenState = combine(
+		_savedQR, _filterState, _isLoading
+	) { savedQR, filter, isLoading ->
+		HomeScreenState(
+			savedQRList = savedQR.toImmutableList(),
+			isContentLoaded = !isLoading,
+
+			filterState = filter
+		)
+	}.onStart { loadQR() }
 		.stateIn(
 			scope = viewModelScope,
 			started = SharingStarted.WhileSubscribed(2_000L),
-			initialValue = persistentListOf()
+			initialValue = HomeScreenState()
 		)
 
 	private val _uiEvents = MutableSharedFlow<UIEvent>()
