@@ -122,4 +122,5 @@
   <string name="export_qr_bottom_sheet_text">Select options regarding image export</string>
   <string name="export_qr_bottom_sheet_title_running">Exporting…</string>
   <string name="camera_action_control_zoom_absent">Camera zoom not available</string>
+  <string name="action_edit_and_export"><![CDATA[Edit & Export]]></string>
 </resources>
