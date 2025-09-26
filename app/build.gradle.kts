@@ -1,3 +1,5 @@
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
+import com.google.gms.googleservices.GoogleServicesPlugin
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
@@ -8,6 +10,16 @@ plugins {
 	alias(libs.plugins.ksp)
 	alias(libs.plugins.kotlinx.serialization)
 	alias(libs.plugins.androidx.room)
+	alias(libs.plugins.firebase.crashlytics) apply false
+	alias(libs.plugins.google.services) apply false
+}
+
+afterEvaluate {
+	// TODO: Work around to let crashlytics and google services work
+	if (gradle.startParameter.taskNames.any { it.contains("play") }) {
+		apply<GoogleServicesPlugin>()
+		apply<CrashlyticsPlugin>()
+	}
 }
 
 android {
@@ -49,6 +61,21 @@ android {
 			storePassword = properties.getProperty("STORE_PASSWORD")
 		}
 	}
+
+	flavorDimensions += "distribution"
+
+	productFlavors {
+		create("play") {
+			dimension = "distribution"
+			applicationIdSuffix = ".play"
+		}
+		create("oss") {
+			dimension = "distribution"
+			applicationIdSuffix = ".oss"
+		}
+	}
+
+
 
 	buildTypes {
 
@@ -129,6 +156,12 @@ dependencies {
 	testImplementation(libs.kotlin.test)
 	testImplementation(libs.kotlinx.coroutines.test)
 	testImplementation(libs.junit)
+
+	// firebase
+	"playImplementation"(platform(libs.firebase.bom))
+	"playImplementation"(libs.firebase.analytics)
+	"playImplementation"(libs.firebase.crashlytics)
+
 	// android tests
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
