@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">QRForge</string>
+  <string name="app_name">QR Forge</string>
   <string name="qr_format_email">Email</string>
   <string name="qr_format_phone">Phone</string>
   <string name="qr_format_url">URL</string>
