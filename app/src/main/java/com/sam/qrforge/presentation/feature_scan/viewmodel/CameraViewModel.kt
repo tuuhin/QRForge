@@ -5,8 +5,12 @@ import androidx.compose.foundation.MutatorMutex
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.viewModelScope
 import com.sam.qrforge.data.mappers.toCompressedByteArray
+import com.sam.qrforge.domain.analytics.AnalyticsEvent
+import com.sam.qrforge.domain.analytics.AnalyticsParams
+import com.sam.qrforge.domain.analytics.AnalyticsTracker
 import com.sam.qrforge.domain.facade.QRImageAnalyzer
 import com.sam.qrforge.domain.facade.QRScannerFacade
+import com.sam.qrforge.domain.facade.exception.NoQRCodeFoundException
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.UIEvent
@@ -39,6 +43,7 @@ class CameraViewModel(
 	private val controller: CameraController,
 	private val qrAnalyzer: QRImageAnalyzer,
 	private val decoder: QRScannerFacade,
+	private val analyticsLogger: AnalyticsTracker,
 ) : AppViewModel() {
 
 	val cameraControlState = combine(
@@ -69,6 +74,16 @@ class CameraViewModel(
 	val analysisResult: SharedFlow<QRContentModel?>
 		get() {
 			val imageAnalyzer = qrAnalyzer.resultAnalysis
+				.onEach { result ->
+					analyticsLogger.logEvent(
+						AnalyticsEvent.SCAN_QR,
+						mapOf(
+							AnalyticsParams.QR_SCAN_MODE to "camera",
+							AnalyticsParams.QR_SCAN_AUTO_CAPTURE to true,
+							AnalyticsParams.IS_SUCCESSFUL to result.isSuccess,
+						)
+					)
+				}
 				.filter { it.isSuccess }.map { it.getOrNull() }
 
 			return merge(imageAnalyzer, _localAnalysis)
@@ -148,8 +163,27 @@ class CameraViewModel(
 		val results = decoder.decodeFromFile(uriString)
 
 		results.fold(
-			onSuccess = { model -> _localAnalysis.update { model } },
+			onSuccess = { model ->
+				_localAnalysis.update { model }
+				analyticsLogger.logEvent(
+					AnalyticsEvent.SCAN_QR,
+					mapOf(
+						AnalyticsParams.IS_SUCCESSFUL to true,
+						AnalyticsParams.QR_SCAN_MODE to "image",
+					)
+				)
+			},
 			onFailure = { err ->
+				if (err !is NoQRCodeFoundException) {
+					analyticsLogger.logEvent(
+						AnalyticsEvent.SCAN_QR,
+						mapOf(
+							AnalyticsParams.IS_SUCCESSFUL to false,
+							AnalyticsParams.QR_SCAN_MODE to "image",
+							AnalyticsParams.ERROR_NAME to err.javaClass::getSimpleName,
+						)
+					)
+				}
 				val message = err.message ?: "Some error"
 				_uiEvent.emit(UIEvent.ShowToast(message))
 			},
@@ -176,6 +210,13 @@ class CameraViewModel(
 			},
 			onImageCapture = ::analyzeBitmap,
 			onError = { err ->
+				analyticsLogger.logEvent(
+					AnalyticsEvent.CAMERA_CAPTURE,
+					mapOf(
+						AnalyticsParams.IS_SUCCESSFUL to false,
+						AnalyticsParams.ERROR_NAME to err.javaClass::getSimpleName,
+					)
+				)
 				val message = err.message ?: "SOME ERROR"
 				_uiEvent.emit(UIEvent.ShowSnackBar(message))
 			},
@@ -188,12 +229,36 @@ class CameraViewModel(
 	}
 
 	private fun analyzeBitmap(bitmap: Bitmap, rotate: Int) = viewModelScope.launch {
+		analyticsLogger.logEvent(
+			AnalyticsEvent.CAMERA_CAPTURE,
+			mapOf(AnalyticsParams.IS_SUCCESSFUL to false)
+		)
 		_analyzerState.update { state -> state.copy(isAnalysing = true) }
 		val bytes = bitmap.asImageBitmap().toCompressedByteArray()
 		val results = decoder.decodeAsBitMap(bytes, bitmap.width, bitmap.height, rotate)
 		results.fold(
-			onSuccess = { model -> _localAnalysis.update { model } },
+			onSuccess = { model ->
+				analyticsLogger.logEvent(
+					AnalyticsEvent.SCAN_QR,
+					mapOf(
+						AnalyticsParams.IS_SUCCESSFUL to true,
+						AnalyticsParams.QR_SCAN_MODE to "camera",
+						AnalyticsParams.QR_SCAN_AUTO_CAPTURE to false
+					)
+				)
+				_localAnalysis.update { model }
+			},
 			onFailure = { err ->
+				if (err !is NoQRCodeFoundException) {
+					analyticsLogger.logEvent(
+						AnalyticsEvent.SCAN_QR,
+						mapOf(
+							AnalyticsParams.IS_SUCCESSFUL to false,
+							AnalyticsParams.QR_SCAN_MODE to "camera",
+							AnalyticsParams.ERROR_NAME to err.javaClass::getSimpleName,
+						)
+					)
+				}
 				val message = err.message ?: "Some error"
 				_uiEvent.emit(UIEvent.ShowToast(message))
 			},

@@ -11,6 +11,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +33,9 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import com.sam.qrforge.R
+import com.sam.qrforge.domain.analytics.AnalyticsEvent
+import com.sam.qrforge.domain.analytics.AnalyticsParams
+import com.sam.qrforge.domain.analytics.AnalyticsTracker
 import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
 import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
@@ -49,10 +53,19 @@ import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 fun NavGraphBuilder.homeRoute(
 	controller: NavController
 ) = fadeAnimatedComposable<NavRoutes.HomeRoute> {
+
+	val analyticsLogger = koinInject<AnalyticsTracker>()
+	LaunchedEffect(Unit) {
+		analyticsLogger.logEvent(
+			AnalyticsEvent.SCREEN_VIEW,
+			mapOf(AnalyticsParams.SCREEN_NAME to "home_screen")
+		)
+	}
 
 	val viewModel = koinViewModel<HomeViewModel>()
 	val state by viewModel.homeScreenState.collectAsStateWithLifecycle()

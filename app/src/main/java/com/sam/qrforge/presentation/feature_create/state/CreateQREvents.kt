@@ -13,4 +13,5 @@ sealed interface CreateQREvents {
 	data class CheckContactsDetails(val uri: String) : CreateQREvents
 
 	data class ShareGeneratedQR(val bitmap: ImageBitmap) : CreateQREvents
+	data object OnPreviewQR : CreateQREvents
 }

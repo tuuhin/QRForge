@@ -73,7 +73,10 @@ fun CreateQRScreen(
 		bottomBar = {
 			ShowGeneratedQRButton(
 				showButton = showPreviewButton,
-				onGenerateQR = onPreviewQR,
+				onGenerateQR = {
+					onEvent(CreateQREvents.OnPreviewQR)
+					onPreviewQR()
+				},
 			)
 		},
 		snackbarHost = { AppCustomSnackBar() },

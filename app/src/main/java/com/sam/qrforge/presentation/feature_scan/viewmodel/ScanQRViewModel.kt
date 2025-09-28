@@ -3,6 +3,9 @@ package com.sam.qrforge.presentation.feature_scan.viewmodel
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.viewModelScope
 import com.sam.qrforge.data.mappers.toCompressedByteArray
+import com.sam.qrforge.domain.analytics.AnalyticsEvent
+import com.sam.qrforge.domain.analytics.AnalyticsParams
+import com.sam.qrforge.domain.analytics.AnalyticsTracker
 import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
 import com.sam.qrforge.domain.models.CreateNewQRModel
@@ -37,6 +40,7 @@ class ScanQRViewModel(
 	private val wifiConnector: WIFIConnectionProvider,
 	private val fileFacade: FileStorageFacade,
 	private val repository: SavedQRDataRepository,
+	private val analyticsLogger: AnalyticsTracker,
 ) : AppViewModel() {
 
 	private val _generatedModel = MutableStateFlow<GeneratedQRUIModel?>(null)
@@ -88,11 +92,25 @@ class ScanQRViewModel(
 			.onEach { res ->
 				when (res) {
 					is Resource.Error -> {
+						analyticsLogger.logEvent(
+							AnalyticsEvent.SAVE_QR,
+							mapOf(
+								AnalyticsParams.IS_SUCCESSFUL to false,
+								AnalyticsParams.ERROR_NAME to res.error::javaClass.name,
+							)
+						)
 						val message = res.message ?: res.error.message ?: "Unable to save"
 						_saveQRDialogState.update { state -> state.copy(errorString = message) }
 					}
 
 					is Resource.Success -> {
+						analyticsLogger.logEvent(
+							AnalyticsEvent.SAVE_QR,
+							mapOf(
+								AnalyticsParams.IS_SUCCESSFUL to false,
+								AnalyticsParams.QR_IS_SCANNED to true,
+							)
+						)
 						_uiEvents.emit(UIEvent.ShowToast("Saved!!"))
 						_uiEvents.emit(UIEvent.NavigateBack)
 					}
@@ -111,6 +129,7 @@ class ScanQRViewModel(
 		val fileResult = fileFacade.saveContentToShare(bytes)
 		fileResult.fold(
 			onSuccess = { uriToShare ->
+				analyticsLogger.logEvent(AnalyticsEvent.SHARE_GENERATED_QR)
 				_uiEvents.emit(UIEvent.ShowToast("Sharing QR"))
 				_activityEvents.emit(LaunchActivityEvent.ShareImageURI(uriToShare))
 			},

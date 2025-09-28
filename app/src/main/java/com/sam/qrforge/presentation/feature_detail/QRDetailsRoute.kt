@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
@@ -12,6 +13,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.sam.qrforge.domain.analytics.AnalyticsEvent
+import com.sam.qrforge.domain.analytics.AnalyticsParams
+import com.sam.qrforge.domain.analytics.AnalyticsTracker
 import com.sam.qrforge.presentation.common.composables.LaunchActivityEventsSideEffect
 import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
 import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
@@ -23,6 +27,7 @@ import com.sam.qrforge.presentation.navigation.animatedComposable
 import com.sam.qrforge.presentation.navigation.fadeAnimatedComposable
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import kotlinx.coroutines.flow.merge
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.viewmodel.sharedKoinViewModel
 
@@ -30,6 +35,16 @@ fun NavGraphBuilder.qrDetailsRoute(controller: NavController) =
 	navigation<NavRoutes.QRDetailsRoute>(startDestination = QRDetailsNavGraph.DetailsRoute) {
 
 		fadeAnimatedComposable<QRDetailsNavGraph.DetailsRoute> { entry ->
+
+			val analytics = koinInject<AnalyticsTracker>()
+
+			LaunchedEffect(Unit) {
+				analytics.logEvent(
+					AnalyticsEvent.SCREEN_VIEW,
+					mapOf(AnalyticsParams.SCREEN_NAME to "qr_details_screen")
+				)
+			}
+
 			val route = entry.savedStateHandle.toRoute<NavRoutes.QRDetailsRoute>()
 
 			val viewModel = entry.sharedKoinViewModel<QRDetailsViewModel>(controller)
@@ -72,6 +87,15 @@ fun NavGraphBuilder.qrDetailsRoute(controller: NavController) =
 
 		animatedComposable<QRDetailsNavGraph.EditDetailsRoute> { entry ->
 
+			val analytics = koinInject<AnalyticsTracker>()
+
+			LaunchedEffect(Unit) {
+				analytics.logEvent(
+					AnalyticsEvent.SCREEN_VIEW,
+					mapOf(AnalyticsParams.SCREEN_NAME to "edit_qr_metadata_screen")
+				)
+			}
+
 			val viewModel = entry.sharedKoinViewModel<QRDetailsViewModel>(controller)
 			val screenState by viewModel.editState.collectAsStateWithLifecycle()
 
@@ -98,6 +122,18 @@ fun NavGraphBuilder.qrDetailsRoute(controller: NavController) =
 		}
 
 		animatedComposable<QRDetailsNavGraph.ExportRoute> { entry ->
+
+			val analytics = koinInject<AnalyticsTracker>()
+
+			LaunchedEffect(Unit) {
+				analytics.logEvent(
+					AnalyticsEvent.SCREEN_VIEW,
+					mapOf(
+						AnalyticsParams.SCREEN_NAME to "export_qr_route",
+						AnalyticsParams.PREVIOUS_SCREEN_NAME to "qr_details_screen"
+					)
+				)
+			}
 
 			val detailsViewModel = entry.sharedKoinViewModel<QRDetailsViewModel>(controller)
 			val screenState by detailsViewModel.screenState.collectAsStateWithLifecycle()

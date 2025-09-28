@@ -5,6 +5,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.sam.qrforge.data.mappers.toCompressedByteArray
+import com.sam.qrforge.domain.analytics.AnalyticsEvent
+import com.sam.qrforge.domain.analytics.AnalyticsParams
+import com.sam.qrforge.domain.analytics.AnalyticsTracker
+import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
 import com.sam.qrforge.domain.models.GeneratedQRModel
@@ -12,6 +16,7 @@ import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.domain.models.qr.QRWiFiModel
 import com.sam.qrforge.domain.provider.WIFIConnectionProvider
 import com.sam.qrforge.domain.repository.SavedQRDataRepository
+import com.sam.qrforge.domain.repository.exception.CannotFindMatchingIdException
 import com.sam.qrforge.domain.util.Resource
 import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
@@ -47,6 +52,7 @@ class QRDetailsViewModel(
 	private val repository: SavedQRDataRepository,
 	private val savedStateHandle: SavedStateHandle,
 	private val fileFacade: FileStorageFacade,
+	private val analyticsLogger: AnalyticsTracker,
 ) : AppViewModel() {
 
 	private val route: NavRoutes.QRDetailsRoute
@@ -130,6 +136,10 @@ class QRDetailsViewModel(
 			when (res) {
 				Resource.Loading -> _uiEvents.emit(UIEvent.ShowToast("Connecting"))
 				is Resource.Error -> {
+					analyticsLogger.logEvent(
+						AnalyticsEvent.QR_CONTEXT_ACTION_FAILED,
+						mapOf(AnalyticsParams.GENERATED_QR_TYPE to QRDataType.TYPE_WIFI)
+					)
 					val message = res.message ?: res.error.message ?: "Cannot connect "
 					_uiEvents.emit(UIEvent.ShowSnackBar(message))
 				}
@@ -147,6 +157,7 @@ class QRDetailsViewModel(
 		val fileResult = fileFacade.saveContentToShare(bytes)
 		fileResult.fold(
 			onSuccess = { uriToShare ->
+				analyticsLogger.logEvent(AnalyticsEvent.SHARE_GENERATED_QR)
 				_uiEvents.emit(UIEvent.ShowToast("Sharing QR"))
 				_activityEvents.emit(LaunchActivityEvent.ShareImageURI(uriToShare))
 			},
@@ -165,11 +176,22 @@ class QRDetailsViewModel(
 			val result = repository.deleteQRModel(model)
 			result.fold(
 				onSuccess = {
+					analyticsLogger.logEvent(
+						AnalyticsEvent.QR_DELETE,
+						mapOf(AnalyticsParams.IS_SUCCESSFUL to true)
+					)
 					_uiEvents.emit(UIEvent.ShowToast("Item Deleted"))
 					_uiEvents.emit(UIEvent.NavigateBack)
 				},
-				onFailure = {
-					val event = UIEvent.ShowToast(it.message ?: "Error")
+				onFailure = { err ->
+					analyticsLogger.logEvent(
+						AnalyticsEvent.QR_DELETE,
+						mapOf(
+							AnalyticsParams.IS_SUCCESSFUL to false,
+							AnalyticsParams.ERROR_NAME to err::javaClass.name
+						)
+					)
+					val event = UIEvent.ShowToast(err.message ?: "Error")
 					_uiEvents.emit(event)
 				},
 			)
@@ -204,10 +226,21 @@ class QRDetailsViewModel(
 			val result = repository.updateQRModel(qRModel)
 			result.fold(
 				onSuccess = {
+					analyticsLogger.logEvent(
+						AnalyticsEvent.QR_METADATA_UPDATE,
+						mapOf(AnalyticsParams.IS_SUCCESSFUL to true)
+					)
 					_uiEvents.emit(UIEvent.ShowToast("Content Updated"))
 					_uiEvents.emit(UIEvent.NavigateBack)
 				},
 				onFailure = { err ->
+					analyticsLogger.logEvent(
+						AnalyticsEvent.QR_METADATA_UPDATE,
+						mapOf(
+							AnalyticsParams.IS_SUCCESSFUL to false,
+							AnalyticsParams.ERROR_NAME to err.javaClass.simpleName
+						)
+					)
 					val event = UIEvent.ShowSnackBar(err.message ?: "Unable to save")
 					_uiEvents.emit(event)
 				},
@@ -223,8 +256,15 @@ class QRDetailsViewModel(
 				val event = UIEvent.ShowSnackBar(message)
 				_uiEvents.emit(event)
 			},
-			onFailure = {
-				val event = UIEvent.ShowSnackBar(it.message ?: "Error")
+			onFailure = { err ->
+				analyticsLogger.logEvent(
+					AnalyticsEvent.QR_METADATA_UPDATE,
+					mapOf(
+						AnalyticsParams.IS_SUCCESSFUL to false,
+						AnalyticsParams.ERROR_NAME to err.javaClass.simpleName
+					)
+				)
+				val event = UIEvent.ShowSnackBar(err.message ?: "Error")
 				_uiEvents.emit(event)
 			},
 		)
@@ -234,11 +274,24 @@ class QRDetailsViewModel(
 		.onEach { res ->
 			when (res) {
 				is Resource.Error -> {
+					val isMissingId = res.error is CannotFindMatchingIdException
+					analyticsLogger.logEvent(
+						AnalyticsEvent.QR_DETAILS_LOAD,
+						mapOf(
+							AnalyticsParams.IS_SUCCESSFUL to false,
+							AnalyticsParams.ERROR_NAME to res.error.javaClass.simpleName,
+							AnalyticsParams.ERROR_WRONG_ID to isMissingId
+						)
+					)
 					val message = res.message ?: res.error.message ?: "Unable to load"
 					_uiEvents.emit(UIEvent.ShowSnackBar(message))
 				}
 
 				is Resource.Success -> {
+					analyticsLogger.logEvent(
+						AnalyticsEvent.QR_DETAILS_LOAD,
+						mapOf(AnalyticsParams.IS_SUCCESSFUL to true)
+					)
 					val model = _savedModel.updateAndGet { res.data }
 					_editState.update { state ->
 						state.copy(title = model?.title ?: "", desc = model?.desc ?: "")

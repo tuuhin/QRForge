@@ -26,6 +26,9 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.sam.qrforge.R
+import com.sam.qrforge.domain.analytics.AnalyticsEvent
+import com.sam.qrforge.domain.analytics.AnalyticsParams
+import com.sam.qrforge.domain.analytics.AnalyticsTracker
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.presentation.common.composables.LaunchActivityEventsSideEffect
 import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
@@ -43,6 +46,7 @@ import com.sam.qrforge.presentation.navigation.nav_graph.NavDeepLinks
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.viewmodel.sharedKoinViewModel
 
@@ -58,6 +62,15 @@ fun NavGraphBuilder.scanRoute(controller: NavController) =
 			)
 		) { backStack ->
 
+			val analytics = koinInject<AnalyticsTracker>()
+
+			LaunchedEffect(Unit) {
+				analytics.logEvent(
+					AnalyticsEvent.SCREEN_VIEW,
+					mapOf(AnalyticsParams.SCREEN_NAME to "scan_qr_screen")
+				)
+			}
+
 			val viewModel = backStack.sharedKoinViewModel<ScanQRViewModel>(controller)
 
 			val cameraViewModel = koinViewModel<CameraViewModel>()
@@ -68,12 +81,17 @@ fun NavGraphBuilder.scanRoute(controller: NavController) =
 			val cameraCaptureState by cameraViewModel.cameraCaptureState.collectAsStateWithLifecycle()
 			val analyzerState by cameraViewModel.imageAnalyzerState.collectAsStateWithLifecycle()
 
-			NavigateToResultsSideEffect(analysis = cameraViewModel::analysisResult) { model ->
-				// TODO: Fix this section
-				viewModel.onEvent(ScanResultScreenEvents.GenerateQR(model))
-				cameraViewModel.onCameraEvents(CameraControllerEvents.OnClearAnalysisResult)
-				controller.navigate(ScanQRNavGraph.ScanResultsRoute)
-			}
+			NavigateToResultsSideEffect(
+				analysis = cameraViewModel::analysisResult,
+				onClearAnalysis = {
+					cameraViewModel.onCameraEvents(CameraControllerEvents.OnClearAnalysisResult)
+				},
+				onNavigate = { model ->
+					viewModel.onEvent(ScanResultScreenEvents.GenerateQR(model))
+					controller.navigate(ScanQRNavGraph.ScanResultsRoute)
+				},
+			)
+
 
 			CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 				ScanQRScreen(
@@ -98,6 +116,15 @@ fun NavGraphBuilder.scanRoute(controller: NavController) =
 		}
 
 		animatedComposable<ScanQRNavGraph.ScanResultsRoute> { backStack ->
+
+			val analytics = koinInject<AnalyticsTracker>()
+
+			LaunchedEffect(Unit) {
+				analytics.logEvent(
+					AnalyticsEvent.SCREEN_VIEW,
+					mapOf(AnalyticsParams.SCREEN_NAME to "scan_results_screen")
+				)
+			}
 
 			val viewModel = backStack.sharedKoinViewModel<ScanQRViewModel>(controller)
 
@@ -134,6 +161,15 @@ fun NavGraphBuilder.scanRoute(controller: NavController) =
 			dialogProperties = DialogProperties(dismissOnBackPress = false)
 		) { backStack ->
 
+			val analytics = koinInject<AnalyticsTracker>()
+
+			LaunchedEffect(Unit) {
+				analytics.logEvent(
+					AnalyticsEvent.SCREEN_VIEW,
+					mapOf(AnalyticsParams.SCREEN_NAME to "save_scan_results_dialog")
+				)
+			}
+
 			val viewModel = backStack.sharedKoinViewModel<ScanQRViewModel>(controller)
 			val saveDialogState by viewModel.saveDialogState.collectAsStateWithLifecycle()
 
@@ -157,15 +193,22 @@ fun NavGraphBuilder.scanRoute(controller: NavController) =
 private fun NavigateToResultsSideEffect(
 	analysis: () -> Flow<QRContentModel?>,
 	onNavigate: (QRContentModel) -> Unit,
+	onClearAnalysis: () -> Unit,
 ) {
 	val currentOnNavigate by rememberUpdatedState(onNavigate)
+	val currentOnClearAnalysis by rememberUpdatedState(onClearAnalysis)
 	val lifecycleOwner = LocalLifecycleOwner.current
 
 	LaunchedEffect(lifecycleOwner) {
 		lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 			analysis()
 				.collectLatest { model ->
-					model?.let { currentOnNavigate(it) }
+					model?.let {
+						// navigate to details
+						currentOnNavigate(it)
+						// clear analysis result
+						currentOnClearAnalysis()
+					}
 				}
 		}
 	}

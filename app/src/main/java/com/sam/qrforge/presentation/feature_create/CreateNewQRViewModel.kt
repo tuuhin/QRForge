@@ -3,6 +3,9 @@ package com.sam.qrforge.presentation.feature_create
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.viewModelScope
 import com.sam.qrforge.data.mappers.toCompressedByteArray
+import com.sam.qrforge.domain.analytics.AnalyticsEvent
+import com.sam.qrforge.domain.analytics.AnalyticsParams
+import com.sam.qrforge.domain.analytics.AnalyticsTracker
 import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
 import com.sam.qrforge.domain.models.CreateNewQRModel
@@ -43,6 +46,7 @@ class CreateNewQRViewModel(
 	private val locationProvider: LocationProvider,
 	private val repository: SavedQRDataRepository,
 	private val saveGeneratedQRFacade: FileStorageFacade,
+	private val analyticsLogger: AnalyticsTracker,
 ) : AppViewModel() {
 
 	private val _saveQRState = MutableStateFlow(SaveQRScreenState())
@@ -79,6 +83,12 @@ class CreateNewQRViewModel(
 			is CreateQREvents.CheckContactsDetails -> findContactsFromURI(event.uri)
 			CreateQREvents.CheckLastKnownLocation -> checkLastKnownLocation()
 			is CreateQREvents.ShareGeneratedQR -> onShareGeneratedQR(event.bitmap)
+			CreateQREvents.OnPreviewQR -> {
+				analyticsLogger.logEvent(
+					AnalyticsEvent.GENERATED_QR,
+					mapOf(AnalyticsParams.GENERATED_QR_TYPE to _contentModel.value.type.toString())
+				)
+			}
 		}
 	}
 
@@ -101,6 +111,7 @@ class CreateNewQRViewModel(
 		fileResult.fold(
 			onSuccess = { uriToShare ->
 				_shareQREvent.emit(LaunchActivityEvent.ShareImageURI(uriToShare))
+				analyticsLogger.logEvent(AnalyticsEvent.SHARE_GENERATED_QR)
 			},
 			onFailure = {
 				val event = UIEvent.ShowToast("Failed to share")
@@ -128,10 +139,25 @@ class CreateNewQRViewModel(
 			val result = repository.insertQRData(createModel)
 			result.fold(
 				onSuccess = { model ->
+					analyticsLogger.logEvent(
+						AnalyticsEvent.SAVE_QR,
+						mapOf(
+							AnalyticsParams.IS_SUCCESSFUL to true,
+							AnalyticsParams.QR_IS_SCANNED to false
+						)
+					)
 					_uiEvents.emit(UIEvent.ShowToast("Saved!!"))
 					_uiEvents.emit(UIEvent.NavigateBack)
 				},
 				onFailure = { err ->
+					analyticsLogger.logEvent(
+						AnalyticsEvent.SAVE_QR,
+						mapOf(
+							AnalyticsParams.IS_SUCCESSFUL to false,
+							AnalyticsParams.QR_IS_SCANNED to false,
+							AnalyticsParams.ERROR_NAME to err::javaClass.name,
+						)
+					)
 					val event = UIEvent.ShowSnackBar(err.message ?: "Unable to save")
 					_uiEvents.emit(event)
 				},
