@@ -17,4 +17,6 @@ sealed interface ExportQRScreenEvents {
 
 	data object OnExportBitmap : ExportQRScreenEvents
 	data object OnCancelExport : ExportQRScreenEvents
+
+	data object OnDismissWarning : ExportQRScreenEvents
 }

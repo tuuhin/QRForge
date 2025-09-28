@@ -83,12 +83,8 @@ fun QRModelCard(
 		},
 		onDismiss = { value ->
 			when (value) {
-				SwipeToDismissBoxValue.StartToEnd -> {
-					onDeleteItem()
-					true
-				}
-
-				else -> false
+				SwipeToDismissBoxValue.StartToEnd -> onDeleteItem()
+				else -> {}
 			}
 		},
 		modifier = modifier,

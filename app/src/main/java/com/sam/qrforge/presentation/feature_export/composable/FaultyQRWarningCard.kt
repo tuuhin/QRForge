@@ -12,7 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +32,7 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 fun FaultyQRWarningCard(
 	showFaultyQRWarning: Boolean,
 	modifier: Modifier = Modifier,
+	onDismissWarning: () -> Unit = {},
 	containerColor: Color = MaterialTheme.colorScheme.tertiary,
 	contentColor: Color = MaterialTheme.colorScheme.onTertiary,
 	shape: Shape = MaterialTheme.shapes.large,
@@ -38,30 +42,44 @@ fun FaultyQRWarningCard(
 		enter = expandVertically() + fadeIn(),
 		exit = shrinkVertically() + fadeOut()
 	) {
-		Surface(
-			color = containerColor,
-			contentColor = contentColor,
-			shape = shape,
-			modifier = modifier
+
+		val swipeToDismissState = rememberSwipeToDismissBoxState()
+
+		SwipeToDismissBox(
+			state = swipeToDismissState,
+			onDismiss = { value ->
+				if (value == SwipeToDismissBoxValue.StartToEnd) {
+					onDismissWarning()
+				}
+			},
+			enableDismissFromEndToStart = false,
+			backgroundContent = {},
 		) {
-			Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(horizontal = 10.dp, vertical = 8.dp),
-				horizontalArrangement = Arrangement.spacedBy(12.dp),
-				verticalAlignment = Alignment.CenterVertically
+			Surface(
+				color = containerColor,
+				contentColor = contentColor,
+				shape = shape,
+				modifier = modifier
 			) {
-				Icon(
-					painter = painterResource(R.drawable.ic_warning_filled),
-					contentDescription = null,
-					tint = MaterialTheme.colorScheme.onTertiary,
-					modifier = Modifier.padding(8.dp)
-				)
-				Text(
-					text = stringResource(R.string.faulty_qr_warning_text),
-					style = MaterialTheme.typography.labelLarge,
-					modifier = Modifier.weight(1f)
-				)
+				Row(
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(horizontal = 10.dp, vertical = 8.dp),
+					horizontalArrangement = Arrangement.spacedBy(12.dp),
+					verticalAlignment = Alignment.CenterVertically
+				) {
+					Icon(
+						painter = painterResource(R.drawable.ic_warning_filled),
+						contentDescription = null,
+						tint = MaterialTheme.colorScheme.onTertiary,
+						modifier = Modifier.padding(8.dp)
+					)
+					Text(
+						text = stringResource(R.string.faulty_qr_warning_text),
+						style = MaterialTheme.typography.labelLarge,
+						modifier = Modifier.weight(1f)
+					)
+				}
 			}
 		}
 	}
