@@ -2,8 +2,10 @@ package com.sam.qrforge.presentation.feature_export.composable
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.presentation.common.models.CanvasCaptureLayer
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
@@ -17,6 +19,7 @@ fun QRMasterTemplate(
 	model: GeneratedQRUIModel,
 	modifier: Modifier = Modifier,
 	captureLayer: CanvasCaptureLayer = CanvasCaptureLayer(),
+	backgroundFallback: Color = MaterialTheme.colorScheme.surfaceContainer,
 	decoration: QRDecorationOption = QRDecorationOption.QRDecorationOptionBasic(),
 ) {
 	Box(
@@ -25,7 +28,9 @@ fun QRMasterTemplate(
 		when (decoration) {
 			is QRDecorationOption.QRDecorationOptionBasic -> QRTemplateBasic(
 				model = model,
-				decoration = decoration,
+				decoration = decoration.copy(
+					backGroundColor = decoration.backGroundColor ?: backgroundFallback
+				),
 				captureLayer = captureLayer,
 				modifier = Modifier.matchParentSize()
 			)

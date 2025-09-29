@@ -49,7 +49,11 @@ fun ExportQRBottomSheet(
 	onEvent: (ExportQRScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
 ) {
+
+	val sheetState = rememberModalBottomSheetState(true)
+
 	ExportQRBottomSheet(
+		sheetState = sheetState,
 		showSheet = state.verificationState == VerificationState.VERIFIED,
 		selectedExportType = state.selectedMimeType,
 		selectedDimension = state.exportDimensions,

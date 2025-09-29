@@ -15,16 +15,15 @@ class QRIntentActionContracts : ActivityResultContract<QRContentModel, Int>() {
 
 	override fun createIntent(context: Context, input: QRContentModel): Intent {
 		return when (input) {
-			is QREmailModel -> Intent(Intent.ACTION_SENDTO, "mailto:".toUri()).apply {
-				putExtra(Intent.EXTRA_EMAIL, input.address)
+			is QREmailModel -> Intent(Intent.ACTION_SENDTO).apply {
+				data = "mailto:".toUri()
+				putExtra(Intent.EXTRA_EMAIL, arrayOf(input.address))
 				input.subject?.let { putExtra(Intent.EXTRA_SUBJECT, it) }
 				input.body?.let { putExtra(Intent.EXTRA_TEXT, it) }
 			}
 
-			is QRSmsModel -> Intent(
-				Intent.ACTION_SEND,
-				"smsto:${input.phoneNumber}".toUri()
-			).apply {
+			is QRSmsModel -> Intent(Intent.ACTION_SEND).apply {
+				data = "smsto:${input.phoneNumber}".toUri()
 				input.message?.let { putExtra("sms_body", it) }
 			}
 
@@ -35,6 +34,6 @@ class QRIntentActionContracts : ActivityResultContract<QRContentModel, Int>() {
 		}
 	}
 
-	override fun parseResult(resultCode: Int, intent: Intent?): Int =resultCode
+	override fun parseResult(resultCode: Int, intent: Intent?): Int = resultCode
 
 }

@@ -130,7 +130,8 @@ fun QRTemplateBasic(
 		showFrame = decoration.showFrame,
 		finderColor = decoration.findersColor ?: MaterialTheme.colorScheme.onBackground,
 		bitsColor = decoration.bitsColor ?: MaterialTheme.colorScheme.onBackground,
-		backgroundColor = decoration.backGroundColor ?: Color.Transparent,
+		backgroundColor = decoration.backGroundColor
+			?: MaterialTheme.colorScheme.surfaceContainerLow,
 		frameColor = decoration.frameColor ?: MaterialTheme.colorScheme.onBackground,
 		captureLayer = captureLayer,
 		modifier = modifier,

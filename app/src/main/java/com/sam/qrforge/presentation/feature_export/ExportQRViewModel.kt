@@ -6,6 +6,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.viewModelScope
 import com.sam.qrforge.data.mappers.toCompressedByteArray
 import com.sam.qrforge.data.mappers.toRGBAModel
+import com.sam.qrforge.domain.analytics.AnalyticsEvent
+import com.sam.qrforge.domain.analytics.AnalyticsParams
+import com.sam.qrforge.domain.analytics.AnalyticsTracker
 import com.sam.qrforge.domain.enums.ExportDimensions
 import com.sam.qrforge.domain.enums.ImageMimeTypes
 import com.sam.qrforge.domain.facade.FileStorageFacade
@@ -37,6 +40,7 @@ import kotlinx.coroutines.launch
 class ExportQRViewModel(
 	private val fileFacade: FileStorageFacade,
 	private val validator: QRValidatorFacade,
+	private val analyticsLogger: AnalyticsTracker
 ) : AppViewModel() {
 
 	private val _decoration =
@@ -104,10 +108,12 @@ class ExportQRViewModel(
 			ExportQRScreenEvents.OnCancelExport -> onCancelExport()
 			is ExportQRScreenEvents.OnVerifyBitmap -> verifyQRBitmap(event.bitmap)
 			ExportQRScreenEvents.OnResetVerify -> _verificationState.update { VerificationState.NOT_VERIFIED }
+			ExportQRScreenEvents.OnDismissWarning -> _verificationState.update { VerificationState.NOT_VERIFIED }
 		}
 	}
 
 	private fun onPreviewSaveURI(uri: String) = viewModelScope.launch {
+		analyticsLogger.logEvent(AnalyticsEvent.EXPORT_QR_PREVIEWED)
 		_activityEvents.emit(LaunchActivityEvent.PreviewImageURI(uri))
 	}
 
@@ -135,11 +141,25 @@ class ExportQRViewModel(
 			.onEach { res ->
 				when (res) {
 					is Resource.Error -> {
+						analyticsLogger.logEvent(
+							AnalyticsEvent.EXPORT_QR_EVENT,
+							mapOf(
+								AnalyticsParams.IS_SUCCESSFUL to false,
+								AnalyticsParams.ERROR_NAME to res.error::javaClass.name
+							)
+						)
 						val message = res.message ?: res.error.message ?: "Cannot upload"
 						_uiEvents.emit(UIEvent.ShowSnackBar(message))
 					}
 
 					is Resource.Success -> {
+						analyticsLogger.logEvent(
+							AnalyticsEvent.EXPORT_QR_EVENT,
+							mapOf(
+								AnalyticsParams.IS_SUCCESSFUL to true,
+								AnalyticsParams.EXPORT_QR_TEMPLATE to _decoration.value.templateType
+							)
+						)
 						val event = UIEvent.ShowSnackBarWithAction(
 							message = "Successfully Exported",
 							actionText = "Preview",
@@ -147,12 +167,14 @@ class ExportQRViewModel(
 						)
 						_uiEvents.emit(event)
 					}
+
 					else -> {}
 				}
 			}.launchIn(this)
 	}
 
 	private fun onCancelExport() {
+		analyticsLogger.logEvent(AnalyticsEvent.EXPORT_QR_CANCELED)
 		_exportJob?.cancel()
 		_exportJob = null
 	}
@@ -169,6 +191,14 @@ class ExportQRViewModel(
 				_verificationState.update { VerificationState.NOT_VERIFIED }
 				return@launch
 			}
+
+			analyticsLogger.logEvent(
+				AnalyticsEvent.EXPORT_QR_VERIFIED,
+				mapOf(
+					AnalyticsParams.IS_SUCCESSFUL to result.isSuccess,
+					AnalyticsParams.EXPORT_QR_TEMPLATE to _decoration.value.templateType
+				)
+			)
 
 			val isVerified = result.getOrNull() ?: false
 			val newState = if (!isVerified) VerificationState.FAILED

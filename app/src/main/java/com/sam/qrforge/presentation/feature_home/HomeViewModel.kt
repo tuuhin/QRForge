@@ -1,6 +1,9 @@
 package com.sam.qrforge.presentation.feature_home
 
 import androidx.lifecycle.viewModelScope
+import com.sam.qrforge.domain.analytics.AnalyticsEvent
+import com.sam.qrforge.domain.analytics.AnalyticsParams
+import com.sam.qrforge.domain.analytics.AnalyticsTracker
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
 import com.sam.qrforge.domain.models.SavedQRModel
 import com.sam.qrforge.domain.repository.SavedQRDataRepository
@@ -27,7 +30,8 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
 	private val repository: SavedQRDataRepository,
-	private val generator: QRGeneratorFacade
+	private val generator: QRGeneratorFacade,
+	private val analyticsLogger: AnalyticsTracker
 ) : AppViewModel() {
 
 	private val _filterState = MutableStateFlow(FilterQRListState())
@@ -67,6 +71,13 @@ class HomeViewModel(
 		.onEach { res ->
 			when (res) {
 				is Resource.Error -> {
+					analyticsLogger.logEvent(
+						AnalyticsEvent.LOAD_ALL_QR,
+						mapOf(
+							AnalyticsParams.IS_SUCCESSFUL to false,
+							AnalyticsParams.ERROR_NAME to res.error.javaClass::getSimpleName
+						)
+					)
 					val message = res.message ?: res.error.message ?: "Unable to load"
 					_uiEvents.emit(UIEvent.ShowSnackBar(message))
 				}

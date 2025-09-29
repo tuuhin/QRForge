@@ -1,3 +1,5 @@
+import com.android.build.api.variant.ResValue
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
@@ -8,6 +10,9 @@ plugins {
 	alias(libs.plugins.ksp)
 	alias(libs.plugins.kotlinx.serialization)
 	alias(libs.plugins.androidx.room)
+//	google services and crashlytics are applied but only configured in play built
+	alias(libs.plugins.firebase.crashlytics)
+	alias(libs.plugins.google.services)
 }
 
 android {
@@ -50,10 +55,29 @@ android {
 		}
 	}
 
+	flavorDimensions += "distribution"
+
+	productFlavors {
+		create("play") {
+			dimension = "distribution"
+			applicationIdSuffix = ".play"
+		}
+		create("oss") {
+			dimension = "distribution"
+			applicationIdSuffix = ".oss"
+			isDefault = true
+		}
+	}
+
+
 	buildTypes {
 
 		debug {
 			applicationIdSuffix = ".debug"
+			// don't send the mapping file as the code is not minified
+			configure<CrashlyticsExtension> {
+				mappingFileUploadEnabled = false
+			}
 		}
 
 		release {
@@ -66,6 +90,10 @@ android {
 				getDefaultProguardFile("proguard-android-optimize.txt"),
 				"proguard-rules.pro"
 			)
+			// send the mapping file too to get the crash report
+			configure<CrashlyticsExtension> {
+				mappingFileUploadEnabled = true
+			}
 		}
 	}
 	compileOptions {
@@ -76,6 +104,22 @@ android {
 		compose = true
 		buildConfig = true
 	}
+}
+
+androidComponents.onVariants { variant ->
+	val buildType = variant.buildType
+	val buildFlavour = variant.flavorName
+	// no changes for the play release
+	if (buildType == "release" && buildFlavour == "play") return@onVariants
+	// only changes for oss release
+	val flavourNameReadable = if (buildFlavour == "play") "Play" else "OSS"
+	val appName = "QR Forge $flavourNameReadable" + if (buildType != "release") " (Debug) " else ""
+
+	val key = object : ResValue.Key {
+		override val name: String = "app_name"
+		override val type: String = "string"
+	}
+	variant.resValues.put(key, ResValue(appName.trim()))
 }
 
 composeCompiler {
@@ -129,6 +173,12 @@ dependencies {
 	testImplementation(libs.kotlin.test)
 	testImplementation(libs.kotlinx.coroutines.test)
 	testImplementation(libs.junit)
+
+	// firebase
+	"playImplementation"(platform(libs.firebase.bom))
+	"playImplementation"(libs.firebase.analytics)
+	"playImplementation"(libs.firebase.crashlytics)
+
 	// android tests
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)

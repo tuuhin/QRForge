@@ -33,11 +33,12 @@ fun ExportQRScreenContent(
 ) {
 	Column(
 		modifier = modifier.padding(contentPadding),
-		verticalArrangement = Arrangement.spacedBy(8.dp),
+		verticalArrangement = Arrangement.spacedBy(6.dp),
 		horizontalAlignment = Alignment.CenterHorizontally,
 	) {
 		FaultyQRWarningCard(
 			showFaultyQRWarning = showFaultyQRWarning,
+			onDismissWarning = { onEvent(ExportQRScreenEvents.OnDismissWarning) },
 			modifier = Modifier.fillMaxWidth()
 		)
 		Surface(
@@ -48,12 +49,13 @@ fun ExportQRScreenContent(
 				model = generatedQR,
 				decoration = decoration,
 				captureLayer = captureLayer,
-				modifier = Modifier.size(260.dp)
+				backgroundFallback = MaterialTheme.colorScheme.surfaceContainerLow,
+				modifier = Modifier.size(240.dp)
 			)
 		}
 		Text(
 			text = stringResource(R.string.select_template_title),
-			style = MaterialTheme.typography.titleLarge,
+			style = MaterialTheme.typography.titleMedium,
 			color = MaterialTheme.colorScheme.secondary,
 			modifier = Modifier
 				.fillMaxWidth()
@@ -68,7 +70,7 @@ fun ExportQRScreenContent(
 		)
 		Text(
 			text = stringResource(R.string.action_edit),
-			style = MaterialTheme.typography.titleLarge,
+			style = MaterialTheme.typography.titleMedium,
 			color = MaterialTheme.colorScheme.secondary,
 			modifier = Modifier
 				.fillMaxWidth()

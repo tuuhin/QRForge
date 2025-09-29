@@ -1,5 +1,6 @@
 package com.sam.qrforge.di
 
+import com.sam.qrforge.domain.analytics.AnalyticsTracker
 import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.QRValidatorFacade
 import com.sam.qrforge.presentation.feature_create.CreateNewQRViewModel
@@ -24,7 +25,8 @@ val presentationModule = module {
 	viewModel {
 		ExportQRViewModel(
 			get<FileStorageFacade>(),
-			get<QRValidatorFacade>(named("ML_KIT"))
+			get<QRValidatorFacade>(named("ML_KIT")),
+			analyticsLogger = get<AnalyticsTracker>()
 		)
 	}
 
