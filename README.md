@@ -71,7 +71,9 @@ Optional permissions, but they aren't necessary to the core app functioning
    ```
 
 2. Open the project in Android Studio.
-3. Build and run the app on your Android device or emulator.
+3. Make sure the built variant is `ossDebug`. Running `play` flavour is not advisable as it requires
+   **google-service.json** to work.
+4. Build and run the app on your Android device or emulator.
 
 ## 💬 Feedback & Support
 
@@ -92,6 +94,6 @@ please add a [GitHub Issue](https://github.com/tuuhin/QRForge/issues/new) first 
 
 ## 🎯 Conclusion
 
-**QR Forge** is more than just a QR generator — it’s a **customizable QR designer** made for
+**QR Forge** is more than just another QR generator with a **customizable QR designer** made for
 convenience, creativity, and everyday use. With its combination of speed, customization, and
 modern design, QR Forge makes creating and scanning QR codes effortless
