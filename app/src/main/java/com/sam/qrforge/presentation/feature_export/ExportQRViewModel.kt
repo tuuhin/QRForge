@@ -196,7 +196,7 @@ class ExportQRViewModel(
 				AnalyticsEvent.EXPORT_QR_VERIFIED,
 				mapOf(
 					AnalyticsParams.IS_SUCCESSFUL to result.isSuccess,
-					AnalyticsParams.EXPORT_QR_TEMPLATE to _decoration.value.templateType
+					AnalyticsParams.EXPORT_QR_TEMPLATE to _decoration.value.templateType.name
 				)
 			)
 
