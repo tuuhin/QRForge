@@ -12,9 +12,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,10 +32,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.enums.ExportDimensions
@@ -80,6 +86,8 @@ private fun ExportQRBottomSheet(
 	onExportTypeChange: (ImageMimeTypes) -> Unit = {},
 	isExportRunning: Boolean = false,
 	sheetState: SheetState = rememberModalBottomSheetState(),
+	containerColor: Color = BottomSheetDefaults.ContainerColor,
+	tonalElevation: Dp = BottomSheetDefaults.Elevation,
 ) {
 	if (!showSheet) return
 
@@ -87,7 +95,8 @@ private fun ExportQRBottomSheet(
 		onDismissRequest = onCancelExport,
 		sheetState = sheetState,
 		modifier = modifier,
-		containerColor = MaterialTheme.colorScheme.surfaceContainer
+		containerColor = containerColor,
+		tonalElevation = tonalElevation,
 	) {
 		ExportQRBottomSheetContent(
 			selectedExportType = selectedExportType,
@@ -116,7 +125,7 @@ private fun ExportQRBottomSheetContent(
 ) {
 	Column(
 		modifier = modifier
-			.heightIn(64.dp)
+			.windowInsetsPadding(WindowInsets.navigationBars)
 			.padding(contentPadding),
 		verticalArrangement = Arrangement.spacedBy(8.dp)
 	) {
@@ -194,6 +203,8 @@ private fun ExportQRBottomSheetContent(
 				)
 			}
 		}
+		// An extra space
+		Spacer(modifier = Modifier.height(2.dp))
 	}
 }
 

@@ -30,6 +30,7 @@ import com.sam.qrforge.R
 import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.presentation.common.composables.painter
 import com.sam.qrforge.presentation.common.composables.string
+import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildSize
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @Composable
@@ -57,7 +58,9 @@ fun QRDataTypeSelector(
 			horizontalArrangement = Arrangement.Center,
 			verticalArrangement = Arrangement.spacedBy(6.dp),
 			maxItemsInEachRow = 4,
-			modifier = Modifier.fillMaxWidth(),
+			modifier = Modifier
+				.fillMaxWidth()
+				.sharedTransitionSkipChildSize(),
 		) {
 			QRDataType.entries.forEach { type ->
 				QRDataTypeCard(

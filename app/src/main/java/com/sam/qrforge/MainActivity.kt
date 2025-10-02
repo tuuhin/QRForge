@@ -47,7 +47,10 @@ class MainActivity : ComponentActivity() {
 
 	override fun onNewIntent(intent: Intent) {
 		super.onNewIntent(intent)
-		navHostController.handleDeepLink(intent)
+		// process the incoming intent if nav controller  is initialized
+		if (::navHostController.isInitialized) {
+			navHostController.handleDeepLink(intent)
+		}
 	}
 
 }

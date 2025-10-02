@@ -2,24 +2,23 @@ package com.sam.qrforge.presentation.feature_home.composables
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.ZeroCornerSize
+import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
@@ -30,6 +29,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
@@ -45,29 +45,30 @@ fun GenerateORScanActions(
 	buttonShape: Shape = MaterialTheme.shapes.extraLarge,
 	generateButtonColor: Color = MaterialTheme.colorScheme.primary,
 	scanButtonColor: Color = MaterialTheme.colorScheme.secondary,
+	windowInsets: WindowInsets = BottomAppBarDefaults.windowInsets,
+	containerColor: Color = BottomAppBarDefaults.containerColor,
+	elevation: Dp = BottomAppBarDefaults.ContainerElevation,
 ) {
 	val clipShape = MaterialTheme.shapes.extraLarge.copy(
 		bottomStart = ZeroCornerSize,
 		bottomEnd = ZeroCornerSize
 	)
 
-	Box(
-		modifier = modifier
-			.sharedTransitionRenderInOverlay(1f)
-			.fillMaxWidth()
-			.heightIn(100.dp)
-			.background(
-				color = MaterialTheme.colorScheme.surfaceContainerHigh,
-				shape = clipShape,
-			),
-		contentAlignment = Alignment.Center
+	Surface(
+		modifier = modifier.sharedTransitionRenderInOverlay(1f),
+		color = containerColor,
+		shape = clipShape,
+		tonalElevation = elevation,
 	) {
 		Row(
 			horizontalArrangement = Arrangement.spacedBy(12.dp),
 			verticalAlignment = Alignment.CenterVertically,
 			modifier = Modifier
-				.windowInsetsPadding(WindowInsets.navigationBars)
-				.padding(horizontal = 12.dp, vertical = 4.dp)
+				.fillMaxWidth()
+				.windowInsetsPadding(windowInsets)
+				.heightIn(80.dp)
+				.padding(BottomAppBarDefaults.ContentPadding)
+				.padding(horizontal = 8.dp)
 		) {
 			Button(
 				onClick = onGenerate,
