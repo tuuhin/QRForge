@@ -41,19 +41,19 @@ fun QRDataTypeSelector(
 ) {
 	Column(
 		modifier = modifier,
-		verticalArrangement = Arrangement.spacedBy(4.dp)
+		verticalArrangement = Arrangement.spacedBy(2.dp)
 	) {
 		Text(
 			text = stringResource(R.string.select_qr_format_title),
-			style = MaterialTheme.typography.bodyLarge,
-			color = MaterialTheme.colorScheme.primary
+			style = MaterialTheme.typography.titleLarge,
+			color = MaterialTheme.colorScheme.primary,
 		)
 		Text(
 			text = stringResource(R.string.select_qr_format_desc),
 			style = MaterialTheme.typography.bodyMedium,
-			color = MaterialTheme.colorScheme.onSurface
+			color = MaterialTheme.colorScheme.onSurfaceVariant
 		)
-		Spacer(modifier = Modifier.height(8.dp))
+		Spacer(modifier = Modifier.height(10.dp))
 		FlowRow(
 			horizontalArrangement = Arrangement.Center,
 			verticalArrangement = Arrangement.spacedBy(6.dp),

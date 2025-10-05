@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -56,7 +57,7 @@ fun QRFormatURLInput(
 
 	val scope = rememberCoroutineScope()
 
-	var textField by rememberSaveable { mutableStateOf(initialState.url ?: "") }
+	var textField by rememberSaveable { mutableStateOf(initialState.url) }
 
 	LaunchedEffect(textField) {
 		val uriModel = QRURLModel(textField)
@@ -87,10 +88,10 @@ fun QRFormatURLInput(
 				) {
 					Icon(
 						painter = painterResource(R.drawable.ic_clear),
-						contentDescription = "Clear content"
+						contentDescription = stringResource(R.string.action_clear)
 					)
-					Spacer(modifier = Modifier.width(4.dp))
-					Text(text = "Clear")
+					Spacer(modifier = Modifier.width(6.dp))
+					Text(text = stringResource(R.string.action_clear))
 				}
 				Button(
 					onClick = {
@@ -100,7 +101,7 @@ fun QRFormatURLInput(
 							if (itemPresent) {
 								val item = entry?.clipData?.getItemAt(0)
 								item?.text?.let {
-									textField = it.toString()
+									textField += it.toString()
 								}
 							}
 						}
@@ -111,16 +112,16 @@ fun QRFormatURLInput(
 				) {
 					Icon(
 						painter = painterResource(R.drawable.ic_paste),
-						contentDescription = "Clear content"
+						contentDescription = stringResource(R.string.action_paste)
 					)
-					Spacer(modifier = Modifier.width(4.dp))
-					Text(text = "Paste")
+					Spacer(modifier = Modifier.width(6.dp))
+					Text(text = stringResource(R.string.action_paste))
 				}
 			}
 			OutlinedTextField(
 				value = textField,
 				onValueChange = { value -> textField = value },
-				placeholder = { Text(text = "Your url content") },
+				placeholder = { Text(text = stringResource(R.string.create_qr_fields_url_placeholder)) },
 				shape = shape,
 				maxLines = 2,
 				minLines = 2,

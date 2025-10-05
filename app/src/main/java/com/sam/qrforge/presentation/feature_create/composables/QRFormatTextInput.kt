@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -91,10 +92,10 @@ fun QRFormatTextInput(
 				) {
 					Icon(
 						painter = painterResource(R.drawable.ic_clear),
-						contentDescription = "Clear content"
+						contentDescription = stringResource(R.string.action_clear)
 					)
 					Spacer(modifier = Modifier.width(4.dp))
-					Text(text = "Clear")
+					Text(text = stringResource(R.string.action_clear))
 				}
 				Button(
 					onClick = {
@@ -104,7 +105,7 @@ fun QRFormatTextInput(
 							if (itemPresent) {
 								val item = entry?.clipData?.getItemAt(0)
 								item?.text?.let {
-									textField = it.toString()
+									textField += it.toString()
 								}
 							}
 						}
@@ -115,16 +116,16 @@ fun QRFormatTextInput(
 				) {
 					Icon(
 						painter = painterResource(R.drawable.ic_paste),
-						contentDescription = "Clear content"
+						contentDescription = stringResource(R.string.action_paste)
 					)
-					Spacer(modifier = Modifier.width(4.dp))
-					Text(text = "Paste")
+					Spacer(modifier = Modifier.width(6.dp))
+					Text(text = stringResource(R.string.action_paste))
 				}
 			}
 			OutlinedTextField(
 				value = textField,
 				onValueChange = { value -> textField = value },
-				placeholder = { Text(text = "QR text content") },
+				placeholder = { Text(text = stringResource(R.string.create_qr_fields_text_placeholder)) },
 				shape = shape,
 				minLines = 4,
 				maxLines = 10,

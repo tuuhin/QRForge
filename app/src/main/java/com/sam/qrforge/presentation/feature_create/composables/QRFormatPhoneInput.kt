@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -68,9 +69,9 @@ fun QRFormatPhoneInput(
 			verticalArrangement = Arrangement.spacedBy(6.dp)
 		) {
 			Text(
-				text = "Enter the telecom number of the peer or select from your contacts",
-				style = MaterialTheme.typography.titleMedium,
-				color = MaterialTheme.colorScheme.secondary
+				text = stringResource(R.string.create_qr_fields_phone_extra),
+				style = MaterialTheme.typography.labelLarge,
+				color = MaterialTheme.colorScheme.tertiary
 			)
 			Row(
 				modifier = Modifier.fillMaxWidth(),
@@ -80,8 +81,7 @@ fun QRFormatPhoneInput(
 				OutlinedTextField(
 					value = phNumber,
 					onValueChange = { value -> phNumber = value },
-					placeholder = { Text(text = "Phone") },
-					label = { Text(text = "Phone") },
+					label = { Text(text = stringResource(R.string.create_qr_fields_phone)) },
 					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 					shape = shape,
 					maxLines = 1,

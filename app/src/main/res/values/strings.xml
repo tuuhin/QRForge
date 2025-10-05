@@ -124,4 +124,27 @@
   <string name="export_qr_bottom_sheet_title_running">Exporting…</string>
   <string name="camera_action_control_zoom_absent">Camera zoom not available</string>
   <string name="action_edit_and_export"><![CDATA[Edit & Export]]></string>
+  <string name="create_qr_fields_geo_lat">Latitude</string>
+  <string name="create_qr_fields_geo_long">Longitude</string>
+  <string name="action_clear">Clear</string>
+  <string name="create_qr_fields_geo_read_location">Location</string>
+  <string name="create_qr_fields_geo_extra_text">Location default to ( 0.0,0.0 ) if known co-ordinates are not used</string>
+  <string name="create_qr_fields_phone_extra">Enter the telecom number of the peer or select from your contacts</string>
+  <string name="create_qr_fields_phone">Phone</string>
+  <string name="create_qr_fields_email_email">Email</string>
+  <string name="create_qr_fields_email_subject">Subject</string>
+  <string name="create_qr_fields_email_message">Message</string>
+  <string name="create_qr_fields_email_extra_email">some@some.com</string>
+  <string name="create_qr_fields_url_placeholder">Some website url</string>
+  <string name="action_paste">Paste</string>
+  <string name="create_qr_fields_text_placeholder">Plain Text Content</string>
+  <string name="create_qr_fields_wifi_ssid">Network Name</string>
+  <string name="create_qr_fields_wifi_ssid_placeholder">Home Network</string>
+  <string name="create_qr_fields_wifi_secret">Password</string>
+  <string name="create_qr_fields_wifi_secret_placeholder">SuperSecret001</string>
+  <string name="create_qr_fields_wifi_security">Security</string>
+  <string name="create_qr_fields_sms_message">Message</string>
+  <string name="create_qr_fields_sms_placeholder">Hello hope you are doing well</string>
+  <string name="read_current_location_dialog_title">Reading Lcoation</string>
+  <string name="read_current_location_dialog_text">Fetching your current location. Make sure you are outdoor</string>
 </resources>

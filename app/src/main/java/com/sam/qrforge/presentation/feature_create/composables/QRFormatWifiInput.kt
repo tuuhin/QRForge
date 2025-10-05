@@ -3,7 +3,6 @@ package com.sam.qrforge.presentation.feature_create.composables
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.shrinkOut
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -39,7 +38,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -60,9 +61,8 @@ fun QRFormatWifiInput(
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 	contentColor: Color = contentColorFor(containerColor),
 ) {
-
+	val focusManager = LocalFocusManager.current
 	val focusRequester = remember { FocusRequester() }
-	val focusRequesterHidden = remember { FocusRequester() }
 
 	var ssidField by rememberSaveable { mutableStateOf(initialState.ssid ?: "") }
 	var secretTextField by rememberSaveable { mutableStateOf(initialState.password ?: "") }
@@ -94,8 +94,8 @@ fun QRFormatWifiInput(
 			OutlinedTextField(
 				value = ssidField,
 				onValueChange = { value -> ssidField = value },
-				label = { Text(text = "Network") },
-				placeholder = { Text(text = "My home network") },
+				label = { Text(text = stringResource(R.string.create_qr_fields_wifi_ssid)) },
+				placeholder = { Text(text = stringResource(R.string.create_qr_fields_wifi_ssid_placeholder)) },
 				leadingIcon = {
 					Icon(
 						painter = painterResource(R.drawable.ic_network),
@@ -114,8 +114,8 @@ fun QRFormatWifiInput(
 				value = secretTextField,
 				onValueChange = { value -> secretTextField = value },
 				enabled = securityType != QRWiFiModel.WifiEncryption.NO_PASS,
-				label = { Text(text = "Password") },
-				placeholder = { Text(text = "Wifi Password") },
+				label = { Text(text = stringResource(R.string.create_qr_fields_wifi_secret)) },
+				placeholder = { Text(text = stringResource(R.string.create_qr_fields_wifi_secret_placeholder)) },
 				leadingIcon = {
 					Icon(
 						painter = painterResource(R.drawable.ic_password),
@@ -126,7 +126,7 @@ fun QRFormatWifiInput(
 					imeAction = ImeAction.Next,
 					keyboardType = KeyboardType.Password
 				),
-				keyboardActions = KeyboardActions(onNext = { focusRequesterHidden.requestFocus() }),
+				keyboardActions = KeyboardActions(onNext = { focusManager.clearFocus() }),
 				shape = shape,
 				modifier = Modifier
 					.focusRequester(focusRequester)
@@ -151,9 +151,7 @@ fun QRFormatWifiInput(
 						checkedThumbColor = MaterialTheme.colorScheme.onSecondaryContainer,
 						checkedBorderColor = MaterialTheme.colorScheme.onSecondaryContainer,
 						checkedTrackColor = MaterialTheme.colorScheme.secondaryContainer
-					), modifier = Modifier
-						.focusable()
-						.focusRequester(focusRequesterHidden)
+					),
 				)
 			}
 			Row(
@@ -164,7 +162,7 @@ fun QRFormatWifiInput(
 				verticalAlignment = Alignment.CenterVertically
 			) {
 				Text(
-					text = "Security",
+					text = stringResource(R.string.create_qr_fields_wifi_security),
 					style = MaterialTheme.typography.titleMedium,
 					color = MaterialTheme.colorScheme.secondary
 				)

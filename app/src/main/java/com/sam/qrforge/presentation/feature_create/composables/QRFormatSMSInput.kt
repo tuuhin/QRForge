@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -90,14 +91,14 @@ fun QRFormatSMSInput(
 				OutlinedTextField(
 					value = phNumber,
 					onValueChange = { value -> phNumber = value },
-					placeholder = { Text(text = "Phone") },
+					placeholder = { Text(text = stringResource(R.string.create_qr_fields_phone)) },
 					leadingIcon = {
 						Icon(
 							painter = painterResource(R.drawable.ic_phone),
 							contentDescription = "Phone"
 						)
 					},
-					label = { Text(text = "Phone") },
+					label = { Text(text = stringResource(R.string.create_qr_fields_phone)) },
 					keyboardOptions = KeyboardOptions(
 						keyboardType = KeyboardType.Number,
 						imeAction = ImeAction.Next
@@ -124,8 +125,8 @@ fun QRFormatSMSInput(
 			OutlinedTextField(
 				value = message,
 				onValueChange = { value -> message = value },
-				placeholder = { Text(text = "Hey how are you") },
-				label = { Text(text = "Message") },
+				placeholder = { Text(text = stringResource(R.string.create_qr_fields_sms_placeholder)) },
+				label = { Text(text = stringResource(R.string.create_qr_fields_sms_message)) },
 				keyboardOptions = KeyboardOptions(
 					keyboardType = KeyboardType.Text,
 					imeAction = ImeAction.Done
@@ -148,11 +149,11 @@ fun QRFormatSMSInput(
 					icon = {
 						Icon(
 							painter = painterResource(R.drawable.ic_clear),
-							contentDescription = "Clear content"
+							contentDescription = stringResource(R.string.action_clear)
 						)
 					},
 					shape = MaterialTheme.shapes.large,
-					label = { Text(text = "Clear") },
+					label = { Text(text = stringResource(R.string.action_clear)) },
 				)
 				SuggestionChip(
 					onClick = {
@@ -162,17 +163,17 @@ fun QRFormatSMSInput(
 							if (!itemPresent) return@launch
 
 							val item = entry?.clipData?.getItemAt(0) ?: return@launch
-							message = item.text.toString()
+							message += item.text.toString()
 						}
 					},
 					icon = {
 						Icon(
 							painter = painterResource(R.drawable.ic_paste),
-							contentDescription = "Clear content"
+							contentDescription = stringResource(R.string.action_paste)
 						)
 					},
 					shape = MaterialTheme.shapes.large,
-					label = { Text("Paste Message") },
+					label = { Text(text = stringResource(R.string.action_paste)) },
 				)
 			}
 		}

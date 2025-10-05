@@ -27,10 +27,12 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.domain.models.qr.QREmailModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
@@ -79,32 +81,28 @@ fun QRFormatEmailInput(
 			OutlinedTextField(
 				value = addressField,
 				onValueChange = { value -> addressField = value },
-				label = { Text(text = "Email") },
+				label = { Text(text = stringResource(R.string.create_qr_fields_email_email)) },
 				keyboardOptions = KeyboardOptions(
 					keyboardType = KeyboardType.Email,
 					imeAction = ImeAction.Next
 				),
 				keyboardActions = KeyboardActions(
-					onNext = {
-						focusRequester1.requestFocus(FocusDirection.Down)
-					},
+					onNext = { focusRequester1.requestFocus(FocusDirection.Down) },
 				),
-				placeholder = { Text(text = "some@mail.com") },
+				placeholder = { Text(text = stringResource(R.string.create_qr_fields_email_extra_email)) },
 				shape = shape,
 				modifier = Modifier.fillMaxWidth(),
 			)
 			OutlinedTextField(
 				value = subjectField,
 				onValueChange = { value -> subjectField = value },
-				label = { Text(text = "Subject") },
+				label = { Text(text = stringResource(R.string.create_qr_fields_email_subject)) },
 				keyboardOptions = KeyboardOptions(
 					keyboardType = KeyboardType.Text,
 					imeAction = ImeAction.Next
 				),
 				keyboardActions = KeyboardActions(
-					onNext = {
-						focusRequester2.requestFocus(FocusDirection.Down)
-					},
+					onNext = { focusRequester2.requestFocus(FocusDirection.Down) },
 				),
 				shape = shape,
 				minLines = 2,
@@ -116,7 +114,7 @@ fun QRFormatEmailInput(
 			OutlinedTextField(
 				value = messageField,
 				onValueChange = { value -> messageField = value },
-				label = { Text(text = "Message") },
+				label = { Text(text = stringResource(R.string.create_qr_fields_email_message)) },
 				shape = shape,
 				minLines = 4,
 				maxLines = 10,
