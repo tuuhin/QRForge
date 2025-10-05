@@ -43,7 +43,6 @@ class LocationProviderImpl(private val context: Context) : LocationProvider {
 	private val isLocationEnabled: Boolean
 		get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) locationManager?.isLocationEnabled == true
 		else {
-			// TODO: Check if this is working
 			Settings.Secure.getInt(
 				context.contentResolver,
 				Settings.Secure.LOCATION_MODE,
