@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
+import com.sam.qrforge.presentation.common.models.QRDecorationOption
 import com.sam.qrforge.presentation.common.models.QRTemplateOption
 import com.sam.qrforge.presentation.common.templates.QRTemplateBasic
 import com.sam.qrforge.presentation.common.templates.QRTemplateLayered
@@ -128,6 +129,7 @@ private fun QRTemplateOption(
 				when (template) {
 					QRTemplateOption.BASIC -> QRTemplateBasic(
 						model = renderModel,
+						decoration = QRDecorationOption.QRDecorationOptionBasic(backGroundColor = Color.Transparent),
 						modifier = Modifier.matchParentSize(),
 					)
 
@@ -138,6 +140,7 @@ private fun QRTemplateOption(
 
 					QRTemplateOption.COLOR_LAYERED -> QRTemplateLayered(
 						model = renderModel,
+						decoration = QRDecorationOption.QRDecorationOptionColorLayer(backGroundColor = Color.Transparent),
 						modifier = Modifier.matchParentSize()
 					)
 				}

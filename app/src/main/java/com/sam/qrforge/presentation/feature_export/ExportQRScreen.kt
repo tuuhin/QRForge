@@ -69,7 +69,7 @@ fun ExportQRScreen(
 	Scaffold(
 		topBar = {
 			ExportScreenTopAppBar(
-				onBeginExport = {
+				onBeginVerify = {
 					scope.launch {
 						val bitmap = captureLayer.captureBitmap()
 						if (bitmap == null) return@launch

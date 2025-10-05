@@ -65,7 +65,7 @@ fun ScanResultsScreen(
 			targetState = content != null,
 			modifier = Modifier
 				.padding(scPadding)
-				.padding(horizontal = dimensionResource(R.dimen.sc_padding))
+				.padding(all = dimensionResource(R.dimen.sc_padding))
 		) { isContentReady ->
 			if (isContentReady && content != null)
 				ScanResultsScreenContent(

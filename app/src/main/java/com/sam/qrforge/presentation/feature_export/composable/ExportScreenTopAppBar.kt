@@ -31,7 +31,7 @@ import com.sam.qrforge.data.utils.hasWriteStoragePermission
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExportScreenTopAppBar(
-	onBeginExport: () -> Unit,
+	onBeginVerify: () -> Unit,
 	modifier: Modifier = Modifier,
 	enabled: Boolean = false,
 	navigation: @Composable () -> Unit = {},
@@ -65,12 +65,16 @@ fun ExportScreenTopAppBar(
 				onClick = {
 					if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !hasPermission)
 						showPermissionDialog = true
-					else onBeginExport()
+					else onBeginVerify()
 				},
 				shape = MaterialTheme.shapes.extraLarge,
+				colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.secondary),
 				enabled = enabled,
 			) {
-				Text(text = stringResource(R.string.action_verify))
+				Text(
+					text = stringResource(R.string.action_verify),
+					style = MaterialTheme.typography.titleSmall
+				)
 			}
 			Spacer(modifier = Modifier.width(2.dp))
 		},
