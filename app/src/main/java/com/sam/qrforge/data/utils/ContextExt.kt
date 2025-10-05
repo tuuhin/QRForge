@@ -5,10 +5,16 @@ import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 
-val Context.hasLocationPermission: Boolean
+val Context.hasCoarseLocationPermission: Boolean
 	get() = ContextCompat.checkSelfPermission(
 		this,
 		Manifest.permission.ACCESS_COARSE_LOCATION
+	) == PermissionChecker.PERMISSION_GRANTED
+
+val Context.hasPreciseLocationPermission: Boolean
+	get() = ContextCompat.checkSelfPermission(
+		this,
+		Manifest.permission.ACCESS_FINE_LOCATION
 	) == PermissionChecker.PERMISSION_GRANTED
 
 val Context.hasReadContactsPermission: Boolean

@@ -6,6 +6,7 @@ import com.sam.qrforge.data.mappers.toCompressedByteArray
 import com.sam.qrforge.domain.analytics.AnalyticsEvent
 import com.sam.qrforge.domain.analytics.AnalyticsParams
 import com.sam.qrforge.domain.analytics.AnalyticsTracker
+import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
 import com.sam.qrforge.domain.models.CreateNewQRModel
@@ -17,6 +18,7 @@ import com.sam.qrforge.domain.models.qr.QRSmsModel
 import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 import com.sam.qrforge.domain.provider.ContactsDataProvider
 import com.sam.qrforge.domain.provider.LocationProvider
+import com.sam.qrforge.domain.provider.exception.LocationNotKnownException
 import com.sam.qrforge.domain.repository.SavedQRDataRepository
 import com.sam.qrforge.presentation.common.mappers.toUIModel
 import com.sam.qrforge.presentation.common.utils.AppViewModel
@@ -25,6 +27,7 @@ import com.sam.qrforge.presentation.common.utils.UIEvent
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenEvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -52,6 +55,16 @@ class CreateNewQRViewModel(
 	private val _saveQRState = MutableStateFlow(SaveQRScreenState())
 	val saveQRState = _saveQRState.asStateFlow()
 
+	private val _showReadLocationDialog = MutableStateFlow(false)
+	val showLocationDialog = _showReadLocationDialog.asStateFlow()
+
+	val isLocationEnabled = locationProvider.locationEnabledFlow
+		.stateIn(
+			scope = viewModelScope,
+			started = SharingStarted.Lazily,
+			initialValue = false
+		)
+
 	private val _contentModel = MutableStateFlow<QRContentModel>(QRPlainTextModel(""))
 	val qrContent = _contentModel.onStart { onGenerateQR() }
 		.stateIn(
@@ -76,6 +89,8 @@ class CreateNewQRViewModel(
 	private val _shareQREvent = MutableSharedFlow<LaunchActivityEvent>()
 	val activityEvent = _shareQREvent.asSharedFlow()
 
+	private var _readLocationJob: Job? = null
+
 	fun onCreateEvents(event: CreateQREvents) {
 		when (event) {
 			is CreateQREvents.OnQRDataTypeChange -> _contentModel.update { event.type.toNewModel() }
@@ -89,6 +104,8 @@ class CreateNewQRViewModel(
 					mapOf(AnalyticsParams.GENERATED_QR_TYPE to _contentModel.value.type.toString())
 				)
 			}
+
+			CreateQREvents.CancelReadCurrentLocation -> onCancelReadCurrentLocation()
 		}
 	}
 
@@ -165,17 +182,59 @@ class CreateNewQRViewModel(
 		}
 	}
 
+	private fun onCancelReadCurrentLocation() {
+		_readLocationJob?.cancel()
+		_readLocationJob = null
+		_showReadLocationDialog.update { false }
+	}
+
+	private fun checkCurrentLocation() {
+		// if it's not geo nothing to be done
+		if (_contentModel.value.type != QRDataType.TYPE_GEO) return
+		// show the dialog
+		_showReadLocationDialog.update { true }
+		// cancel the job if any
+		_readLocationJob?.cancel()
+		_readLocationJob = viewModelScope.launch {
+			val currentLocationResult = locationProvider.readCurrentLocation()
+			currentLocationResult.fold(
+				onSuccess = { location ->
+					_contentModel.update { content ->
+						if (content !is QRGeoPointModel) content
+						else content.copy(lat = location.latitude, long = location.longitude)
+					}
+				},
+				onFailure = { err ->
+					val event = UIEvent.ShowToast(err.message ?: "Cannot read location")
+					_uiEvents.emit(event)
+				},
+			)
+			// dismiss the dialog
+			_showReadLocationDialog.update { false }
+		}
+	}
+
 	private fun checkLastKnownLocation() = viewModelScope.launch {
-		val result = locationProvider.invoke()
-		result.fold(
+		// if it's not geo nothing to be done
+		if (_contentModel.value.type != QRDataType.TYPE_GEO) return@launch
+
+		val lastLocationResult = locationProvider.readLastLocation()
+		lastLocationResult.fold(
 			onSuccess = { location ->
 				_contentModel.update { content ->
 					if (content !is QRGeoPointModel) content
 					else content.copy(lat = location.latitude, long = location.longitude)
 				}
 			},
-			onFailure = {
-				val event = UIEvent.ShowSnackBar(it.message ?: "Location cannot be found")
+			onFailure = { err ->
+				val event = if (err is LocationNotKnownException) {
+					analyticsLogger.logEvent(AnalyticsEvent.LOCATION_READ_FAILED)
+					UIEvent.ShowSnackBarWithAction(
+						message = "Couldn’t find your recent location — fetching your current one instead",
+						actionText = "Check",
+						action = ::checkCurrentLocation
+					)
+				} else UIEvent.ShowSnackBar(err.message ?: "Location cannot be found")
 				_uiEvents.emit(event)
 			},
 		)

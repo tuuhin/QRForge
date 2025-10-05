@@ -35,7 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.data.contracts.PickContactsContract
-import com.sam.qrforge.data.utils.hasLocationPermission
+import com.sam.qrforge.data.utils.hasCoarseLocationPermission
 import com.sam.qrforge.data.utils.hasReadContactsPermission
 import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.domain.models.qr.QRContentModel
@@ -50,14 +50,14 @@ fun QRContentInputContainer(
 	onUseCurrentLocation: () -> Unit,
 	onReadContactsDetails: (String) -> Unit,
 	modifier: Modifier = Modifier,
-	selectedType: QRDataType = QRDataType.TYPE_TEXT,
+	isLocationEnabled: Boolean = true,
 ) {
 	val context = LocalContext.current
 
 	val currentOnReadContactsDetails by rememberUpdatedState(onReadContactsDetails)
 
 	var hasContactsPermission by remember { mutableStateOf(context.hasReadContactsPermission) }
-	var hasLocationPermission by remember { mutableStateOf(context.hasLocationPermission) }
+	var hasLocationPermission by remember { mutableStateOf(context.hasCoarseLocationPermission) }
 
 	val permissionsLauncher = rememberLauncherForActivityResult(
 		contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -66,9 +66,13 @@ fun QRContentInputContainer(
 				hasContactsPermission =
 					perms.getOrDefault(Manifest.permission.READ_CONTACTS, false)
 			}
-			if (perms.containsKey(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+			// we want any of the permissions to be granted
+			if (perms.containsKey(Manifest.permission.ACCESS_COARSE_LOCATION) ||
+				perms.containsKey(Manifest.permission.ACCESS_FINE_LOCATION)
+			) {
 				hasLocationPermission =
-					perms.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)
+					perms.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) ||
+							perms.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false)
 			}
 		}
 	)
@@ -83,21 +87,21 @@ fun QRContentInputContainer(
 
 	Column(
 		modifier = modifier,
-		verticalArrangement = Arrangement.spacedBy(4.dp)
+		verticalArrangement = Arrangement.spacedBy(2.dp)
 	) {
 		Text(
 			text = stringResource(R.string.select_qr_content_title),
-			style = MaterialTheme.typography.bodyLarge,
-			color = MaterialTheme.colorScheme.primary
+			style = MaterialTheme.typography.titleLarge,
+			color = MaterialTheme.colorScheme.primary,
 		)
 		Text(
 			text = stringResource(R.string.select_qr_content_desc),
 			style = MaterialTheme.typography.bodyMedium,
-			color = MaterialTheme.colorScheme.onSurface
+			color = MaterialTheme.colorScheme.onSurfaceVariant
 		)
-		Spacer(modifier = Modifier.height(8.dp))
+		Spacer(modifier = Modifier.height(10.dp))
 		AnimatedContent(
-			targetState = selectedType,
+			targetState = content.type,
 			transitionSpec = {
 				slideInVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)) + expandIn(
 					expandFrom = Alignment.TopCenter,
@@ -119,9 +123,15 @@ fun QRContentInputContainer(
 				QRDataType.TYPE_GEO -> QRFormatGeoInput(
 					initialState = (content as? QRGeoPointModel) ?: QRGeoPointModel(),
 					onStateChange = onContentChange,
+					isLocationEnabled = isLocationEnabled,
 					onUseLastKnownLocation = {
 						if (hasLocationPermission) onUseCurrentLocation()
-						else permissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
+						else permissionsLauncher.launch(
+							arrayOf(
+								Manifest.permission.ACCESS_COARSE_LOCATION,
+								Manifest.permission.ACCESS_FINE_LOCATION
+							)
+						)
 					},
 				)
 

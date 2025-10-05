@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -36,8 +37,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
@@ -52,7 +55,8 @@ fun QRFormatGeoInput(
 	initialState: QRGeoPointModel = QRGeoPointModel(),
 	onUseLastKnownLocation: () -> Unit = {},
 	shape: Shape = MaterialTheme.shapes.large,
-	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+	isLocationEnabled: Boolean = true,
+	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
 	contentColor: Color = contentColorFor(containerColor),
 	contentPadding: PaddingValues = PaddingValues(12.dp),
 ) {
@@ -105,26 +109,27 @@ fun QRFormatGeoInput(
 						painter = painterResource(R.drawable.ic_clear),
 						contentDescription = "Clear content"
 					)
-					Spacer(modifier = Modifier.width(4.dp))
+					Spacer(modifier = Modifier.width(6.dp))
 					Text(
-						text = "Clear",
+						text = stringResource(R.string.action_clear),
 						style = MaterialTheme.typography.bodyMedium
 					)
 				}
 				Button(
 					onClick = onUseLastKnownLocation,
+					enabled = isLocationEnabled,
 					shape = MaterialTheme.shapes.large,
 					contentPadding = PaddingValues(vertical = 12.dp),
 					modifier = Modifier.weight(1f)
 				) {
 					Icon(
 						painter = painterResource(R.drawable.ic_geo),
-						contentDescription = "Clear content",
+						contentDescription = stringResource(R.string.create_qr_fields_geo_read_location),
 						modifier = Modifier.size(20.dp),
 					)
-					Spacer(modifier = Modifier.width(4.dp))
+					Spacer(modifier = Modifier.width(6.dp))
 					Text(
-						text = "Current location",
+						text = stringResource(R.string.create_qr_fields_geo_read_location),
 						style = MaterialTheme.typography.bodyMedium
 					)
 				}
@@ -135,7 +140,7 @@ fun QRFormatGeoInput(
 				verticalAlignment = Alignment.CenterVertically
 			) {
 				Text(
-					text = "Latitude",
+					text = stringResource(R.string.create_qr_fields_geo_lat),
 					style = MaterialTheme.typography.titleMedium,
 					color = MaterialTheme.colorScheme.secondary
 				)
@@ -159,7 +164,7 @@ fun QRFormatGeoInput(
 				verticalAlignment = Alignment.CenterVertically
 			) {
 				Text(
-					text = "Longitude",
+					text = stringResource(R.string.create_qr_fields_geo_long),
 					style = MaterialTheme.typography.titleMedium,
 					color = MaterialTheme.colorScheme.secondary
 				)
@@ -179,6 +184,14 @@ fun QRFormatGeoInput(
 						.width(120.dp),
 				)
 			}
+			HorizontalDivider()
+			Text(
+				text = stringResource(R.string.create_qr_fields_geo_extra_text),
+				style = MaterialTheme.typography.labelLarge,
+				color = MaterialTheme.colorScheme.tertiary,
+				modifier = Modifier.align(Alignment.CenterHorizontally),
+				textAlign = TextAlign.Center,
+			)
 		}
 	}
 }

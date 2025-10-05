@@ -38,6 +38,7 @@ import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildSize
 import com.sam.qrforge.presentation.feature_create.composables.CreateQRScreenContent
+import com.sam.qrforge.presentation.feature_create.composables.ReadingLocationDialog
 import com.sam.qrforge.presentation.feature_create.composables.ShowGeneratedQRButton
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
 import com.sam.qrforge.ui.theme.QRForgeTheme
@@ -53,6 +54,8 @@ fun CreateQRScreen(
 	onEvent: (CreateQREvents) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
 	onPreviewQR: () -> Unit = {},
+	showReadingLocationDialog: Boolean = false,
+	isLocationEnabled: Boolean = true,
 ) {
 	val layoutDirection = LocalLayoutDirection.current
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -60,6 +63,11 @@ fun CreateQRScreen(
 	val showPreviewButton by remember(content) {
 		derivedStateOf { content.isValid }
 	}
+
+	ReadingLocationDialog(
+		showDialog = showReadingLocationDialog,
+		onDismiss = { onEvent(CreateQREvents.CancelReadCurrentLocation) },
+	)
 
 	Scaffold(
 		topBar = {
@@ -90,6 +98,7 @@ fun CreateQRScreen(
 	) { scPadding ->
 		CreateQRScreenContent(
 			content = content,
+			isLocationEnabled = isLocationEnabled,
 			onSelectType = { onEvent(CreateQREvents.OnQRDataTypeChange(it)) },
 			onContentUpdate = { onEvent(CreateQREvents.OnUpdateQRContent(it)) },
 			onReadCurrentLocation = { onEvent(CreateQREvents.CheckLastKnownLocation) },

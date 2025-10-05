@@ -22,6 +22,7 @@ fun CreateQRScreenContent(
 	onReadCurrentLocation: () -> Unit = {},
 	onReadContactsDetails: (String) -> Unit = {},
 	onContentUpdate: (QRContentModel) -> Unit,
+	isLocationEnabled: Boolean = true,
 	contentPadding: PaddingValues = PaddingValues(12.dp)
 ) {
 	val scrollState = rememberScrollState()
@@ -39,8 +40,8 @@ fun CreateQRScreenContent(
 			modifier = Modifier.fillMaxWidth()
 		)
 		QRContentInputContainer(
-			selectedType = content.type,
 			content = content,
+			isLocationEnabled = isLocationEnabled,
 			onUseCurrentLocation = onReadCurrentLocation,
 			onReadContactsDetails = onReadContactsDetails,
 			onContentChange = onContentUpdate,
