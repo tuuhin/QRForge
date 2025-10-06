@@ -1,9 +1,10 @@
 package com.sam.qrforge.presentation.feature_scan.screen
 
+import android.Manifest
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -18,18 +19,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.sam.qrforge.R
-import com.sam.qrforge.data.utils.hasCameraPermission
 import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
@@ -43,7 +41,7 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @OptIn(
 	ExperimentalMaterial3Api::class,
-	ExperimentalSharedTransitionApi::class
+	ExperimentalSharedTransitionApi::class, ExperimentalPermissionsApi::class
 )
 @Composable
 fun ScanQRScreen(
@@ -54,18 +52,17 @@ fun ScanQRScreen(
 	modifier: Modifier = Modifier,
 	navigation: @Composable () -> Unit = {},
 ) {
-
 	val layoutDirection = LocalLayoutDirection.current
-	val context = LocalContext.current
 
-	var hasPermission by remember { mutableStateOf(context.hasCameraPermission) }
+	val permissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
 
 	Scaffold(
 		topBar = {
 			TopAppBar(
 				title = { },
 				navigationIcon = navigation,
-				colors = if (hasPermission) TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+				colors = if (permissionState.status.isGranted)
+					TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
 				else TopAppBarDefaults.topAppBarColors(),
 			)
 		},
@@ -78,8 +75,8 @@ fun ScanQRScreen(
 		),
 	) { scPadding ->
 		Crossfade(
-			targetState = hasPermission,
-			animationSpec = tween(200, easing = FastOutSlowInEasing),
+			targetState = permissionState.status.isGranted,
+			animationSpec = tween(durationMillis = 100, delayMillis = 10, easing = EaseInOut),
 		) { isGranted ->
 			if (isGranted) {
 				ScanQRScreenContent(
@@ -90,7 +87,8 @@ fun ScanQRScreen(
 					modifier = Modifier.fillMaxSize()
 				)
 			} else PermissionPlaceHolder(
-				onPermissionChanged = { perms -> hasPermission = perms },
+				permissionStatus = permissionState.status,
+				onLaunchPermissionDialog = { permissionState.launchPermissionRequest() },
 				onGalleryImageSelected = { uri ->
 					onCameraEvent(CameraControllerEvents.OnSelectImageURI(uri))
 				},

@@ -2,6 +2,9 @@ package com.sam.qrforge.data.utils
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 
@@ -34,3 +37,9 @@ val Context.hasCameraPermission: Boolean
 		this,
 		Manifest.permission.CAMERA
 	) == PermissionChecker.PERMISSION_GRANTED
+
+val Context.applicationSettingsIntent: Intent
+	get() = Intent().apply {
+		action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+		data = Uri.fromParts("package", packageName, null)
+	}

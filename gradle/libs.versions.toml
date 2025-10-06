@@ -26,6 +26,7 @@ cameraX = "1.5.0"
 barcodeScanning = "17.3.0"
 googleServices = "4.4.3"
 crashlyticsPlugin = "3.0.6"
+accompanistPermissions = "0.37.3"
 
 
 [libraries]
@@ -57,7 +58,8 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
-
+#util
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 #zebra crossing
 barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "core" }

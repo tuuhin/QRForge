@@ -42,40 +42,12 @@ import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.enums.ExportDimensions
 import com.sam.qrforge.domain.enums.ImageMimeTypes
-import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenEvents
-import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenState
-import com.sam.qrforge.presentation.feature_export.state.VerificationState
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import com.sam.qrforge.ui.theme.displayFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExportQRBottomSheet(
-	state: ExportQRScreenState,
-	onEvent: (ExportQRScreenEvents) -> Unit,
-	modifier: Modifier = Modifier,
-) {
-
-	val sheetState = rememberModalBottomSheetState(true)
-
-	ExportQRBottomSheet(
-		sheetState = sheetState,
-		showSheet = state.verificationState == VerificationState.VERIFIED,
-		selectedExportType = state.selectedMimeType,
-		selectedDimension = state.exportDimensions,
-		isExportRunning = !state.canExport,
-		onCancelExport = { onEvent(ExportQRScreenEvents.OnResetVerify) },
-		onBeginExport = { onEvent(ExportQRScreenEvents.OnExportBitmap) },
-		onExportTypeChange = { onEvent(ExportQRScreenEvents.OnExportMimeTypeChange(it)) },
-		onDimensionChange = { onEvent(ExportQRScreenEvents.OnExportDimensionChange(it)) },
-		modifier = modifier,
-	)
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ExportQRBottomSheet(
 	showSheet: Boolean,
 	onCancelExport: () -> Unit,
 	onBeginExport: () -> Unit,
@@ -85,7 +57,7 @@ private fun ExportQRBottomSheet(
 	onDimensionChange: (ExportDimensions) -> Unit = {},
 	onExportTypeChange: (ImageMimeTypes) -> Unit = {},
 	isExportRunning: Boolean = false,
-	sheetState: SheetState = rememberModalBottomSheetState(),
+	sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 	containerColor: Color = BottomSheetDefaults.ContainerColor,
 	tonalElevation: Dp = BottomSheetDefaults.Elevation,
 ) {

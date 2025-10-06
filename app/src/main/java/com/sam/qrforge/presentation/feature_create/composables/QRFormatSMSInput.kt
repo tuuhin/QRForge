@@ -1,5 +1,8 @@
 package com.sam.qrforge.presentation.feature_create.composables
 
+import android.Manifest
+import android.content.ActivityNotFoundException
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -31,6 +35,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,28 +43,65 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.sam.qrforge.R
+import com.sam.qrforge.data.contracts.PickContactsContract
+import com.sam.qrforge.data.utils.applicationSettingsIntent
 import com.sam.qrforge.domain.models.qr.QRSmsModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun QRFormatSMSInput(
 	onStateChange: (QRSmsModel) -> Unit,
 	modifier: Modifier = Modifier,
 	initialState: QRSmsModel = QRSmsModel(),
-	onOpenContacts: () -> Unit = {},
+	onSelectContacts: (String) -> Unit = {},
 	contentPadding: PaddingValues = PaddingValues(12.dp),
 	shape: Shape = MaterialTheme.shapes.large,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 	contentColor: Color = contentColorFor(containerColor),
 ) {
+	val context = LocalContext.current
+
 	val focusManager = LocalFocusManager.current
 	val clipboardManager = LocalClipboard.current
 
-	val scope = rememberCoroutineScope()
+	var showDialog by remember { mutableStateOf(false) }
 
+	val permissionState = rememberPermissionState(Manifest.permission.READ_CONTACTS)
+
+	val currentOnSelectContracts by rememberUpdatedState(onSelectContacts)
+	val readContactsLauncher = rememberLauncherForActivityResult(
+		contract = PickContactsContract(),
+		onResult = { uri ->
+			val uriString = uri?.toString() ?: return@rememberLauncherForActivityResult
+			currentOnSelectContracts(uriString)
+		},
+	)
+
+	ContactsPermissionDialog(
+		showDialog = showDialog,
+		permissionStatus = permissionState.status,
+		onCancel = { showDialog = false },
+		onShowLauncher = {
+			permissionState.launchPermissionRequest()
+			showDialog = false
+		},
+		onOpenSettings = {
+			try {
+				context.startActivity(context.applicationSettingsIntent)
+			} catch (_: ActivityNotFoundException) {
+			}
+			showDialog = false
+		},
+	)
+
+	val scope = rememberCoroutineScope()
 	val focusRequester = remember { FocusRequester() }
 
 	var phNumber by rememberSaveable(initialState.phoneNumber) {
@@ -111,7 +153,11 @@ fun QRFormatSMSInput(
 					modifier = Modifier.weight(1f)
 				)
 				Surface(
-					onClick = onOpenContacts,
+					onClick = {
+						if (permissionState.status.isGranted)
+							readContactsLauncher.launch(Unit)
+						else showDialog = true
+					},
 					shape = MaterialTheme.shapes.large,
 					color = MaterialTheme.colorScheme.primary,
 				) {

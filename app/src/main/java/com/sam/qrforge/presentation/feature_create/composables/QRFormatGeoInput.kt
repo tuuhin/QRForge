@@ -1,5 +1,6 @@
 package com.sam.qrforge.presentation.feature_create.composables
 
+import android.Manifest
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +37,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,11 +46,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.sam.qrforge.R
+import com.sam.qrforge.data.utils.applicationSettingsIntent
 import com.sam.qrforge.domain.models.qr.QRGeoPointModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.coroutines.flow.collectLatest
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun QRFormatGeoInput(
 	onStateChange: (QRGeoPointModel) -> Unit,
@@ -61,7 +69,39 @@ fun QRFormatGeoInput(
 	contentPadding: PaddingValues = PaddingValues(12.dp),
 ) {
 
+	val context = LocalContext.current
 	val focusManager = LocalFocusManager.current
+
+	var showDialog by remember { mutableStateOf(false) }
+
+	val permissionState = rememberMultiplePermissionsState(
+		permissions = listOf(
+			Manifest.permission.ACCESS_COARSE_LOCATION,
+			Manifest.permission.ACCESS_FINE_LOCATION
+		)
+	)
+
+	val isLocationPermissionGranted by remember(permissionState) {
+		derivedStateOf { permissionState.permissions.any { it.status.isGranted } }
+	}
+
+	LocationPermissionDialog(
+		showDialog = showDialog,
+		isPermanentlyDenied = permissionState.shouldShowRationale,
+		onCancel = { showDialog = false },
+		onShowLauncher = {
+			permissionState.launchMultiplePermissionRequest()
+			showDialog = false
+		},
+		onOpenSettings = {
+			try {
+				context.startActivity(context.applicationSettingsIntent)
+			} finally {
+				showDialog = false
+			}
+		},
+	)
+
 	val focusRequester = remember { FocusRequester() }
 
 	var latitude by rememberSaveable(initialState.lat) { mutableStateOf(initialState.lat.toString()) }
@@ -116,7 +156,10 @@ fun QRFormatGeoInput(
 					)
 				}
 				Button(
-					onClick = onUseLastKnownLocation,
+					onClick = {
+						if (isLocationPermissionGranted) onUseLastKnownLocation()
+						else showDialog = true
+					},
 					enabled = isLocationEnabled,
 					shape = MaterialTheme.shapes.large,
 					contentPadding = PaddingValues(vertical = 12.dp),

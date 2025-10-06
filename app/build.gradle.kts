@@ -169,6 +169,7 @@ dependencies {
 	implementation(libs.zxing.core)
 	implementation(libs.androidx.concurrent.futures.ktx)
 	implementation(libs.barcode.scanning)
+	implementation(libs.accompanist.permissions)
 	//tests
 	testImplementation(libs.kotlin.test)
 	testImplementation(libs.kotlinx.coroutines.test)
