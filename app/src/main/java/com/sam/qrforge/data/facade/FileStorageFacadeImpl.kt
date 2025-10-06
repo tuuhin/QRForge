@@ -11,6 +11,7 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.core.content.FileProvider
 import androidx.core.graphics.scale
+import com.sam.qrforge.data.utils.hasWriteStoragePermission
 import com.sam.qrforge.domain.enums.ExportDimensions
 import com.sam.qrforge.domain.enums.ImageMimeTypes
 import com.sam.qrforge.domain.facade.FileStorageFacade
@@ -121,8 +122,8 @@ class FileStorageFacadeImpl(private val context: Context) : FileStorageFacade {
 		compressFormat: Bitmap.CompressFormat = Bitmap.CompressFormat.PNG,
 	): Resource<String, Exception> {
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-			throw Exception("Invalid method use scoped storage")
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !context.hasWriteStoragePermission)
+			return Resource.Error(Exception("Invalid API or permission missing"))
 
 		val picturesDir = Environment
 			.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
