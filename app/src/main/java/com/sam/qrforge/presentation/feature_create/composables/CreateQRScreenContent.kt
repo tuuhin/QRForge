@@ -12,17 +12,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.domain.enums.QRDataType
+import com.sam.qrforge.domain.models.BaseLocationModel
+import com.sam.qrforge.domain.models.ContactsDataModel
 import com.sam.qrforge.domain.models.qr.QRContentModel
 
 @Composable
 fun CreateQRScreenContent(
-	content: QRContentModel,
+	contentFormat: QRDataType,
 	onSelectType: (QRDataType) -> Unit,
 	modifier: Modifier = Modifier,
 	onReadCurrentLocation: () -> Unit = {},
 	onReadContactsDetails: (String) -> Unit = {},
 	onContentUpdate: (QRContentModel) -> Unit,
 	isLocationEnabled: Boolean = true,
+	lastKnownLocation: BaseLocationModel? = null,
+	lastReadContacts: ContactsDataModel? = null,
 	contentPadding: PaddingValues = PaddingValues(12.dp)
 ) {
 	val scrollState = rememberScrollState()
@@ -35,13 +39,15 @@ fun CreateQRScreenContent(
 			.verticalScroll(scrollState),
 	) {
 		QRDataTypeSelector(
-			selectedType = content.type,
+			selectedType = contentFormat,
 			onSelectType = onSelectType,
 			modifier = Modifier.fillMaxWidth()
 		)
 		QRContentInputContainer(
-			content = content,
+			qrContentType = contentFormat,
 			isLocationEnabled = isLocationEnabled,
+			lastKnownLocation = lastKnownLocation,
+			lastReadContacts = lastReadContacts,
 			onUseCurrentLocation = onReadCurrentLocation,
 			onReadContactsDetails = onReadContactsDetails,
 			onContentChange = onContentUpdate,

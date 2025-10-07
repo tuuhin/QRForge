@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.KeyboardActionHandler
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
@@ -49,7 +52,8 @@ import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.domain.models.qr.QRWiFiModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
 
 @Composable
 fun QRFormatWifiInput(
@@ -64,21 +68,25 @@ fun QRFormatWifiInput(
 	val focusManager = LocalFocusManager.current
 	val focusRequester = remember { FocusRequester() }
 
-	var ssidField by rememberSaveable { mutableStateOf(initialState.ssid ?: "") }
-	var secretTextField by rememberSaveable { mutableStateOf(initialState.password ?: "") }
+	val ssidFieldState = rememberTextFieldState()
+	val secretTextField = rememberTextFieldState()
 	var securityType by rememberSaveable { mutableStateOf(initialState.encryption) }
 	var isHidden by rememberSaveable { mutableStateOf(initialState.isHidden) }
 
+	LaunchedEffect(initialState) {
+		ssidFieldState.setTextAndPlaceCursorAtEnd(initialState.ssid ?: "")
+		secretTextField.setTextAndPlaceCursorAtEnd(initialState.password ?: "")
+	}
 
-	LaunchedEffect(ssidField, secretTextField, securityType, isHidden) {
-		val model = QRWiFiModel(
-			ssid = ssidField,
-			password = if (securityType == QRWiFiModel.WifiEncryption.NO_PASS) null else secretTextField,
-			encryption = securityType,
-			isHidden = isHidden,
-		)
-		snapshotFlow { model }
-			.collectLatest { onContentChange(it) }
+	LaunchedEffect(ssidFieldState, secretTextField, securityType, isHidden) {
+		val ssidFlow = snapshotFlow { ssidFieldState.text.toString() }
+		val securityFlow = snapshotFlow { secretTextField.text.toString() }
+		val typeFlow = snapshotFlow { securityType }
+		val hiddenFlow = snapshotFlow { isHidden }
+
+		combine(ssidFlow, securityFlow, typeFlow, hiddenFlow) { ssid, secureText, type, hidden ->
+			onContentChange(QRWiFiModel(ssid, secureText, type, hidden))
+		}.launchIn(this)
 	}
 
 	Surface(
@@ -92,8 +100,7 @@ fun QRFormatWifiInput(
 			verticalArrangement = Arrangement.spacedBy(6.dp)
 		) {
 			OutlinedTextField(
-				value = ssidField,
-				onValueChange = { value -> ssidField = value },
+				state = ssidFieldState,
 				label = { Text(text = stringResource(R.string.create_qr_fields_wifi_ssid)) },
 				placeholder = { Text(text = stringResource(R.string.create_qr_fields_wifi_ssid_placeholder)) },
 				leadingIcon = {
@@ -106,13 +113,12 @@ fun QRFormatWifiInput(
 					imeAction = ImeAction.Next,
 					keyboardType = KeyboardType.Ascii
 				),
-				keyboardActions = KeyboardActions(onNext = { focusRequester.requestFocus() }),
+				onKeyboardAction = KeyboardActionHandler { focusRequester.requestFocus() },
 				shape = shape,
 				modifier = Modifier.fillMaxWidth(),
 			)
 			OutlinedTextField(
-				value = secretTextField,
-				onValueChange = { value -> secretTextField = value },
+				state = secretTextField,
 				enabled = securityType != QRWiFiModel.WifiEncryption.NO_PASS,
 				label = { Text(text = stringResource(R.string.create_qr_fields_wifi_secret)) },
 				placeholder = { Text(text = stringResource(R.string.create_qr_fields_wifi_secret_placeholder)) },
@@ -126,7 +132,7 @@ fun QRFormatWifiInput(
 					imeAction = ImeAction.Next,
 					keyboardType = KeyboardType.Password
 				),
-				keyboardActions = KeyboardActions(onNext = { focusManager.clearFocus() }),
+				onKeyboardAction = KeyboardActionHandler { focusManager.clearFocus() },
 				shape = shape,
 				modifier = Modifier
 					.focusRequester(focusRequester)
@@ -176,7 +182,7 @@ fun QRFormatWifiInput(
 							onClick = {
 								securityType = encryption
 								if (encryption == QRWiFiModel.WifiEncryption.NO_PASS)
-									secretTextField = ""
+									secretTextField.clearText()
 							},
 							label = { Text(text = encryption.string) },
 							shape = MaterialTheme.shapes.large,

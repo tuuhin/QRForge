@@ -57,17 +57,15 @@ fun NavGraphBuilder.createNewQRRoute(
 		}
 
 		val viewModel = backStack.sharedKoinViewModel<CreateNewQRViewModel>(controller)
-		val currentContent by viewModel.qrContent.collectAsStateWithLifecycle()
-		val showLocationDialog by viewModel.showLocationDialog.collectAsStateWithLifecycle()
-		val isLocationEnabled by viewModel.isLocationEnabled.collectAsStateWithLifecycle()
+		val screenState by viewModel.screenState.collectAsStateWithLifecycle()
+		val isContentValid by viewModel.isContentValid.collectAsStateWithLifecycle()
 
 		UIEventsSideEffect(events = viewModel::uiEvents)
 
 		CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 			CreateQRScreen(
-				content = currentContent,
-				showReadingLocationDialog = showLocationDialog,
-				isLocationEnabled = isLocationEnabled,
+				state = screenState,
+				isContentValid = isContentValid,
 				onEvent = viewModel::onCreateEvents,
 				onPreviewQR = dropUnlessResumed {
 					controller.navigate(CreateNewQRNavGraph.PreviewNewRoute)

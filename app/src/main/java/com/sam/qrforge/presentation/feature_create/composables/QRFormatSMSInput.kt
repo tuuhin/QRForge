@@ -9,8 +9,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.KeyboardActionHandler
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.insert
+import androidx.compose.foundation.text.input.maxLength
+import androidx.compose.foundation.text.input.placeCursorAtEnd
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -25,7 +33,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -49,9 +56,11 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.sam.qrforge.R
 import com.sam.qrforge.data.contracts.PickContactsContract
 import com.sam.qrforge.data.utils.applicationSettingsIntent
+import com.sam.qrforge.domain.models.ContactsDataModel
 import com.sam.qrforge.domain.models.qr.QRSmsModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -60,6 +69,7 @@ fun QRFormatSMSInput(
 	onStateChange: (QRSmsModel) -> Unit,
 	modifier: Modifier = Modifier,
 	initialState: QRSmsModel = QRSmsModel(),
+	readContactsModel: ContactsDataModel? = null,
 	onSelectContacts: (String) -> Unit = {},
 	contentPadding: PaddingValues = PaddingValues(12.dp),
 	shape: Shape = MaterialTheme.shapes.large,
@@ -104,15 +114,27 @@ fun QRFormatSMSInput(
 	val scope = rememberCoroutineScope()
 	val focusRequester = remember { FocusRequester() }
 
-	var phNumber by rememberSaveable(initialState.phoneNumber) {
-		mutableStateOf(initialState.phoneNumber ?: "")
-	}
-	var message by rememberSaveable { mutableStateOf(initialState.message ?: "") }
+	val phNumberFieldState = rememberTextFieldState()
+	val messageTextFieldState = rememberTextFieldState()
 
-	LaunchedEffect(phNumber, message) {
-		val model = QRSmsModel(phoneNumber = phNumber, message = message)
-		snapshotFlow { model }
-			.collectLatest { onStateChange(it) }
+	LaunchedEffect(Unit) {
+		phNumberFieldState.setTextAndPlaceCursorAtEnd(initialState.phoneNumber ?: "")
+		messageTextFieldState.setTextAndPlaceCursorAtEnd(initialState.message ?: "")
+	}
+
+	LaunchedEffect(readContactsModel) {
+		readContactsModel?.let {
+			phNumberFieldState.setTextAndPlaceCursorAtEnd(it.phoneNumber)
+		}
+	}
+
+	LaunchedEffect(phNumberFieldState, messageTextFieldState) {
+		val phNumber = snapshotFlow { phNumberFieldState.text.toString() }
+		val messages = snapshotFlow { messageTextFieldState.text.toString() }
+
+		combine(phNumber, messages) { number, message ->
+			onStateChange(QRSmsModel(phoneNumber = number, message = message))
+		}.launchIn(this)
 	}
 
 	Surface(
@@ -131,8 +153,8 @@ fun QRFormatSMSInput(
 				verticalAlignment = Alignment.CenterVertically
 			) {
 				OutlinedTextField(
-					value = phNumber,
-					onValueChange = { value -> phNumber = value },
+					state = phNumberFieldState,
+					inputTransformation = InputTransformation.maxLength(15),
 					placeholder = { Text(text = stringResource(R.string.create_qr_fields_phone)) },
 					leadingIcon = {
 						Icon(
@@ -145,11 +167,11 @@ fun QRFormatSMSInput(
 						keyboardType = KeyboardType.Number,
 						imeAction = ImeAction.Next
 					),
-					keyboardActions = KeyboardActions(
-						onNext = { focusRequester.requestFocus() },
-					), shape = shape,
-					maxLines = 1,
-					singleLine = true,
+					onKeyboardAction = KeyboardActionHandler {
+						focusRequester.requestFocus()
+					},
+					shape = shape,
+					lineLimits = TextFieldLineLimits.SingleLine,
 					modifier = Modifier.weight(1f)
 				)
 				Surface(
@@ -169,19 +191,21 @@ fun QRFormatSMSInput(
 				}
 			}
 			OutlinedTextField(
-				value = message,
-				onValueChange = { value -> message = value },
+				state = messageTextFieldState,
 				placeholder = { Text(text = stringResource(R.string.create_qr_fields_sms_placeholder)) },
 				label = { Text(text = stringResource(R.string.create_qr_fields_sms_message)) },
 				keyboardOptions = KeyboardOptions(
 					keyboardType = KeyboardType.Text,
 					imeAction = ImeAction.Done
 				),
-				keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+				onKeyboardAction = KeyboardActionHandler {
+					focusManager.clearFocus()
+				},
 				shape = shape,
-				minLines = 3,
-				maxLines = 5,
-				singleLine = false,
+				lineLimits = TextFieldLineLimits.MultiLine(
+					minHeightInLines = 3,
+					maxHeightInLines = 5
+				),
 				modifier = Modifier
 					.fillMaxWidth()
 					.focusRequester(focusRequester),
@@ -191,7 +215,7 @@ fun QRFormatSMSInput(
 				modifier = Modifier.align(Alignment.End)
 			) {
 				SuggestionChip(
-					onClick = { message = "" },
+					onClick = { messageTextFieldState.clearText() },
 					icon = {
 						Icon(
 							painter = painterResource(R.drawable.ic_clear),
@@ -209,7 +233,11 @@ fun QRFormatSMSInput(
 							if (!itemPresent) return@launch
 
 							val item = entry?.clipData?.getItemAt(0) ?: return@launch
-							message += item.text.toString()
+							val clipboardText = item.text.toString()
+							messageTextFieldState.edit {
+								insert(originalText.length, clipboardText)
+								placeCursorAtEnd()
+							}
 						}
 					},
 					icon = {

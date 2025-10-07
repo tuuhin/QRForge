@@ -9,10 +9,11 @@ import com.sam.qrforge.domain.analytics.AnalyticsTracker
 import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.domain.facade.FileStorageFacade
 import com.sam.qrforge.domain.facade.QRGeneratorFacade
+import com.sam.qrforge.domain.models.BaseLocationModel
+import com.sam.qrforge.domain.models.ContactsDataModel
 import com.sam.qrforge.domain.models.CreateNewQRModel
 import com.sam.qrforge.domain.models.GeneratedQRModel
 import com.sam.qrforge.domain.models.qr.QRContentModel
-import com.sam.qrforge.domain.models.qr.QRGeoPointModel
 import com.sam.qrforge.domain.models.qr.QRPlainTextModel
 import com.sam.qrforge.domain.models.qr.QRSmsModel
 import com.sam.qrforge.domain.models.qr.QRTelephoneModel
@@ -25,6 +26,7 @@ import com.sam.qrforge.presentation.common.utils.AppViewModel
 import com.sam.qrforge.presentation.common.utils.LaunchActivityEvent
 import com.sam.qrforge.presentation.common.utils.UIEvent
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
+import com.sam.qrforge.presentation.feature_create.state.CreateQRScreenState
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenEvents
 import com.sam.qrforge.presentation.feature_create.state.SaveQRScreenState
 import kotlinx.coroutines.Job
@@ -34,6 +36,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -55,22 +59,42 @@ class CreateNewQRViewModel(
 	private val _saveQRState = MutableStateFlow(SaveQRScreenState())
 	val saveQRState = _saveQRState.asStateFlow()
 
-	private val _showReadLocationDialog = MutableStateFlow(false)
-	val showLocationDialog = _showReadLocationDialog.asStateFlow()
-
-	val isLocationEnabled = locationProvider.locationEnabledFlow
-		.stateIn(
-			scope = viewModelScope,
-			started = SharingStarted.Lazily,
-			initialValue = false
-		)
-
 	private val _contentModel = MutableStateFlow<QRContentModel>(QRPlainTextModel(""))
-	val qrContent = _contentModel.onStart { onGenerateQR() }
+	val qrContent = _contentModel.asStateFlow()
+
+	private val _showReadLocationDialog = MutableStateFlow(false)
+	private val _lastKnownLocation = MutableStateFlow<BaseLocationModel?>(null)
+	private val _lastReadContacts = MutableStateFlow<ContactsDataModel?>(null)
+
+	private val _contentFormat = _contentModel.map { it.type }.distinctUntilChanged()
+
+	val screenState = combine(
+		_showReadLocationDialog,
+		_lastKnownLocation,
+		_lastReadContacts,
+		locationProvider.locationEnabledFlow,
+		_contentFormat
+	) { shoDialog, lastLocation, lastContacts, isLocationEnabled, format ->
+		CreateQRScreenState(
+			showLocationDialog = shoDialog,
+			lastReadLocation = lastLocation,
+			lastReadContacts = lastContacts,
+			isLocationEnabled = isLocationEnabled,
+			selectedQRFormat = format
+		)
+	}.onStart { onGenerateQR() }.stateIn(
+		scope = viewModelScope,
+		started = SharingStarted.Lazily,
+		initialValue = CreateQRScreenState()
+	)
+
+
+	val isContentValid = _contentModel.map { it.isValid }
+		.distinctUntilChanged()
 		.stateIn(
 			scope = viewModelScope,
-			started = SharingStarted.WhileSubscribed(2000),
-			initialValue = QRPlainTextModel("")
+			started = SharingStarted.WhileSubscribed(1_000),
+			initialValue = false
 		)
 
 	private val _generatedQR = MutableStateFlow<GeneratedQRModel?>(null)
@@ -93,16 +117,26 @@ class CreateNewQRViewModel(
 
 	fun onCreateEvents(event: CreateQREvents) {
 		when (event) {
-			is CreateQREvents.OnQRDataTypeChange -> _contentModel.update { event.type.toNewModel() }
+			is CreateQREvents.OnQRDataTypeChange -> {
+				_contentModel.update { event.type.toNewModel() }
+				// reset's the values
+				_lastReadContacts.update { null }
+				_lastKnownLocation.update { null }
+			}
+
 			is CreateQREvents.OnUpdateQRContent -> _contentModel.updateAndGet { event.content }
 			is CreateQREvents.CheckContactsDetails -> findContactsFromURI(event.uri)
 			CreateQREvents.CheckLastKnownLocation -> checkLastKnownLocation()
 			is CreateQREvents.ShareGeneratedQR -> onShareGeneratedQR(event.bitmap)
 			CreateQREvents.OnPreviewQR -> {
+				val content = _contentModel.value
 				analyticsLogger.logEvent(
 					AnalyticsEvent.GENERATED_QR,
-					mapOf(AnalyticsParams.GENERATED_QR_TYPE to _contentModel.value.type.toString())
+					mapOf(AnalyticsParams.GENERATED_QR_TYPE to content.type.toString())
 				)
+				// resets the values
+				_lastReadContacts.update { null }
+				_lastKnownLocation.update { null }
 			}
 
 			CreateQREvents.CancelReadCurrentLocation -> onCancelReadCurrentLocation()
@@ -198,12 +232,7 @@ class CreateNewQRViewModel(
 		_readLocationJob = viewModelScope.launch {
 			val currentLocationResult = locationProvider.readCurrentLocation()
 			currentLocationResult.fold(
-				onSuccess = { location ->
-					_contentModel.update { content ->
-						if (content !is QRGeoPointModel) content
-						else content.copy(lat = location.latitude, long = location.longitude)
-					}
-				},
+				onSuccess = { location -> _lastKnownLocation.update { location } },
 				onFailure = { err ->
 					val event = UIEvent.ShowToast(err.message ?: "Cannot read location")
 					_uiEvents.emit(event)
@@ -220,12 +249,7 @@ class CreateNewQRViewModel(
 
 		val lastLocationResult = locationProvider.readLastLocation()
 		lastLocationResult.fold(
-			onSuccess = { location ->
-				_contentModel.update { content ->
-					if (content !is QRGeoPointModel) content
-					else content.copy(lat = location.latitude, long = location.longitude)
-				}
-			},
+			onSuccess = { location -> _lastKnownLocation.update { location } },
 			onFailure = { err ->
 				val event = if (err is LocationNotKnownException) {
 					analyticsLogger.logEvent(AnalyticsEvent.LOCATION_READ_FAILED)
@@ -244,19 +268,13 @@ class CreateNewQRViewModel(
 		val result = contactsProvider.invoke(uri)
 		result.fold(
 			onSuccess = { contacts ->
-				val updatedContent = _contentModel.updateAndGet { content ->
-					// update the content
-					when (content) {
-						is QRTelephoneModel -> content.copy(number = contacts.phoneNumber)
-						is QRSmsModel -> content.copy(phoneNumber = contacts.phoneNumber)
-						else -> content
-					}
-				}
-				when (updatedContent) {
+				_lastReadContacts.update { contacts }
+				val contentModel = _contentModel.value
+				when (contentModel) {
 					is QRSmsModel -> _saveQRState.update { state ->
 						state.copy(
 							title = "SMS TO :${contacts.displayName} (${contacts.phoneNumber})",
-							desc = "Message :${updatedContent.message}"
+							desc = "Message :${contentModel.message}"
 						)
 					}
 

@@ -5,10 +5,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import com.google.android.gms.location.CurrentLocationRequest
@@ -117,11 +119,7 @@ class LocationProviderImpl(private val context: Context) : LocationProvider {
 
 			Log.d(TAG, "CURRENT LOCATION FETCHED")
 
-			val currentLocation = BaseLocationModel(
-				latitude = location.latitude,
-				longitude = location.longitude
-			)
-			Result.success(currentLocation)
+			Result.success(location.toBaseLocation())
 		} catch (e: Exception) {
 			if (e is CancellationException) {
 				Log.d(TAG, "CANCELLATION EXCEPTION OCCURRED TOKEN CANCELLED")
@@ -150,15 +148,17 @@ class LocationProviderImpl(private val context: Context) : LocationProvider {
 			val location = locationProvider.getLastLocation(locationRequest).await()
 				?: return Result.failure(LocationNotKnownException())
 
-			val lastLocation = BaseLocationModel(
-				latitude = location.latitude,
-				longitude = location.longitude
-			)
-			Result.success(lastLocation)
+			Result.success(location.toBaseLocation())
 		} catch (e: Exception) {
 			if (e is CancellationException) throw e
 			Result.failure(e)
 		}
 	}
 
+
+	private fun Location.toBaseLocation(): BaseLocationModel {
+		val roundedLat = (latitude * 1_0000).fastRoundToInt() / 1_0000.0
+		val roundedLong = (longitude * 1_0000).fastRoundToInt() / 1_0000.0
+		return BaseLocationModel(roundedLat, roundedLong)
+	}
 }

@@ -26,19 +26,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.enums.QRDataType
+import com.sam.qrforge.domain.models.BaseLocationModel
+import com.sam.qrforge.domain.models.ContactsDataModel
 import com.sam.qrforge.domain.models.qr.QRContentModel
-import com.sam.qrforge.domain.models.qr.QRGeoPointModel
-import com.sam.qrforge.domain.models.qr.QRSmsModel
-import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 
 @Composable
 fun QRContentInputContainer(
-	content: QRContentModel,
+	qrContentType: QRDataType,
 	onContentChange: (QRContentModel) -> Unit,
 	onUseCurrentLocation: () -> Unit,
 	onReadContactsDetails: (String) -> Unit,
 	modifier: Modifier = Modifier,
 	isLocationEnabled: Boolean = true,
+	lastKnownLocation: BaseLocationModel? = null,
+	lastReadContacts: ContactsDataModel? = null,
 ) {
 
 	Column(
@@ -57,7 +58,7 @@ fun QRContentInputContainer(
 		)
 		Spacer(modifier = Modifier.height(10.dp))
 		AnimatedContent(
-			targetState = content.type,
+			targetState = qrContentType,
 			transitionSpec = {
 				slideInVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)) + expandIn(
 					expandFrom = Alignment.TopCenter,
@@ -77,22 +78,22 @@ fun QRContentInputContainer(
 				QRDataType.TYPE_URL -> QRFormatURLInput(onStateChange = onContentChange)
 				QRDataType.TYPE_WIFI -> QRFormatWifiInput(onContentChange = onContentChange)
 				QRDataType.TYPE_GEO -> QRFormatGeoInput(
-					initialState = (content as? QRGeoPointModel) ?: QRGeoPointModel(),
 					onStateChange = onContentChange,
+					lastKnownLocation = lastKnownLocation,
 					isLocationEnabled = isLocationEnabled,
 					onUseLastKnownLocation = onUseCurrentLocation,
 				)
 
 				QRDataType.TYPE_PHONE -> QRFormatPhoneInput(
-					initialState = (content as? QRTelephoneModel) ?: QRTelephoneModel(),
 					onStateChange = onContentChange,
 					onSelectContacts = onReadContactsDetails,
+					readContactsModel = lastReadContacts
 				)
 
 				QRDataType.TYPE_SMS -> QRFormatSMSInput(
-					initialState = (content as? QRSmsModel) ?: QRSmsModel(),
 					onStateChange = onContentChange,
 					onSelectContacts = onReadContactsDetails,
+					readContactsModel = lastReadContacts
 				)
 			}
 		}
