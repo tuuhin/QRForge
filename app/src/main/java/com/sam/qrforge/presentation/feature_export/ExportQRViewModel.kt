@@ -183,11 +183,16 @@ class ExportQRViewModel(
 		_verificationState.update { VerificationState.VERIFYING }
 
 		viewModelScope.launch {
-			// check certification result
-			val result = validator.isValid(bitmap.toRGBAModel())
+			val currentDecoration = _decoration.value
+			var bitmapRGBAModel = bitmap.toRGBAModel()
+			if (currentDecoration is QRDecorationOption.QRDecorationOptionMinimal && !currentDecoration.showBackground) {
+				// add a secondary layer to cover the transparently
+				bitmapRGBAModel = bitmapRGBAModel.toGrayIfTransparent()
+			}
+			// now check for validation
+			val result = validator.isValid(bitmapRGBAModel)
 
 			if (result.isFailure) {
-				_uiEvents.emit(UIEvent.ShowSnackBar("Cannot verify the given QR"))
 				_verificationState.update { VerificationState.NOT_VERIFIED }
 				return@launch
 			}
@@ -196,7 +201,7 @@ class ExportQRViewModel(
 				AnalyticsEvent.EXPORT_QR_VERIFIED,
 				mapOf(
 					AnalyticsParams.IS_SUCCESSFUL to result.isSuccess,
-					AnalyticsParams.EXPORT_QR_TEMPLATE to _decoration.value.templateType
+					AnalyticsParams.EXPORT_QR_TEMPLATE to _decoration.value.templateType.name
 				)
 			)
 

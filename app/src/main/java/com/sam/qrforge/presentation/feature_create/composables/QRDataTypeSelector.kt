@@ -30,6 +30,7 @@ import com.sam.qrforge.R
 import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.presentation.common.composables.painter
 import com.sam.qrforge.presentation.common.composables.string
+import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildSize
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @Composable
@@ -40,24 +41,26 @@ fun QRDataTypeSelector(
 ) {
 	Column(
 		modifier = modifier,
-		verticalArrangement = Arrangement.spacedBy(4.dp)
+		verticalArrangement = Arrangement.spacedBy(2.dp)
 	) {
 		Text(
 			text = stringResource(R.string.select_qr_format_title),
-			style = MaterialTheme.typography.bodyLarge,
-			color = MaterialTheme.colorScheme.primary
+			style = MaterialTheme.typography.titleLarge,
+			color = MaterialTheme.colorScheme.primary,
 		)
 		Text(
 			text = stringResource(R.string.select_qr_format_desc),
 			style = MaterialTheme.typography.bodyMedium,
-			color = MaterialTheme.colorScheme.onSurface
+			color = MaterialTheme.colorScheme.onSurfaceVariant
 		)
-		Spacer(modifier = Modifier.height(8.dp))
+		Spacer(modifier = Modifier.height(10.dp))
 		FlowRow(
 			horizontalArrangement = Arrangement.Center,
 			verticalArrangement = Arrangement.spacedBy(6.dp),
 			maxItemsInEachRow = 4,
-			modifier = Modifier.fillMaxWidth(),
+			modifier = Modifier
+				.fillMaxWidth()
+				.sharedTransitionSkipChildSize(),
 		) {
 			QRDataType.entries.forEach { type ->
 				QRDataTypeCard(

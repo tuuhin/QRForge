@@ -17,9 +17,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -29,17 +26,16 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import com.sam.qrforge.R
-import com.sam.qrforge.domain.models.qr.QRContentModel
-import com.sam.qrforge.domain.models.qr.QRGeoPointModel
-import com.sam.qrforge.domain.models.qr.QRPlainTextModel
-import com.sam.qrforge.domain.models.qr.QRTelephoneModel
+import com.sam.qrforge.domain.enums.QRDataType
 import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
 import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildSize
 import com.sam.qrforge.presentation.feature_create.composables.CreateQRScreenContent
+import com.sam.qrforge.presentation.feature_create.composables.ReadingLocationDialog
 import com.sam.qrforge.presentation.feature_create.composables.ShowGeneratedQRButton
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
+import com.sam.qrforge.presentation.feature_create.state.CreateQRScreenState
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
 @OptIn(
@@ -48,8 +44,9 @@ import com.sam.qrforge.ui.theme.QRForgeTheme
 )
 @Composable
 fun CreateQRScreen(
-	content: QRContentModel,
+	state: CreateQRScreenState,
 	modifier: Modifier = Modifier,
+	isContentValid: Boolean = false,
 	onEvent: (CreateQREvents) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
 	onPreviewQR: () -> Unit = {},
@@ -57,9 +54,11 @@ fun CreateQRScreen(
 	val layoutDirection = LocalLayoutDirection.current
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-	val showPreviewButton by remember(content) {
-		derivedStateOf { content.isValid }
-	}
+
+	ReadingLocationDialog(
+		showDialog = state.showLocationDialog,
+		onDismiss = { onEvent(CreateQREvents.CancelReadCurrentLocation) },
+	)
 
 	Scaffold(
 		topBar = {
@@ -72,7 +71,7 @@ fun CreateQRScreen(
 		},
 		bottomBar = {
 			ShowGeneratedQRButton(
-				showButton = showPreviewButton,
+				showButton = isContentValid,
 				onGenerateQR = {
 					onEvent(CreateQREvents.OnPreviewQR)
 					onPreviewQR()
@@ -89,7 +88,10 @@ fun CreateQRScreen(
 			)
 	) { scPadding ->
 		CreateQRScreenContent(
-			content = content,
+			contentFormat = state.selectedQRFormat,
+			isLocationEnabled = state.isLocationEnabled,
+			lastReadContacts = state.lastReadContacts,
+			lastKnownLocation = state.lastReadLocation,
 			onSelectType = { onEvent(CreateQREvents.OnQRDataTypeChange(it)) },
 			onContentUpdate = { onEvent(CreateQREvents.OnUpdateQRContent(it)) },
 			onReadCurrentLocation = { onEvent(CreateQREvents.CheckLastKnownLocation) },
@@ -107,22 +109,22 @@ fun CreateQRScreen(
 	}
 }
 
-private class QRContentPreviewParams : CollectionPreviewParameterProvider<QRContentModel>(
+private class QRContentTypePreviewParams : CollectionPreviewParameterProvider<QRDataType>(
 	listOf(
-		QRPlainTextModel("Hello"),
-		QRTelephoneModel("0000000000"),
-		QRGeoPointModel(23.0, 67.0)
+		QRDataType.TYPE_TEXT,
+		QRDataType.TYPE_GEO,
+		QRDataType.TYPE_PHONE,
 	)
 )
 
 @PreviewLightDark
 @Composable
 private fun CreateQRScreenPreview(
-	@PreviewParameter(QRContentPreviewParams::class)
-	content: QRContentModel,
+	@PreviewParameter(QRContentTypePreviewParams::class)
+	format: QRDataType,
 ) = QRForgeTheme {
 	CreateQRScreen(
-		content = content,
+		state = CreateQRScreenState(selectedQRFormat = format),
 		navigation = {
 			Icon(
 				imageVector = Icons.AutoMirrored.Filled.ArrowBack,

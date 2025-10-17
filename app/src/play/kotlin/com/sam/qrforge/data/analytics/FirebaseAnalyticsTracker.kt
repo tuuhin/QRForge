@@ -1,7 +1,6 @@
 package com.sam.qrforge.data.analytics
 
 import androidx.core.os.bundleOf
-import androidx.core.os.toPersistableBundle
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.sam.qrforge.domain.analytics.AnalyticsEvent
 import com.sam.qrforge.domain.analytics.AnalyticsParams
@@ -11,11 +10,18 @@ class FirebaseAnalyticsTracker(private val analytics: FirebaseAnalytics) : Analy
 
 	override fun logEvent(event: AnalyticsEvent, params: Map<AnalyticsParams, Any>) {
 
-		val paramsBundle = params.map { (key, value) -> key.param to value }
-			.toMap().toPersistableBundle()
-
-		val bundle = bundleOf().apply {
-			putAll(paramsBundle)
+		val bundle = bundleOf()
+		for ((key, value) in params) {
+			when (value) {
+				is String -> bundle.putString(key.param, value)
+				is Int -> bundle.putInt(key.param, value)
+				is Long -> bundle.putLong(key.param, value)
+				is Double -> bundle.putDouble(key.param, value)
+				is Float -> bundle.putFloat(key.param, value)
+				is Boolean -> bundle.putBoolean(key.param, value)
+				// send plain to string version
+				else -> bundle.putString(key.param, value.toString())
+			}
 		}
 		analytics.logEvent(event.eventName, bundle)
 	}

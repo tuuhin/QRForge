@@ -4,14 +4,13 @@ import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
 import android.provider.ContactsContract
-import android.util.Log
 import androidx.core.database.getStringOrNull
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import com.sam.qrforge.data.utils.hasReadContactsPermission
-import com.sam.qrforge.domain.provider.exception.ContactsPermissionMissingException
-import com.sam.qrforge.domain.provider.ContactsDataProvider
 import com.sam.qrforge.domain.models.ContactsDataModel
+import com.sam.qrforge.domain.provider.ContactsDataProvider
+import com.sam.qrforge.domain.provider.exception.ContactsPermissionMissingException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -65,15 +64,12 @@ class ContactsDataProviderImpl(private val context: Context) : ContactsDataProvi
 
 		if (hasPhNumber == "0") return null
 
-		Log.d(TAG, "READ COMMONS")
-
 		val phNumber = readPhoneNumber(id) ?: return null
-
-		Log.d(TAG, "READ NUMBER")
+		val strippedPhNumber = phNumber.trim().replace("\\s+".toRegex(), "")
 
 		return ContactsDataModel(
 			displayName = displayName,
-			phoneNumber = phNumber,
+			phoneNumber = strippedPhNumber,
 		)
 	}
 

@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.SavedQRModel
@@ -73,7 +74,7 @@ fun HomeScreenContent(
 		HorizontalDivider()
 		Crossfade(
 			targetState = contentState,
-			animationSpec = tween(durationMillis = 200, easing = EaseOut),
+			animationSpec = tween(durationMillis = 240, delayMillis = 100, easing = EaseOut),
 			modifier = Modifier.weight(1f)
 		) { state ->
 			when (state) {
@@ -119,14 +120,15 @@ private fun EmptyContent(
 		Image(
 			painter = painterResource(R.drawable.ic_qr_2),
 			contentDescription = "QR Logo",
-			modifier = Modifier.size(200.dp),
-			colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
+			modifier = Modifier.size(192.dp),
+			colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary)
 		)
 		Text(
 			text = if (isListFullyEmpty) stringResource(R.string.no_qr_saved)
 			else stringResource(R.string.no_qr_saved_typed),
-			style = MaterialTheme.typography.titleLarge,
-			color = MaterialTheme.colorScheme.secondary,
+			style = MaterialTheme.typography.bodyLarge,
+			fontWeight = FontWeight.SemiBold,
+			color = MaterialTheme.colorScheme.primary,
 		)
 	}
 }

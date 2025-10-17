@@ -5,6 +5,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -48,6 +50,7 @@ fun ScanResultsScreenContent(
 		verticalArrangement = Arrangement.spacedBy(12.dp),
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
+		Spacer(modifier = Modifier.height(12.dp))
 		QRContentTypeChip(type = content.type)
 		AnimatedBasicQRContent(
 			generated = generatedModel,

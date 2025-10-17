@@ -16,4 +16,5 @@ enum class AnalyticsEvent(val eventName: String) {
 	QR_METADATA_UPDATE("present_qr_metadata_update"),
 	QR_DETAILS_LOAD("qr_content_details_load"),
 	LOAD_ALL_QR("load_all"),
+	LOCATION_READ_FAILED("location_read_failed"),
 }

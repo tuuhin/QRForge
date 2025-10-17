@@ -3,7 +3,7 @@ agp = "8.13.0"
 concurrentFuturesKtx = "1.3.0"
 core = "3.5.3"
 coreSplashscreen = "1.0.1"
-firebaseBom = "34.3.0"
+firebaseBom = "34.4.0"
 kotlin = "2.2.20"
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -15,17 +15,18 @@ playServicesLocationVersion = "21.3.0"
 kotlinxDatetime = "0.7.1"
 lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
-composeBom = "2025.09.01"
+composeBom = "2025.10.00"
 koinBom = "4.1.0"
 materialIconsExtended = "1.7.8"
 navigationCompose = "2.9.5"
-roomCompiler = "2.8.1"
-uiTextGoogleFonts = "1.9.2"
+roomCompiler = "2.8.2"
+uiTextGoogleFonts = "1.9.3"
 ksp = "2.2.20-2.0.2"
-cameraX = "1.5.0"
+cameraX = "1.5.1"
 barcodeScanning = "17.3.0"
-googleServices = "4.4.3"
+googleServices = "4.4.4"
 crashlyticsPlugin = "3.0.6"
+accompanistPermissions = "0.37.3"
 
 
 [libraries]
@@ -57,7 +58,8 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
-
+#util
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 #zebra crossing
 barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "core" }

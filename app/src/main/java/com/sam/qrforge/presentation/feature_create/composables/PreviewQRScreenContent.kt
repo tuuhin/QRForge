@@ -1,11 +1,14 @@
 package com.sam.qrforge.presentation.feature_create.composables
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,17 +32,20 @@ fun PreviewQRScreenContent(
 	onShareContent: (ImageBitmap) -> Unit = {},
 	onExportContent: () -> Unit = {},
 	contentPadding: PaddingValues = PaddingValues(0.dp),
+	scrollState: ScrollState = rememberScrollState(),
 ) {
 
 	val captureLayer = CanvasCaptureLayer.rememberCaptureLayer()
 	val scope = rememberCoroutineScope()
 
 	Column(
-		modifier = modifier.padding(contentPadding),
+		modifier = modifier
+			.verticalScroll(scrollState)
+			.padding(contentPadding),
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.spacedBy(16.dp)
 	) {
-		Spacer(modifier = Modifier.height(20.dp))
+		Spacer(modifier = Modifier.height(12.dp))
 		QRContentTypeChip(content.type)
 		AnimatedBasicQRContent(
 			generated = generated,

@@ -14,4 +14,6 @@ sealed interface CreateQREvents {
 
 	data class ShareGeneratedQR(val bitmap: ImageBitmap) : CreateQREvents
 	data object OnPreviewQR : CreateQREvents
+
+	data object CancelReadCurrentLocation : CreateQREvents
 }

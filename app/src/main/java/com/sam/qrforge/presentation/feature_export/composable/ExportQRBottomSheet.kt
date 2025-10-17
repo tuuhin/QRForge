@@ -12,9 +12,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,48 +32,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sam.qrforge.R
 import com.sam.qrforge.domain.enums.ExportDimensions
 import com.sam.qrforge.domain.enums.ImageMimeTypes
-import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenEvents
-import com.sam.qrforge.presentation.feature_export.state.ExportQRScreenState
-import com.sam.qrforge.presentation.feature_export.state.VerificationState
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import com.sam.qrforge.ui.theme.displayFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExportQRBottomSheet(
-	state: ExportQRScreenState,
-	onEvent: (ExportQRScreenEvents) -> Unit,
-	modifier: Modifier = Modifier,
-) {
-
-	val sheetState = rememberModalBottomSheetState(true)
-
-	ExportQRBottomSheet(
-		sheetState = sheetState,
-		showSheet = state.verificationState == VerificationState.VERIFIED,
-		selectedExportType = state.selectedMimeType,
-		selectedDimension = state.exportDimensions,
-		isExportRunning = !state.canExport,
-		onCancelExport = { onEvent(ExportQRScreenEvents.OnResetVerify) },
-		onBeginExport = { onEvent(ExportQRScreenEvents.OnExportBitmap) },
-		onExportTypeChange = { onEvent(ExportQRScreenEvents.OnExportMimeTypeChange(it)) },
-		onDimensionChange = { onEvent(ExportQRScreenEvents.OnExportDimensionChange(it)) },
-		modifier = modifier,
-	)
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ExportQRBottomSheet(
 	showSheet: Boolean,
 	onCancelExport: () -> Unit,
 	onBeginExport: () -> Unit,
@@ -79,7 +57,9 @@ private fun ExportQRBottomSheet(
 	onDimensionChange: (ExportDimensions) -> Unit = {},
 	onExportTypeChange: (ImageMimeTypes) -> Unit = {},
 	isExportRunning: Boolean = false,
-	sheetState: SheetState = rememberModalBottomSheetState(),
+	sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+	containerColor: Color = BottomSheetDefaults.ContainerColor,
+	tonalElevation: Dp = BottomSheetDefaults.Elevation,
 ) {
 	if (!showSheet) return
 
@@ -87,7 +67,8 @@ private fun ExportQRBottomSheet(
 		onDismissRequest = onCancelExport,
 		sheetState = sheetState,
 		modifier = modifier,
-		containerColor = MaterialTheme.colorScheme.surfaceContainer
+		containerColor = containerColor,
+		tonalElevation = tonalElevation,
 	) {
 		ExportQRBottomSheetContent(
 			selectedExportType = selectedExportType,
@@ -116,7 +97,7 @@ private fun ExportQRBottomSheetContent(
 ) {
 	Column(
 		modifier = modifier
-			.heightIn(64.dp)
+			.windowInsetsPadding(WindowInsets.navigationBars)
 			.padding(contentPadding),
 		verticalArrangement = Arrangement.spacedBy(8.dp)
 	) {
@@ -194,6 +175,8 @@ private fun ExportQRBottomSheetContent(
 				)
 			}
 		}
+		// An extra space
+		Spacer(modifier = Modifier.height(2.dp))
 	}
 }
 

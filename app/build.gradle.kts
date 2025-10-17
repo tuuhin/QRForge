@@ -23,8 +23,8 @@ android {
 		applicationId = "com.sam.qrforge"
 		minSdk = 26
 		targetSdk = 36
-		versionCode = 1
-		versionName = "1.0"
+		versionCode = 7
+		versionName = "1.0.1"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
@@ -169,6 +169,7 @@ dependencies {
 	implementation(libs.zxing.core)
 	implementation(libs.androidx.concurrent.futures.ktx)
 	implementation(libs.barcode.scanning)
+	implementation(libs.accompanist.permissions)
 	//tests
 	testImplementation(libs.kotlin.test)
 	testImplementation(libs.kotlinx.coroutines.test)
