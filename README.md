@@ -1,11 +1,17 @@
-# :purple_square: QR Forge
+# :purple_circle: QR Forge
 
 QRForge a modern android app for generating, customizing, and scanning QR codes with a modern UI
 built using Kotlin and Jetpack Compose
 
+## 📦 Download
+
+You can install either the `play` variant from play store and the `oss` variant from GitHub
+
+[<img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" width="240">](https://play.google.com/store/apps/details?id=com.sam.qrforge.play)[<img alt="Get it on GitHub" src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" width="240">](https://github.com/tuuhin/QRForge/releases)
+
 ## 📖 About
 
-QR Forge is a lightweight, user-friendly Android application that allows you to both **generate**
+QR Forge is a lightweight, user-friendly An̥droid application that allows you to both **generate**
 and **scan** QR codes with ease. Whether you want to share your Wi-Fi credentials, send a quick SMS,
 share a location, or simply create a custom QR code design, QR Forge makes it effortless.
 
@@ -58,7 +64,7 @@ Optional permissions, but they aren't necessary to the core app functioning
 
 ## :next_track_button: What's next
 
-- [ ] Launching this application to google play store
+- [x] Launching this application to google play store
 - [ ] Smoother experience while editing QR before export
 
 ## ⚡ Getting Started
