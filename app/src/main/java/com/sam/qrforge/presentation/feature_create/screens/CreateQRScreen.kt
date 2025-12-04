@@ -26,7 +26,10 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import com.sam.qrforge.R
-import com.sam.qrforge.domain.enums.QRDataType
+import com.sam.qrforge.domain.models.qr.QRContentModel
+import com.sam.qrforge.domain.models.qr.QRGeoPointModel
+import com.sam.qrforge.domain.models.qr.QRPlainTextModel
+import com.sam.qrforge.domain.models.qr.QRWiFiModel
 import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
@@ -53,7 +56,6 @@ fun CreateQRScreen(
 ) {
 	val layoutDirection = LocalLayoutDirection.current
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-
 
 	ReadingLocationDialog(
 		showDialog = state.showLocationDialog,
@@ -88,7 +90,7 @@ fun CreateQRScreen(
 			)
 	) { scPadding ->
 		CreateQRScreenContent(
-			contentFormat = state.selectedQRFormat,
+			content = state.qrContent,
 			isLocationEnabled = state.isLocationEnabled,
 			lastReadContacts = state.lastReadContacts,
 			lastKnownLocation = state.lastReadLocation,
@@ -109,22 +111,22 @@ fun CreateQRScreen(
 	}
 }
 
-private class QRContentTypePreviewParams : CollectionPreviewParameterProvider<QRDataType>(
+private class QRContentPreviewParams : CollectionPreviewParameterProvider<QRContentModel>(
 	listOf(
-		QRDataType.TYPE_TEXT,
-		QRDataType.TYPE_GEO,
-		QRDataType.TYPE_PHONE,
+		QRPlainTextModel("Hello world"),
+		QRGeoPointModel(0.0, 0.0),
+		QRWiFiModel(ssid = "Sam", encryption = QRWiFiModel.WifiEncryption.NO_PASS, isHidden = true)
 	)
 )
 
 @PreviewLightDark
 @Composable
 private fun CreateQRScreenPreview(
-	@PreviewParameter(QRContentTypePreviewParams::class)
-	format: QRDataType,
+	@PreviewParameter(QRContentPreviewParams::class)
+	format: QRContentModel,
 ) = QRForgeTheme {
 	CreateQRScreen(
-		state = CreateQRScreenState(selectedQRFormat = format),
+		state = CreateQRScreenState(qrContent = format),
 		navigation = {
 			Icon(
 				imageVector = Icons.AutoMirrored.Filled.ArrowBack,

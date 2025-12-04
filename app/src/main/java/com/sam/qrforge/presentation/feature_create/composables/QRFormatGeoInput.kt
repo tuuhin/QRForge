@@ -121,19 +121,18 @@ fun QRFormatGeoInput(
 	val latitudeField = rememberTextFieldState()
 	val longitudeField = rememberTextFieldState()
 
-	LaunchedEffect(Unit) {
+	LaunchedEffect(initialState) {
 		latitudeField.setTextAndPlaceCursorAtEnd(initialState.lat.toString())
 		longitudeField.setTextAndPlaceCursorAtEnd(initialState.long.toString())
 	}
 
 	LaunchedEffect(lastKnownLocation) {
-		lastKnownLocation?.let {
-			latitudeField.setTextAndPlaceCursorAtEnd(lastKnownLocation.latitude.toString())
-			longitudeField.setTextAndPlaceCursorAtEnd(lastKnownLocation.longitude.toString())
-		}
+		if (lastKnownLocation == null) return@LaunchedEffect
+		latitudeField.setTextAndPlaceCursorAtEnd(lastKnownLocation.latitude.toString())
+		longitudeField.setTextAndPlaceCursorAtEnd(lastKnownLocation.longitude.toString())
 	}
 
-	LaunchedEffect(latitudeField, longitudeField) {
+	LaunchedEffect(Unit) {
 		val latFlow = snapshotFlow { latitudeField.text.toString() }
 		val longFlow = snapshotFlow { longitudeField.text.toString() }
 

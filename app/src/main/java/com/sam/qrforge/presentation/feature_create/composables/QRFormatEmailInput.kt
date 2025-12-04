@@ -36,8 +36,8 @@ import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.domain.models.qr.QREmailModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
 
 @OptIn(FlowPreview::class)
 @Composable
@@ -65,14 +65,14 @@ fun QRFormatEmailInput(
 		messageFieldState.setTextAndPlaceCursorAtEnd(initialState.body ?: "")
 	}
 
-	LaunchedEffect(emailAddressFieldState, subjectFieldState, messageFieldState) {
+	LaunchedEffect(Unit) {
 		val email = snapshotFlow { emailAddressFieldState.text.toString() }
 		val subject = snapshotFlow { subjectFieldState.text.toString() }
 		val message = snapshotFlow { messageFieldState.text.toString() }
 
 		combine(email, subject, message) { email, subject, message ->
-			onStateChange(QREmailModel(address = email, subject = subject, body = message))
-		}.launchIn(this)
+			QREmailModel(address = email, subject = subject, body = message)
+		}.collectLatest { onStateChange(it) }
 	}
 
 	Surface(

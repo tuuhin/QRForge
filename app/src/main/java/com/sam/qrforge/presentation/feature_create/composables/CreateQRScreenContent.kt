@@ -18,7 +18,7 @@ import com.sam.qrforge.domain.models.qr.QRContentModel
 
 @Composable
 fun CreateQRScreenContent(
-	contentFormat: QRDataType,
+	content: QRContentModel,
 	onSelectType: (QRDataType) -> Unit,
 	modifier: Modifier = Modifier,
 	onReadCurrentLocation: () -> Unit = {},
@@ -39,12 +39,12 @@ fun CreateQRScreenContent(
 			.verticalScroll(scrollState),
 	) {
 		QRDataTypeSelector(
-			selectedType = contentFormat,
+			selectedType = content.type,
 			onSelectType = onSelectType,
 			modifier = Modifier.fillMaxWidth()
 		)
 		QRContentInputContainer(
-			qrContentType = contentFormat,
+			qrContentModel = content,
 			isLocationEnabled = isLocationEnabled,
 			lastKnownLocation = lastKnownLocation,
 			lastReadContacts = lastReadContacts,

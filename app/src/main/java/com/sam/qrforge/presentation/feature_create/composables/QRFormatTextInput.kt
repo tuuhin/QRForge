@@ -70,7 +70,7 @@ fun QRFormatTextInput(
 		textFieldState.setTextAndPlaceCursorAtEnd(initialState.text)
 	}
 
-	LaunchedEffect(textFieldState) {
+	LaunchedEffect(Unit) {
 		// send the updates
 		snapshotFlow { textFieldState.text.toString() }
 			.collectLatest {
@@ -119,7 +119,6 @@ fun QRFormatTextInput(
 								placeCursorAtEnd()
 							}
 						}
-
 					},
 					shape = MaterialTheme.shapes.large,
 					contentPadding = PaddingValues(vertical = 12.dp),
