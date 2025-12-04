@@ -281,11 +281,11 @@ public fun com.sam.qrforge.presentation.feature_create.composables.ContactsPermi
     - containerColor: STABLE (marked @Stable or @Immutable)
 
 @Composable
-public fun com.sam.qrforge.presentation.feature_create.composables.CreateQRScreenContent(contentFormat: com.sam.qrforge.domain.enums.QRDataType, onSelectType: kotlin.Function1<com.sam.qrforge.domain.enums.QRDataType, kotlin.Unit>, modifier: androidx.compose.ui.Modifier, onReadCurrentLocation: kotlin.Function0<kotlin.Unit>, onReadContactsDetails: kotlin.Function1<kotlin.String, kotlin.Unit>, onContentUpdate: kotlin.Function1<com.sam.qrforge.domain.models.qr.QRContentModel, kotlin.Unit>, isLocationEnabled: kotlin.Boolean, lastKnownLocation: com.sam.qrforge.domain.models.BaseLocationModel?, lastReadContacts: com.sam.qrforge.domain.models.ContactsDataModel?, contentPadding: androidx.compose.foundation.layout.PaddingValues): kotlin.Unit
+public fun com.sam.qrforge.presentation.feature_create.composables.CreateQRScreenContent(content: com.sam.qrforge.domain.models.qr.QRContentModel, onSelectType: kotlin.Function1<com.sam.qrforge.domain.enums.QRDataType, kotlin.Unit>, modifier: androidx.compose.ui.Modifier, onReadCurrentLocation: kotlin.Function0<kotlin.Unit>, onReadContactsDetails: kotlin.Function1<kotlin.String, kotlin.Unit>, onContentUpdate: kotlin.Function1<com.sam.qrforge.domain.models.qr.QRContentModel, kotlin.Unit>, isLocationEnabled: kotlin.Boolean, lastKnownLocation: com.sam.qrforge.domain.models.BaseLocationModel?, lastReadContacts: com.sam.qrforge.domain.models.ContactsDataModel?, contentPadding: androidx.compose.foundation.layout.PaddingValues): kotlin.Unit
   skippable: true
   restartable: true
   params:
-    - contentFormat: STABLE (class with no mutable properties)
+    - content: STABLE (class with no mutable properties)
     - onSelectType: STABLE (function type)
     - modifier: STABLE (marked @Stable or @Immutable)
     - onReadCurrentLocation: STABLE (function type)
@@ -335,11 +335,11 @@ public fun com.sam.qrforge.presentation.feature_create.composables.PreviewQRScre
     - scrollState: STABLE (marked @Stable or @Immutable)
 
 @Composable
-public fun com.sam.qrforge.presentation.feature_create.composables.QRContentInputContainer(qrContentType: com.sam.qrforge.domain.enums.QRDataType, onContentChange: kotlin.Function1<com.sam.qrforge.domain.models.qr.QRContentModel, kotlin.Unit>, onUseCurrentLocation: kotlin.Function0<kotlin.Unit>, onReadContactsDetails: kotlin.Function1<kotlin.String, kotlin.Unit>, modifier: androidx.compose.ui.Modifier, isLocationEnabled: kotlin.Boolean, lastKnownLocation: com.sam.qrforge.domain.models.BaseLocationModel?, lastReadContacts: com.sam.qrforge.domain.models.ContactsDataModel?): kotlin.Unit
+public fun com.sam.qrforge.presentation.feature_create.composables.QRContentInputContainer(qrContentModel: com.sam.qrforge.domain.models.qr.QRContentModel, onContentChange: kotlin.Function1<com.sam.qrforge.domain.models.qr.QRContentModel, kotlin.Unit>, onUseCurrentLocation: kotlin.Function0<kotlin.Unit>, onReadContactsDetails: kotlin.Function1<kotlin.String, kotlin.Unit>, modifier: androidx.compose.ui.Modifier, isLocationEnabled: kotlin.Boolean, lastKnownLocation: com.sam.qrforge.domain.models.BaseLocationModel?, lastReadContacts: com.sam.qrforge.domain.models.ContactsDataModel?): kotlin.Unit
   skippable: true
   restartable: true
   params:
-    - qrContentType: STABLE (class with no mutable properties)
+    - qrContentModel: STABLE (class with no mutable properties)
     - onContentChange: STABLE (function type)
     - onUseCurrentLocation: STABLE (function type)
     - onReadContactsDetails: STABLE (function type)
@@ -568,7 +568,7 @@ public fun com.sam.qrforge.presentation.feature_create.screens.CreateQRScreen(st
     - onPreviewQR: STABLE (function type)
 
 @Composable
-private fun com.sam.qrforge.presentation.feature_create.screens.CreateQRScreenPreview(format: com.sam.qrforge.domain.enums.QRDataType): kotlin.Unit
+private fun com.sam.qrforge.presentation.feature_create.screens.CreateQRScreenPreview(format: com.sam.qrforge.domain.models.qr.QRContentModel): kotlin.Unit
   skippable: true
   restartable: true
   params:
