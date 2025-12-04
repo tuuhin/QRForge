@@ -5,8 +5,9 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.staticCompositionLocalOf
 
-val LocalSnackBarState = compositionLocalOf { SnackbarHostState() }
+val LocalSnackBarState = staticCompositionLocalOf { SnackbarHostState() }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 val LocalSharedTransitionScopeProvider = compositionLocalOf<SharedTransitionScope?> { null }

@@ -112,7 +112,7 @@ fun QRDetailsScreen(
 			.sharedBoundsWrapper(
 				key = SharedTransitionKeys.sharedBoundsToItemDetail(qrId),
 				resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-				placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+				placeHolderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize
 			)
 	) { scPadding ->
 		Crossfade(

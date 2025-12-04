@@ -10,6 +10,7 @@ plugins {
 	alias(libs.plugins.ksp)
 	alias(libs.plugins.kotlinx.serialization)
 	alias(libs.plugins.androidx.room)
+	alias(libs.plugins.stability.analyzer)
 //	google services and crashlytics are applied but only configured in play built
 	alias(libs.plugins.firebase.crashlytics)
 	alias(libs.plugins.google.services)
@@ -164,6 +165,9 @@ dependencies {
 	implementation(libs.bundles.androidx.camerax)
 	// kotlinx
 	implementation(libs.bundles.kotlinx)
+	// graphics shapes
+	implementation(libs.androidx.graphics.core)
+	implementation(libs.androidx.graphics.shapes)
 	// others
 	implementation(libs.gms.play.services.location)
 	implementation(libs.zxing.core)
