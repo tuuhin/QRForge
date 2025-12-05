@@ -112,6 +112,17 @@ fun Modifier.sharedTransitionSkipChildSize(): Modifier {
 }
 
 @Composable
+fun Modifier.sharedTransitionSkipChildPosition(): Modifier {
+	val transitionScope = LocalSharedTransitionScopeProvider.current ?: return this
+
+	return with(transitionScope) {
+		this@sharedTransitionSkipChildPosition
+			.skipToLookaheadPosition()
+	}
+}
+
+
+@Composable
 fun Modifier.sharedTransitionRenderInOverlay(zIndexInOverlay: Float): Modifier {
 	val transitionScope = LocalSharedTransitionScopeProvider.current ?: return this
 	return with(transitionScope) {

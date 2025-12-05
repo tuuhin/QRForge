@@ -33,7 +33,6 @@ import com.sam.qrforge.domain.models.qr.QRWiFiModel
 import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
-import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildSize
 import com.sam.qrforge.presentation.feature_create.composables.CreateQRScreenContent
 import com.sam.qrforge.presentation.feature_create.composables.ReadingLocationDialog
 import com.sam.qrforge.presentation.feature_create.composables.ShowGeneratedQRButton
@@ -68,7 +67,6 @@ fun CreateQRScreen(
 				title = { Text(text = stringResource(R.string.create_qr_screen_title)) },
 				navigationIcon = navigation,
 				scrollBehavior = scrollBehavior,
-				modifier = Modifier.sharedTransitionSkipChildSize()
 			)
 		},
 		bottomBar = {

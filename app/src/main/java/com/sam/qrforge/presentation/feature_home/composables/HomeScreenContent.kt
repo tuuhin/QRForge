@@ -1,7 +1,7 @@
 package com.sam.qrforge.presentation.feature_home.composables
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -74,7 +74,7 @@ fun HomeScreenContent(
 		HorizontalDivider()
 		Crossfade(
 			targetState = contentState,
-			animationSpec = tween(durationMillis = 240, delayMillis = 100, easing = EaseOut),
+			animationSpec = tween(durationMillis = 200, delayMillis = 90, easing = EaseInOut),
 			modifier = Modifier.weight(1f)
 		) { state ->
 			when (state) {
