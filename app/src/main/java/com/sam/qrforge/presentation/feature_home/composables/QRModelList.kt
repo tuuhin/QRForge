@@ -69,7 +69,7 @@ fun QRModelList(
 					.sharedBoundsWrapper(
 						key = SharedTransitionKeys.sharedBoundsToItemDetail(item.qrModel.id),
 						resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-						placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+						placeHolderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize
 					),
 			)
 		}

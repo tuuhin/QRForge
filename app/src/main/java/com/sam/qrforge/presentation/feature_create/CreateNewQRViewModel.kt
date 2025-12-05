@@ -66,21 +66,19 @@ class CreateNewQRViewModel(
 	private val _lastKnownLocation = MutableStateFlow<BaseLocationModel?>(null)
 	private val _lastReadContacts = MutableStateFlow<ContactsDataModel?>(null)
 
-	private val _contentFormat = _contentModel.map { it.type }.distinctUntilChanged()
-
 	val screenState = combine(
 		_showReadLocationDialog,
 		_lastKnownLocation,
 		_lastReadContacts,
 		locationProvider.locationEnabledFlow,
-		_contentFormat
-	) { shoDialog, lastLocation, lastContacts, isLocationEnabled, format ->
+		_contentModel
+	) { shoDialog, lastLocation, lastContacts, isLocationEnabled, content ->
 		CreateQRScreenState(
 			showLocationDialog = shoDialog,
 			lastReadLocation = lastLocation,
 			lastReadContacts = lastContacts,
 			isLocationEnabled = isLocationEnabled,
-			selectedQRFormat = format
+			qrContent = content
 		)
 	}.onStart { onGenerateQR() }.stateIn(
 		scope = viewModelScope,
@@ -189,7 +187,7 @@ class CreateNewQRViewModel(
 		viewModelScope.launch {
 			val result = repository.insertQRData(createModel)
 			result.fold(
-				onSuccess = { model ->
+				onSuccess = {
 					analyticsLogger.logEvent(
 						AnalyticsEvent.SAVE_QR,
 						mapOf(
@@ -230,6 +228,7 @@ class CreateNewQRViewModel(
 		// cancel the job if any
 		_readLocationJob?.cancel()
 		_readLocationJob = viewModelScope.launch {
+			analyticsLogger.logEvent(AnalyticsEvent.LOCATION_READ_CURRENT)
 			val currentLocationResult = locationProvider.readCurrentLocation()
 			currentLocationResult.fold(
 				onSuccess = { location -> _lastKnownLocation.update { location } },
@@ -269,8 +268,7 @@ class CreateNewQRViewModel(
 		result.fold(
 			onSuccess = { contacts ->
 				_lastReadContacts.update { contacts }
-				val contentModel = _contentModel.value
-				when (contentModel) {
+				when (val contentModel = _contentModel.value) {
 					is QRSmsModel -> _saveQRState.update { state ->
 						state.copy(
 							title = "SMS TO :${contacts.displayName} (${contacts.phoneNumber})",

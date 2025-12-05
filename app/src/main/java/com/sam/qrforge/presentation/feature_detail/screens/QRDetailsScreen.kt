@@ -37,7 +37,6 @@ import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.common.utils.SharedTransitionKeys
 import com.sam.qrforge.presentation.common.utils.sharedBoundsWrapper
-import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildSize
 import com.sam.qrforge.presentation.feature_detail.composables.ConfirmDeleteDialog
 import com.sam.qrforge.presentation.feature_detail.composables.MissingQRDetailsContent
 import com.sam.qrforge.presentation.feature_detail.composables.QRDetailsScreenContent
@@ -95,7 +94,6 @@ fun QRDetailsScreen(
 				onDeleteItem = { onEvent(QRDetailsScreenEvents.ToggleDeleteDialog) },
 				navigation = navigation,
 				scrollBehavior = scrollBehavior,
-				modifier = Modifier.sharedTransitionSkipChildSize()
 			)
 		},
 		floatingActionButton = {
@@ -112,7 +110,7 @@ fun QRDetailsScreen(
 			.sharedBoundsWrapper(
 				key = SharedTransitionKeys.sharedBoundsToItemDetail(qrId),
 				resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-				placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+				placeHolderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize
 			)
 	) { scPadding ->
 		Crossfade(

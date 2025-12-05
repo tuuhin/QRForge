@@ -128,7 +128,7 @@ fun QRFormatSMSInput(
 		}
 	}
 
-	LaunchedEffect(phNumberFieldState, messageTextFieldState) {
+	LaunchedEffect(Unit) {
 		val phNumber = snapshotFlow { phNumberFieldState.text.toString() }
 		val messages = snapshotFlow { messageTextFieldState.text.toString() }
 

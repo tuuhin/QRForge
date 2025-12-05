@@ -19,7 +19,7 @@ import kotlin.time.ExperimentalTime
 
 fun String.toQRModel(): QRContentModel {
 	val result = when {
-		startsWith("mailto:") -> QREmailModel.toQRModel(this)
+		startsWith("mailto:") || startsWith("MATMSG:") -> QREmailModel.toQRModel(this)
 		startsWith("geo:") -> QRGeoPointModel.toQRModel(this)
 		startsWith("SMSTO:") -> QRSmsModel.toQRModel(this)
 		startsWith("WIFI:") -> QRWiFiModel.toQRModel(this)

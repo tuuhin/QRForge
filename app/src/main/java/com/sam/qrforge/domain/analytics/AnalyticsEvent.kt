@@ -17,4 +17,5 @@ enum class AnalyticsEvent(val eventName: String) {
 	QR_DETAILS_LOAD("qr_content_details_load"),
 	LOAD_ALL_QR("load_all"),
 	LOCATION_READ_FAILED("location_read_failed"),
+	LOCATION_READ_CURRENT("current_location_read_requested"),
 }

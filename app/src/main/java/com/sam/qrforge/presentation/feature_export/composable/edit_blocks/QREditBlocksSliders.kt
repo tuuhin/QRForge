@@ -14,6 +14,7 @@ import androidx.compose.material3.SliderState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -200,7 +201,7 @@ private fun QREditBlockContentMargin(
 private fun QREditBlockBitsSize(
 	onBitsMultiplierChange: (Float) -> Unit,
 	modifier: Modifier = Modifier,
-	range: OpenEndRange<Float> = .5f..<1.5f,
+	range: QRBitsSizeRange = QRBitsSizeRange(.5f..1.5f),
 	initialBitSize: Float = 1f,
 	sliderColors: SliderColors = SliderDefaults.colors(),
 	titleStyle: TextStyle = MaterialTheme.typography.bodyMedium,
@@ -215,7 +216,7 @@ private fun QREditBlockBitsSize(
 			value = (initialBitSize * 10f).roundToInt() / 10f,
 			onValueChangeFinished = {},
 			steps = 10,
-			valueRange = range.start..range.endExclusive,
+			valueRange = range.range,
 		)
 	}
 
@@ -303,3 +304,6 @@ fun EditDecorationSliderOptions(
 		}
 	}
 }
+
+@Immutable
+data class QRBitsSizeRange(val range: ClosedFloatingPointRange<Float> = .5f..1.5f)

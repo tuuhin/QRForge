@@ -89,7 +89,7 @@ fun QRDetailsScreenContent(
 			shape = MaterialTheme.shapes.medium,
 			modifier = Modifier.sharedElementWrapper(
 				key = SharedTransitionKeys.sharedElementQRCodeItemToDetail(savedContent.id),
-				placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+				placeHolderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
 				clipShape = MaterialTheme.shapes.medium
 			)
 		)
@@ -99,8 +99,7 @@ fun QRDetailsScreenContent(
 			hasAssociatedAction = savedContent.format != QRDataType.TYPE_TEXT,
 			onShare = {
 				scope.launch {
-					val bitmap = captureLayer.captureBitmap()
-					if (bitmap == null) return@launch
+					val bitmap = captureLayer.captureBitmap() ?: return@launch
 					onShare(bitmap)
 				}
 			},

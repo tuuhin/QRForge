@@ -52,8 +52,8 @@ import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.domain.models.qr.QRWiFiModel
 import com.sam.qrforge.ui.theme.QRForgeTheme
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
 
 @Composable
 fun QRFormatWifiInput(
@@ -85,8 +85,8 @@ fun QRFormatWifiInput(
 		val hiddenFlow = snapshotFlow { isHidden }
 
 		combine(ssidFlow, securityFlow, typeFlow, hiddenFlow) { ssid, secureText, type, hidden ->
-			onContentChange(QRWiFiModel(ssid, secureText, type, hidden))
-		}.launchIn(this)
+			QRWiFiModel(ssid, secureText, type, hidden)
+		}.collectLatest { onContentChange(it) }
 	}
 
 	Surface(

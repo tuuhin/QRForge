@@ -1,10 +1,12 @@
 [versions]
-agp = "8.13.0"
+agp = "8.13.1"
 concurrentFuturesKtx = "1.3.0"
-core = "3.5.3"
-coreSplashscreen = "1.0.1"
-firebaseBom = "34.4.0"
-kotlin = "2.2.20"
+core = "3.5.4"
+coreSplashscreen = "1.2.0"
+firebaseBom = "34.6.0"
+graphicsCore = "1.0.4"
+graphicsShapes = "1.1.0"
+kotlin = "2.2.21"
 coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -13,15 +15,15 @@ kotlinxCollectionsImmutable = "0.4.0"
 kotlinxCoroutinesTest = "1.10.2"
 playServicesLocationVersion = "21.3.0"
 kotlinxDatetime = "0.7.1"
-lifecycleRuntimeKtx = "2.9.4"
-activityCompose = "1.11.0"
-composeBom = "2025.10.00"
+lifecycleRuntimeKtx = "2.10.0"
+activityCompose = "1.12.1"
+composeBom = "2025.12.00"
 koinBom = "4.1.0"
 materialIconsExtended = "1.7.8"
-navigationCompose = "2.9.5"
-roomCompiler = "2.8.2"
-uiTextGoogleFonts = "1.9.3"
-ksp = "2.2.20-2.0.2"
+navigationCompose = "2.9.6"
+roomCompiler = "2.8.4"
+uiTextGoogleFonts = "1.10.0"
+ksp = "2.3.0"
 cameraX = "1.5.1"
 barcodeScanning = "17.3.0"
 googleServices = "4.4.4"
@@ -45,6 +47,9 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+#graphics
+androidx-graphics-core = { module = "androidx.graphics:graphics-core", version.ref = "graphicsCore" }
+androidx-graphics-shapes = { module = "androidx.graphics:graphics-shapes", version.ref = "graphicsShapes" }
 #lifecyle and navigation
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
@@ -99,6 +104,7 @@ kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", vers
 androidx_room = { id = "androidx.room", version.ref = "roomCompiler" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlyticsPlugin" }
+stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", version = "0.6.0" }
 
 [bundles]
 koin = ["koin-core", "koin-android", "koin-android-startup", "koin-compose", "koin-compose-navigation", ]

@@ -1,6 +1,5 @@
 package com.sam.qrforge.presentation.feature_scan.composable
 
-import android.util.Log
 import androidx.camera.core.SurfaceRequest
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -31,6 +29,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildPosition
 import com.sam.qrforge.presentation.common.utils.sharedTransitionSkipChildSize
 import com.sam.qrforge.presentation.feature_scan.state.CameraCaptureState
 import com.sam.qrforge.presentation.feature_scan.state.CameraControllerEvents
@@ -51,10 +50,6 @@ fun ScanQRScreenContent(
 		analyzerState.isAnalysing
 	) {
 		derivedStateOf { cameraCaptureState.isCapturing || analyzerState.isAnalysing }
-	}
-
-	SideEffect {
-		Log.d("TAG", "$isCapturingOrAnalyzing")
 	}
 
 	val lifecycleOwner = LocalLifecycleOwner.current
@@ -87,7 +82,10 @@ fun ScanQRScreenContent(
 					Image(
 						bitmap = cameraCaptureState.postCapturePreview.asImageBitmap(),
 						contentDescription = "Capture Preview",
-						modifier = Modifier.matchParentSize()
+						modifier = Modifier
+							.matchParentSize()
+							.sharedTransitionSkipChildSize()
+							.sharedTransitionSkipChildPosition()
 					)
 				} else {
 					CameraContent(
@@ -147,7 +145,7 @@ private fun CameraContent(
 	Crossfade(
 		targetState = surfaceRequest != null,
 		animationSpec = tween(durationMillis = 400, easing = EaseInOutCirc),
-		modifier = modifier.sharedTransitionSkipChildSize()
+		modifier = modifier
 	) { isReady ->
 		if (isReady && surfaceRequest != null) {
 			AndroidCameraView(
@@ -157,7 +155,10 @@ private fun CameraContent(
 				isFocusEnabled = enabled,
 				onRelativeScaleChange = onRelativeZoom,
 				tapToFocus = onTapToFocus,
-				modifier = Modifier.fillMaxSize()
+				modifier = Modifier
+					.fillMaxSize()
+					.sharedTransitionSkipChildSize()
+					.sharedTransitionSkipChildPosition()
 			)
 		} else Box(
 			modifier = Modifier

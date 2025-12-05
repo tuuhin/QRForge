@@ -113,7 +113,7 @@ fun QRFormatPhoneInput(
 		}
 	}
 
-	LaunchedEffect(phNumberFieldState) {
+	LaunchedEffect(Unit) {
 		snapshotFlow { phNumberFieldState.text.toString() }
 			.collectLatest { number -> onStateChange(QRTelephoneModel(number)) }
 	}

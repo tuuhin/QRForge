@@ -4,9 +4,15 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.EaseInOutBounce
 import androidx.compose.animation.core.EaseInOutExpo
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -65,7 +71,8 @@ fun CameraZoomPicker(
 	val isZoomRangeAvailable by remember(zoomState) {
 		derivedStateOf { abs(zoomState.maxZoomRatio - zoomState.minZoomRatio) > 0 }
 	}
-//	// don't show the picker is zoom is not available
+
+	// don't show the picker is zoom is not available
 	if (!isZoomRangeAvailable) {
 		ZoomValueButton(
 			zoomLevel = zoomState.zoomRatio,
@@ -81,7 +88,17 @@ fun CameraZoomPicker(
 	AnimatedContent(
 		targetState = showPicker,
 		contentAlignment = Alignment.Center,
-		modifier = modifier
+		modifier = modifier,
+		transitionSpec = {
+			fadeIn(animationSpec = tween(200, delayMillis = 50)) togetherWith
+					fadeOut(animationSpec = tween(90)) using
+					SizeTransform { _, _ ->
+						spring(
+							dampingRatio = Spring.DampingRatioLowBouncy,
+							stiffness = Spring.StiffnessLow
+						)
+					}
+		}
 	) { canShowPicker ->
 		CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 			if (canShowPicker) ZoomPickerSlider(

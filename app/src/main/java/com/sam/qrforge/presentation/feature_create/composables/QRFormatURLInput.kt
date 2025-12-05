@@ -67,7 +67,7 @@ fun QRFormatURLInput(
 		textFieldState.setTextAndPlaceCursorAtEnd(initialState.url)
 	}
 
-	LaunchedEffect(textFieldState) {
+	LaunchedEffect(Unit) {
 		// send the updates
 		snapshotFlow { textFieldState.text.toString() }
 			.collectLatest {
