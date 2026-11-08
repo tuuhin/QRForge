@@ -1,11 +1,10 @@
-import com.android.build.api.variant.ResValue
+import com.android.build.api.dsl.ApkSigningConfig
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
 	alias(libs.plugins.android.application)
-	alias(libs.plugins.kotlin.android)
 	alias(libs.plugins.kotlin.compose)
 	alias(libs.plugins.ksp)
 	alias(libs.plugins.kotlinx.serialization)
@@ -14,16 +13,23 @@ plugins {
 //	google services and crashlytics are applied but only configured in play built
 	alias(libs.plugins.firebase.crashlytics)
 	alias(libs.plugins.google.services)
+	alias(libs.plugins.koin.compiler)
 }
 
 android {
 	namespace = "com.sam.qrforge"
-	compileSdk = 36
+
+	compileSdk {
+		val majorVersion = libs.versions.android.compilesdk.major.get().toInt()
+		version = release(majorVersion) {
+			minorApiLevel = libs.versions.android.compilesdk.revision.get().toInt()
+		}
+	}
 
 	defaultConfig {
 		applicationId = "com.sam.qrforge"
-		minSdk = 26
-		targetSdk = 36
+		minSdk = libs.versions.android.minsdk.get().toInt()
+		targetSdk = libs.versions.android.targetsdk.get().toInt()
 		versionCode = 8
 		versionName = "1.0.2"
 
@@ -32,28 +38,7 @@ android {
 
 	signingConfigs {
 		// find if there is a properties file
-		val keySecretFile = rootProject.file("keystore.properties")
-		if (!keySecretFile.exists()) return@signingConfigs
-
-		// load the properties
-		val properties = Properties()
-		keySecretFile.inputStream().use { properties.load(it) }
-
-		val userHome = System.getProperty("user.home")
-		val storeFileName = properties.getProperty("STORE_FILE_NAME")
-
-		val keyStoreFolder = File(userHome, "keystore")
-		if (!keyStoreFolder.exists()) return@signingConfigs
-
-		val keyStoreFile = File(keyStoreFolder, storeFileName)
-		if (!keyStoreFile.exists()) return@signingConfigs
-
-		create("release") {
-			storeFile = keyStoreFile
-			keyAlias = properties.getProperty("KEY_ALIAS")
-			keyPassword = properties.getProperty("KEY_PASSWORD")
-			storePassword = properties.getProperty("STORE_PASSWORD")
-		}
+		createReleaseConfig()
 	}
 
 	flavorDimensions += "distribution"
@@ -82,15 +67,11 @@ android {
 		}
 
 		release {
-			isMinifyEnabled = true
-			isShrinkResources = true
-			multiDexEnabled = true
+			optimization {
+				enable = true
+			}
 			// change the signing config if release is not found
 			signingConfig = signingConfigs.findByName("release")
-			proguardFiles(
-				getDefaultProguardFile("proguard-android-optimize.txt"),
-				"proguard-rules.pro"
-			)
 			// send the mapping file too to get the crash report
 			configure<CrashlyticsExtension> {
 				mappingFileUploadEnabled = true
@@ -107,24 +88,7 @@ android {
 	}
 }
 
-androidComponents.onVariants { variant ->
-	val buildType = variant.buildType
-	val buildFlavour = variant.flavorName
-	// no changes for the play release
-	if (buildType == "release" && buildFlavour == "play") return@onVariants
-	// only changes for oss release
-	val flavourNameReadable = if (buildFlavour == "play") "Play" else "OSS"
-	val appName = "QR Forge $flavourNameReadable" + if (buildType != "release") " (Debug) " else ""
-
-	val key = object : ResValue.Key {
-		override val name: String = "app_name"
-		override val type: String = "string"
-	}
-	variant.resValues.put(key, ResValue(appName.trim()))
-}
-
 composeCompiler {
-//	featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)
 	val compilerReportDirectory = project.layout.buildDirectory.dir("compose_compiler")
 	reportsDestination.set(compilerReportDirectory)
 	metricsDestination.set(compilerReportDirectory)
@@ -140,7 +104,7 @@ kotlin {
 	}
 }
 
-room {
+room3 {
 	schemaDirectory("$projectDir/schemas")
 }
 
@@ -192,4 +156,46 @@ dependencies {
 	androidTestImplementation(libs.androidx.ui.test.junit4)
 	debugImplementation(libs.androidx.ui.tooling)
 	debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+fun NamedDomainObjectContainer<out ApkSigningConfig>.createReleaseConfig() {
+	val keySecretFile = project.file("keystore.properties")
+
+	var storeFileName: String? = null
+	var keyAlias: String? = null
+	var keyPassword: String? = null
+	var storePassword: String? = null
+
+	// first check if keystore exists in the root project
+	if (keySecretFile.exists()) {
+		val properties = Properties()
+		keySecretFile.inputStream().use { properties.load(it) }
+		storeFileName = properties.getProperty("STORE_FILE_NAME")
+		keyAlias = properties.getProperty("KEY_ALIAS")
+		keyPassword = properties.getProperty("KEY_PASSWORD")
+		storePassword = properties.getProperty("STORE_PASSWORD")
+	}
+
+	// if not found fallback to env
+	if (storeFileName.isNullOrBlank()) storeFileName = System.getenv("STORE_FILE_NAME")
+	if (keyAlias.isNullOrBlank()) keyAlias = System.getenv("KEY_ALIAS")
+	if (keyPassword.isNullOrBlank()) keyPassword = System.getenv("KEY_PASSWORD")
+	if (storePassword.isNullOrBlank()) storePassword = System.getenv("STORE_PASSWORD")
+
+	// finally search for the jks file
+	val jksFile = storeFileName?.takeIf { it.isNotBlank() }?.let(project::file)
+
+	val propertiesOk =
+		!keyAlias.isNullOrBlank() && !keyPassword.isNullOrBlank() && !storePassword.isNullOrBlank()
+	val isJskFileOk = jksFile?.exists() == true
+
+	if (!propertiesOk || !isJskFileOk) return
+
+	// Create the release config
+	create("release") {
+		storeFile = jksFile
+		this.keyAlias = keyAlias
+		this.keyPassword = keyPassword
+		this.storePassword = storePassword
+	}
 }
