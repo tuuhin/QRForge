@@ -14,3 +14,5 @@
 .cxx
 local.properties
 keystore.properties
+.junie/*
+.kotlin/*

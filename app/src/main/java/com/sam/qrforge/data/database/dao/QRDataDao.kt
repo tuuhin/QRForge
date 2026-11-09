@@ -1,11 +1,11 @@
 package com.sam.qrforge.data.database.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Upsert
+import androidx.room3.Dao
+import androidx.room3.Delete
+import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
+import androidx.room3.Query
+import androidx.room3.Upsert
 import com.sam.qrforge.data.database.entity.QRDataEntity
 import com.sam.qrforge.domain.enums.QRDataType
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +21,9 @@ interface QRDataDao {
 
 	@Query("SELECT * FROM SAVED_QR_ENTITY")
 	fun fetchAllQREntity(): Flow<List<QRDataEntity>>
+
+	@Query("SELECT * FROM SAVED_QR_ENTITY")
+	suspend fun fetchAllQREntities(): List<QRDataEntity>
 
 	@Query("SELECT * FROM SAVED_QR_ENTITY WHERE _ID=:id")
 	suspend fun fetchQREntityById(id: Long): QRDataEntity?

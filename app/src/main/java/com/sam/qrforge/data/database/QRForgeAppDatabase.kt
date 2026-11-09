@@ -1,23 +1,22 @@
 package com.sam.qrforge.data.database
 
 import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
+import androidx.room3.ColumnTypeConverters
+import androidx.room3.Database
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
 import com.sam.qrforge.data.database.converters.LocalDateTimeConvertor
 import com.sam.qrforge.data.database.converters.QRDataTypeConvertor
 import com.sam.qrforge.data.database.dao.QRDataDao
 import com.sam.qrforge.data.database.entity.QRDataEntity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asExecutor
 
 @Database(
 	entities = [QRDataEntity::class],
 	exportSchema = true,
 	version = 1
 )
-@TypeConverters(
+@ColumnTypeConverters(
 	value = [
 		QRDataTypeConvertor::class,
 		LocalDateTimeConvertor::class,
@@ -39,13 +38,24 @@ abstract class QRForgeAppDatabase : RoomDatabase() {
 						klass = QRForgeAppDatabase::class.java,
 						name = DB_NAME
 					)
-						.addTypeConverter(QRDataTypeConvertor())
-						.addTypeConverter(LocalDateTimeConvertor())
-						.setQueryExecutor(Dispatchers.IO.asExecutor())
+						.addColumnTypeConverter(QRDataTypeConvertor())
+						.addColumnTypeConverter(LocalDateTimeConvertor())
+						.setQueryCoroutineContext(Dispatchers.IO)
 						.build()
 				}
 				_database!!
 			}
+		}
+
+		fun createInMemoryDatabase(context: Context): QRForgeAppDatabase {
+			return Room.inMemoryDatabaseBuilder(
+				context = context,
+				klass = QRForgeAppDatabase::class.java,
+			)
+				.addColumnTypeConverter(QRDataTypeConvertor())
+				.addColumnTypeConverter(LocalDateTimeConvertor())
+				.setQueryCoroutineContext(Dispatchers.IO)
+				.build()
 		}
 	}
 }

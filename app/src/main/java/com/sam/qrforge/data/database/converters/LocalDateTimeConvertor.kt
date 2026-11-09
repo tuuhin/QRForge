@@ -1,24 +1,22 @@
 package com.sam.qrforge.data.database.converters
 
-import androidx.room.ProvidedTypeConverter
-import androidx.room.TypeConverter
+import androidx.room3.ColumnTypeConverter
+import androidx.room3.ProvidedColumnTypeConverter
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-@ProvidedTypeConverter
-@OptIn(ExperimentalTime::class)
+@ProvidedColumnTypeConverter
 class LocalDateTimeConvertor {
 
 	private val timeZone = TimeZone.currentSystemDefault()
 
-	@TypeConverter
+	@ColumnTypeConverter
 	fun fromLocalTime(time: LocalDateTime): Long = time.toInstant(timeZone).toEpochMilliseconds()
 
-	@TypeConverter
+	@ColumnTypeConverter
 	fun toLocalTime(timeInMillis: Long) =
 		Instant.fromEpochMilliseconds(timeInMillis).toLocalDateTime(timeZone)
 }

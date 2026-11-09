@@ -1,8 +1,8 @@
 package com.sam.qrforge.data.database.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.ColumnInfo
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 import com.sam.qrforge.domain.enums.QRDataType
 import kotlinx.datetime.LocalDateTime
 

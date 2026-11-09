@@ -1,16 +1,16 @@
 package com.sam.qrforge.data.database.converters
 
-import androidx.room.ProvidedTypeConverter
-import androidx.room.TypeConverter
+import androidx.room3.ColumnTypeConverter
+import androidx.room3.ProvidedColumnTypeConverter
 import com.sam.qrforge.domain.enums.QRDataType
 
-@ProvidedTypeConverter
+@ProvidedColumnTypeConverter
 class QRDataTypeConvertor {
 
-	@TypeConverter
+	@ColumnTypeConverter
 	fun fromDataType(type: QRDataType) = type.name
 
-	@TypeConverter
+	@ColumnTypeConverter
 	fun toDataType(name: String): QRDataType {
 		return try {
 			QRDataType.valueOf(name)
