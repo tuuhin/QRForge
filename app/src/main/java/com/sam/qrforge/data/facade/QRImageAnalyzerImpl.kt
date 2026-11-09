@@ -24,16 +24,14 @@ private val THROTTLE_TIME = 200.milliseconds
 
 class QRImageAnalyzerImpl(private val scanner: QRScannerFacade) : QRImageAnalyzer {
 
-	@OptIn(ExperimentalCoroutinesApi::class)
 	private val dispatcher = Dispatchers.IO.limitedParallelism(4)
 	private val _scope = CoroutineScope(dispatcher + SupervisorJob())
 
-	private val _result = MutableSharedFlow<Result<QRContentModel>>(
-		extraBufferCapacity = 1,
-		onBufferOverflow = BufferOverflow.DROP_OLDEST
-	)
 	override val resultAnalysis: Flow<Result<QRContentModel>>
-		get() = _result
+		field = MutableSharedFlow<Result<QRContentModel>>(
+			extraBufferCapacity = 1,
+			onBufferOverflow = BufferOverflow.DROP_OLDEST
+		)
 
 	@ExperimentalGetImage
 	override fun analyze(image: ImageProxy) {
@@ -49,11 +47,11 @@ class QRImageAnalyzerImpl(private val scanner: QRScannerFacade) : QRImageAnalyze
 				)
 				result.fold(
 					onSuccess = {
-						_result.emit(Result.success(it))
+						resultAnalysis.emit(Result.success(it))
 					},
 					onFailure = { err ->
 						if (err is NoQRCodeFoundException) return@fold
-						_result.emit(Result.failure(Exception(err)))
+						resultAnalysis.emit(Result.failure(Exception(err)))
 					},
 				)
 				delay(THROTTLE_TIME)

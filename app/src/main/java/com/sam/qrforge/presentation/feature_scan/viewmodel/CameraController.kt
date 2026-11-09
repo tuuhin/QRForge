@@ -35,7 +35,9 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import org.koin.core.annotation.Factory
 
+@Factory
 class CameraController(private val context: Context) {
 
 	private val _isCameraReady = MutableStateFlow(false)

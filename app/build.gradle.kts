@@ -86,6 +86,10 @@ android {
 		compose = true
 		buildConfig = true
 	}
+
+	sourceSets {
+		getByName("androidTest").assets.directories.add("$projectDir/schemas")
+	}
 }
 
 composeCompiler {
@@ -106,6 +110,10 @@ kotlin {
 
 room3 {
 	schemaDirectory("$projectDir/schemas")
+}
+
+koinCompiler {
+	userLogs = true
 }
 
 dependencies {
@@ -149,6 +157,9 @@ dependencies {
 	"playImplementation"(libs.firebase.crashlytics)
 
 	// android tests
+	androidTestImplementation(libs.turbine)
+	androidTestImplementation(libs.kotlin.test.junit)
+	androidTestImplementation(libs.assertk)
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
 	androidTestImplementation(platform(libs.androidx.compose.bom))

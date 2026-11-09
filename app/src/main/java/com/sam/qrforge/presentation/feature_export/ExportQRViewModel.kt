@@ -36,10 +36,13 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
+import org.koin.core.annotation.Named
 
+@KoinViewModel
 class ExportQRViewModel(
 	private val fileFacade: FileStorageFacade,
-	private val validator: QRValidatorFacade,
+	@Named("ML_KIT") private val validator: QRValidatorFacade,
 	private val analyticsLogger: AnalyticsTracker
 ) : AppViewModel() {
 

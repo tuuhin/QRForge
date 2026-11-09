@@ -38,7 +38,9 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 
+@KoinViewModel
 class CameraViewModel(
 	private val controller: CameraController,
 	private val qrAnalyzer: QRImageAnalyzer,

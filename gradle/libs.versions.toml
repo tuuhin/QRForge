@@ -35,6 +35,8 @@ crashlyticsPlugin = "3.0.8"
 accompanistPermissions = "0.37.3"
 koin-plugin = "1.2.3"
 stability-analyzer = "0.15.0"
+assertk = "0.28.1"
+turbine_version = "1.2.1"
 
 [libraries]
 #core
@@ -65,11 +67,14 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 #kotlin libs
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 #util
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
+assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine_version" }
 #zebra crossing
 barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing-core" }
@@ -79,6 +84,7 @@ koin-core = { module = "io.insert-koin:koin-core" }
 koin-android = { module = "io.insert-koin:koin-android" }
 koin-compose = { module = "io.insert-koin:koin-androidx-compose" }
 koin-compose-navigation = { module = "io.insert-koin:koin-compose-viewmodel-navigation" }
+koin-annotations = { module = "io.insert-koin:koin-annotations" }
 koin-android-startup = { module = "io.insert-koin:koin-androidx-startup" }
 #room
 androidx-room-compiler = { module = "androidx.room3:room3-compiler", version.ref = "roomCompiler" }
@@ -112,7 +118,7 @@ stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", ve
 koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
 
 [bundles]
-koin = ["koin-core", "koin-android", "koin-android-startup", "koin-compose", "koin-compose-navigation", ]
+koin = ["koin-core", "koin-android", "koin-android-startup", "koin-compose", "koin-compose-navigation", "koin-annotations"]
 androidx-camerax = ["androidx-camera-core", "androidx-camera-camera2", "androidx-camera-lifecycle", "androidx-camera-compose", "androidx-camera-mlkit-vision"]
 compose-ui = ["androidx-ui", "androidx-ui-graphics", "androidx-ui-tooling-preview", "androidx-material3", "androidx-material-icons-extended", "androidx-ui-text-google-fonts"]
 androidx-lifecycle = ["androidx-lifecycle-runtime-compose", "androidx-lifecycle-runtime-ktx"]
