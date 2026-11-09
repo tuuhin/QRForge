@@ -12,10 +12,9 @@ import com.sam.qrforge.domain.models.qr.QRSmsModel
 import com.sam.qrforge.domain.models.qr.QRTelephoneModel
 import com.sam.qrforge.domain.models.qr.QRURLModel
 import com.sam.qrforge.domain.models.qr.QRWiFiModel
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 fun String.toQRModel(): QRContentModel {
 	val result = when {
@@ -30,7 +29,6 @@ fun String.toQRModel(): QRContentModel {
 	return result ?: QRPlainTextModel(this)
 }
 
-@OptIn(ExperimentalTime::class)
 fun CreateNewQRModel.toEntity() = QRDataEntity(
 	title = title,
 	desc = desc,

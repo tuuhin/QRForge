@@ -11,6 +11,7 @@ import com.sam.qrforge.data.facade.QRImageAnalyzerImpl
 import com.sam.qrforge.domain.facade.QRImageAnalyzer
 import com.sam.qrforge.domain.facade.QRScannerFacade
 import com.sam.qrforge.domain.facade.QRValidatorFacade
+import com.sam.qrforge.domain.util.PlatformCoroutineDispatchers
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
@@ -19,24 +20,31 @@ import org.koin.core.annotation.Single
 @Module
 class MLKitModule {
 
-	@Single
-	fun providesBarcodeScanning(): BarcodeScanner {
-		val options = BarcodeScannerOptions.Builder()
-			.setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-			.build()
-		return BarcodeScanning.getClient(options)
-	}
+    @Single
+    fun providesBarcodeScanning(): BarcodeScanner {
+        val options = BarcodeScannerOptions.Builder()
+            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+            .build()
+        return BarcodeScanning.getClient(options)
+    }
 
-	@Single
-	fun providesMLKitQRScanner(context: Context, scanner: BarcodeScanner): QRScannerFacade =
-		MLKitQRScannerFacadeImpl(context, scanner)
+    @Single
+    fun providesMLKitQRScanner(
+        context: Context,
+        scanner: BarcodeScanner,
+        dispatchers: PlatformCoroutineDispatchers,
+    ): QRScannerFacade = MLKitQRScannerFacadeImpl(context, scanner, dispatchers)
 
-	@Factory
-	fun providesQRImageAnalyzer(facade: QRScannerFacade): QRImageAnalyzer =
-		QRImageAnalyzerImpl(facade)
+    @Factory
+    fun providesQRImageAnalyzer(
+        facade: QRScannerFacade,
+        dispatchers: PlatformCoroutineDispatchers,
+    ): QRImageAnalyzer = QRImageAnalyzerImpl(facade, dispatchers)
 
-	@Factory
-	@Named("ML_KIT")
-	fun providesValidatorFacade(scanner: BarcodeScanner): QRValidatorFacade  =
-		MLKitQRValidatorFacadeImpl(scanner)
+    @Factory
+    @Named("ML_KIT")
+    fun providesValidatorFacade(
+        scanner: BarcodeScanner,
+        dispatchers: PlatformCoroutineDispatchers,
+    ): QRValidatorFacade = MLKitQRValidatorFacadeImpl(scanner, dispatchers)
 }

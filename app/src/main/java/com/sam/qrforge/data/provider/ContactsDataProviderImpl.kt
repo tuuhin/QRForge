@@ -3,20 +3,22 @@ package com.sam.qrforge.data.provider
 import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
+import android.os.Bundle
 import android.provider.ContactsContract
 import androidx.core.database.getStringOrNull
 import androidx.core.net.toUri
-import androidx.core.os.bundleOf
 import com.sam.qrforge.data.utils.hasReadContactsPermission
 import com.sam.qrforge.domain.models.ContactsDataModel
 import com.sam.qrforge.domain.provider.ContactsDataProvider
 import com.sam.qrforge.domain.provider.exception.ContactsPermissionMissingException
-import kotlinx.coroutines.Dispatchers
+import com.sam.qrforge.domain.util.PlatformCoroutineDispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 
-private const val TAG = "CONTACTS_PROVIDER"
-
-class ContactsDataProviderImpl(private val context: Context) : ContactsDataProvider {
+class ContactsDataProviderImpl(
+    private val context: Context,
+    private val dispatchers: PlatformCoroutineDispatchers,
+) : ContactsDataProvider {
 
 	private val secondProjection: Array<String>
 		get() = arrayOf(
@@ -36,7 +38,7 @@ class ContactsDataProviderImpl(private val context: Context) : ContactsDataProvi
 		val contactsUri = ContactsContract.Contacts
 			.getLookupUri(context.contentResolver, uri.toUri())
 
-		return withContext(Dispatchers.IO) {
+        return withContext(dispatchers.io) {
 			try {
 				val result = context.contentResolver
 					.query(contactsUri, secondProjection, null, null)
@@ -44,6 +46,7 @@ class ContactsDataProviderImpl(private val context: Context) : ContactsDataProvi
 					?: return@withContext Result.failure(Exception("Unable to process info"))
 				Result.success(result)
 			} catch (e: Exception) {
+                if (e is CancellationException) throw e
 				e.printStackTrace()
 				Result.failure(e)
 			}
@@ -74,10 +77,14 @@ class ContactsDataProviderImpl(private val context: Context) : ContactsDataProvi
 	}
 
 	private fun readPhoneNumber(id: Long): String? {
-		val args = bundleOf(
-			ContentResolver.QUERY_ARG_SQL_SELECTION to "${ContactsContract.CommonDataKinds.Phone.CONTACT_ID} = ?",
-			ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS to arrayOf("$id")
-		)
+
+        val args = Bundle().apply {
+            putString(
+                ContentResolver.QUERY_ARG_SQL_SELECTION,
+                "${ContactsContract.CommonDataKinds.Phone.CONTACT_ID} = ?",
+            )
+            putStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS, arrayOf("$id"))
+        }
 
 		return context.contentResolver.query(
 			ContactsContract.CommonDataKinds.Phone.CONTENT_URI,

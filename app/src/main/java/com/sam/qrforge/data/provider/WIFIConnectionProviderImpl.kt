@@ -23,97 +23,100 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 
-private const val TAG = "WIFI_CONNECTIVITY_PROVIDER"
 
 class WIFIConnectionProviderImpl(private val context: Context) : WIFIConnectionProvider {
 
-	private val _connectivityManager by lazy { context.getSystemService<ConnectivityManager>() }
-	private val _wifiManager by lazy { context.getSystemService<WifiManager>() }
+    private val _connectivityManager by lazy { context.getSystemService<ConnectivityManager>() }
+    private val _wifiManager by lazy { context.getSystemService<WifiManager>() }
 
-	private val _isWifiEnabled: Boolean
-		get() = _wifiManager?.isWifiEnabled ?: false
+    private val _isWifiEnabled: Boolean
+        get() = _wifiManager?.isWifiEnabled ?: false
 
-	override fun connectToWifi(ssid: String, passphrase: String?, isHidden: Boolean)
-			: Flow<Resource<Boolean, Exception>> =
-		if (Build.VERSION.SDK_INT_FULL >= Build.VERSION_CODES_FULL.Q)
-			connect(ssid, passphrase, isHidden)
-		else connectBelowAPI30(ssid, passphrase)
+    override fun connectToWifi(ssid: String, passphrase: String?, isHidden: Boolean)
+        : Flow<Resource<Boolean, Exception>> =
+        if (Build.VERSION.SDK_INT_FULL >= Build.VERSION_CODES_FULL.Q)
+            connect(ssid, passphrase, isHidden)
+        else connectBelowAPI30(ssid, passphrase)
 
 
-	@RequiresApi(Build.VERSION_CODES.Q)
-	fun connect(ssid: String, password: String?, isHidden: Boolean = false)
-			: Flow<Resource<Boolean, Exception>> {
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun connect(ssid: String, password: String?, isHidden: Boolean = false)
+        : Flow<Resource<Boolean, Exception>> {
 
-		val specifier = WifiNetworkSpecifier.Builder()
-			.setSsid(ssid)
-			.setIsHiddenSsid(isHidden)
+        val specifier = WifiNetworkSpecifier.Builder()
+            .setSsid(ssid)
+            .setIsHiddenSsid(isHidden)
 
-		// set password
-		password?.let(specifier::setWpa2Passphrase)
+        // set password
+        password?.let(specifier::setWpa2Passphrase)
 
-		val request = NetworkRequest.Builder()
-			.addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-			.setNetworkSpecifier(specifier.build())
-			.build()
+        val request = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .setNetworkSpecifier(specifier.build())
+            .build()
 
-		return callbackFlow {
-			trySend(Resource.Loading)
+        return callbackFlow {
+            trySend(Resource.Loading)
 
-			if (!_isWifiEnabled) {
-				trySend(Resource.Error(WIFINotEnabledException()))
-				return@callbackFlow awaitClose { }
-			}
+            if (!_isWifiEnabled) {
+                trySend(Resource.Error(WIFINotEnabledException()))
+                return@callbackFlow awaitClose { }
+            }
 
-			val callback = object : ConnectivityManager.NetworkCallback() {
+            val callback = object : ConnectivityManager.NetworkCallback() {
 
-				override fun onAvailable(network: Network) {
-					super.onAvailable(network)
-					Log.d(TAG, "NETWORK READY")
-					// bind to the network
-					val result = _connectivityManager?.bindProcessToNetwork(network) ?: false
-					trySend(Resource.Success(result))
-				}
+                override fun onAvailable(network: Network) {
+                    super.onAvailable(network)
+                    Log.d(TAG, "NETWORK READY")
+                    // bind to the network
+                    val result = _connectivityManager?.bindProcessToNetwork(network) ?: false
+                    trySend(Resource.Success(result))
+                }
 
-				override fun onUnavailable() {
-					super.onUnavailable()
-					Log.d(TAG, "NETWORK UNAVAILABLE")
-					trySend(Resource.Error(NetworkUnAvailableException()))
-					close()
-				}
-			}
+                override fun onUnavailable() {
+                    super.onUnavailable()
+                    Log.d(TAG, "NETWORK UNAVAILABLE")
+                    trySend(Resource.Error(NetworkUnAvailableException()))
+                    close()
+                }
+            }
 
-			Log.d(TAG, "NETWORK CALLBACK ADDED")
-			_connectivityManager?.requestNetwork(request, callback, 10_000)
+            Log.d(TAG, "NETWORK CALLBACK ADDED")
+            _connectivityManager?.requestNetwork(request, callback, 10_000)
 
-			awaitClose {
-				Log.d(TAG, "CLOSING NETWORK CALLBACK")
-				_connectivityManager?.unregisterNetworkCallback(callback)
-			}
-		}
-	}
+            awaitClose {
+                Log.d(TAG, "CLOSING NETWORK CALLBACK")
+                _connectivityManager?.unregisterNetworkCallback(callback)
+            }
+        }
+    }
 
-	fun connectBelowAPI30(ssid: String, password: String?): Flow<Resource<Boolean, Exception>> {
-		return flow {
+    fun connectBelowAPI30(ssid: String, password: String?): Flow<Resource<Boolean, Exception>> {
+        return flow {
 
-			if (!_isWifiEnabled) {
-				emit(Resource.Error(WIFINotEnabledException()))
-				return@flow
-			}
+            if (!_isWifiEnabled) {
+                emit(Resource.Error(WIFINotEnabledException()))
+                return@flow
+            }
 
-			val config = WifiConfiguration().apply {
-				SSID = ssid
-				password?.let { preSharedKey = password }
-			}
-			emit(Resource.Loading)
-			try {
-				val networkId = _wifiManager?.addNetwork(config) ?: -1
-				_wifiManager?.disconnect()
-				_wifiManager?.enableNetwork(networkId, true)
-				val result = _wifiManager?.reconnect() ?: false
-				emit(Resource.Success(result))
-			} catch (e: Exception) {
-				emit(Resource.Error(e))
-			}
-		}
-	}
+            val config = WifiConfiguration().apply {
+                SSID = ssid
+                password?.let { preSharedKey = password }
+            }
+            emit(Resource.Loading)
+            try {
+                val networkId = _wifiManager?.addNetwork(config) ?: -1
+                _wifiManager?.disconnect()
+                _wifiManager?.enableNetwork(networkId, true)
+                val result = _wifiManager?.reconnect() ?: false
+                emit(Resource.Success(result))
+            } catch (e: Exception) {
+                emit(Resource.Error(e))
+            }
+        }
+    }
+
+    companion object {
+        private const val TAG = "WIFI_CONNECTIVITY_PROVIDER"
+    }
 }

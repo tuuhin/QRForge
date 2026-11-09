@@ -10,6 +10,7 @@ import com.sam.qrforge.domain.repository.SavedQRDataRepository
 import com.sam.qrforge.domain.repository.exception.CannotFindMatchingIdException
 import com.sam.qrforge.domain.repository.exception.UnableToProcessSQLException
 import com.sam.qrforge.domain.util.Resource
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -29,6 +30,7 @@ class SaveQRDataRepoImpl(private val dao: QRDataDao) : SavedQRDataRepository {
 		} catch (_: SQLException) {
 			Result.failure(UnableToProcessSQLException())
 		} catch (e: Exception) {
+            if (e is CancellationException) throw e
 			Result.failure(e)
 		}
 	}
@@ -58,6 +60,7 @@ class SaveQRDataRepoImpl(private val dao: QRDataDao) : SavedQRDataRepository {
 		} catch (_: SQLException) {
 			Result.failure(UnableToProcessSQLException())
 		} catch (e: Exception) {
+            if (e is CancellationException) throw e
 			Result.failure(e)
 		}
 	}
@@ -72,13 +75,17 @@ class SaveQRDataRepoImpl(private val dao: QRDataDao) : SavedQRDataRepository {
 			.flowOn(Dispatchers.IO)
 			.onStart { emit(Resource.Loading) }
 			.catch { err ->
-				if (err is SQLException) emit(
-					Resource.Error(
-						UnableToProcessSQLException(),
-						"Issue with db cannot read data"
-					)
-				)
-				else emit(Resource.Error(Exception(err)))
+                when (err) {
+                    is SQLException -> emit(
+                        Resource.Error(
+                            UnableToProcessSQLException(),
+                            "Issue with db cannot read data",
+                        ),
+                    )
+
+                    is Exception -> emit(Resource.Error(err))
+                    else -> emit(Resource.Error(Exception(err)))
+                }
 			}
 	}
 
@@ -111,6 +118,7 @@ class SaveQRDataRepoImpl(private val dao: QRDataDao) : SavedQRDataRepository {
 		} catch (_: SQLException) {
 			Result.failure(UnableToProcessSQLException())
 		} catch (e: Exception) {
+            if (e is CancellationException) throw e
 			Result.failure(e)
 		}
 	}
@@ -122,6 +130,7 @@ class SaveQRDataRepoImpl(private val dao: QRDataDao) : SavedQRDataRepository {
 		} catch (_: SQLException) {
 			Result.failure(UnableToProcessSQLException())
 		} catch (e: Exception) {
+            if (e is CancellationException) throw e
 			Result.failure(e)
 		}
 	}
