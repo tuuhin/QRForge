@@ -1,171 +1,195 @@
 package com.sam.qrforge.presentation.feature_detail
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.navigation
-import androidx.navigation.toRoute
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.scene.DialogSceneStrategy
+import androidx.navigation3.ui.NavDisplay
 import com.sam.qrforge.domain.analytics.AnalyticsEvent
 import com.sam.qrforge.domain.analytics.AnalyticsParams
 import com.sam.qrforge.domain.analytics.AnalyticsTracker
 import com.sam.qrforge.presentation.common.composables.LaunchActivityEventsSideEffect
 import com.sam.qrforge.presentation.common.composables.UIEventsSideEffect
-import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionVisibilityScopeProvider
+import com.sam.qrforge.presentation.common.utils.LocalSharedTransitionScopeProvider
 import com.sam.qrforge.presentation.feature_detail.screens.QRDetailsScreen
 import com.sam.qrforge.presentation.feature_detail.screens.QREditScreen
 import com.sam.qrforge.presentation.feature_export.ExportQRScreen
 import com.sam.qrforge.presentation.feature_export.ExportQRViewModel
-import com.sam.qrforge.presentation.navigation.animatedComposable
-import com.sam.qrforge.presentation.navigation.fadeAnimatedComposable
+import com.sam.qrforge.presentation.navigation.composable.NavigationBackArrow
 import com.sam.qrforge.presentation.navigation.nav_graph.NavRoutes
+import com.sam.qrforge.presentation.navigation.scene.BottomSheetSceneStrategy
+import com.sam.qrforge.presentation.navigation.util.NavDestinationBuilder
 import kotlinx.coroutines.flow.merge
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.compose.viewmodel.sharedKoinViewModel
 
-fun NavGraphBuilder.qrDetailsRoute(controller: NavController) =
-	navigation<NavRoutes.QRDetailsRoute>(startDestination = QRDetailsNavGraph.DetailsRoute) {
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+class QRDetailsNavDestination : NavDestinationBuilder {
 
-		fadeAnimatedComposable<QRDetailsNavGraph.DetailsRoute> { entry ->
+    override fun EntryProviderScope<NavKey>.navEntry(backStack: NavBackStack<NavKey>) =
+        entry<NavRoutes.QRDetailsRoute> { rootRoute ->
 
-			val analytics = koinInject<AnalyticsTracker>()
+            val nestedNavStack = rememberNavBackStack(QRDetailsNavGraph.DetailsRoute)
+            val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
 
-			LaunchedEffect(Unit) {
-				analytics.logEvent(
-					AnalyticsEvent.SCREEN_VIEW,
-					mapOf(AnalyticsParams.SCREEN_NAME to "qr_details_screen")
-				)
-			}
+            val defaultSpatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+            val defaultEffectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+            val fastSpatialSpec = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
+            val fastEffectsSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
 
-			val route = entry.savedStateHandle.toRoute<NavRoutes.QRDetailsRoute>()
+            val viewModel = koinViewModel<QRDetailsViewModel>()
+            val analytics = koinInject<AnalyticsTracker>()
 
-			val viewModel = entry.sharedKoinViewModel<QRDetailsViewModel>(controller)
-			val screenState by viewModel.screenState.collectAsStateWithLifecycle()
+            val currentRoute by remember(nestedNavStack) {
+                derivedStateOf { nestedNavStack.lastOrNull() }
+            }
 
-			UIEventsSideEffect(
-				events = viewModel::uiEvents,
-				onNavigateBack = { controller.popBackStack() },
-			)
-			LaunchActivityEventsSideEffect(viewModel::activityEvents)
+            SideEffect(currentRoute, rootRoute) {
+                val route = (currentRoute as? QRDetailsNavGraph) ?: return@SideEffect
+                analytics.logEvent(
+                    AnalyticsEvent.SCREEN_VIEW,
+                    mapOf(
+                        AnalyticsParams.SCREEN_NAME to route.analyticsScreenName,
+                        AnalyticsParams.SCREEN_GROUP to rootRoute.analyticsName,
+                    ),
+                )
+            }
 
-			CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
-				QRDetailsScreen(
-					qrId = route.qrId,
-					state = screenState,
-					onEvent = viewModel::onEvent,
-					onNavigateToHome = dropUnlessResumed {
-						controller.navigate(NavRoutes.HomeRoute) {
-							popUpTo<NavRoutes.HomeRoute>()
-						}
-					},
-					onNavigateToEdit = dropUnlessResumed {
-						controller.navigate(QRDetailsNavGraph.EditDetailsRoute)
-					},
-					onNavigateToExport = dropUnlessResumed {
-						controller.navigate(QRDetailsNavGraph.ExportRoute)
-					},
-					navigation = {
-						if (controller.previousBackStackEntry != null)
-							IconButton(onClick = dropUnlessResumed { controller.popBackStack() }) {
-								Icon(
-									imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-									contentDescription = "Back Arrow"
-								)
-							}
-					},
-				)
-			}
-		}
+            NavDisplay(
+                backStack = nestedNavStack,
+                sharedTransitionScope = LocalSharedTransitionScopeProvider.current,
+                sceneStrategies = listOf(
+                    DialogSceneStrategy(),
+                    BottomSheetSceneStrategy(),
+                    listDetailStrategy,
+                ),
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator(),
+                ),
+                transitionSpec = {
+                    scaleIn(
+                        animationSpec = defaultSpatialSpec,
+                        initialScale = 0.9f,
+                    ) + fadeIn(animationSpec = defaultEffectsSpec) togetherWith
+                        scaleOut(
+                            animationSpec = fastSpatialSpec,
+                            targetScale = 1.1f,
+                        ) + fadeOut(fastEffectsSpec)
+                },
+                popTransitionSpec = {
+                    scaleIn(
+                        animationSpec = defaultSpatialSpec,
+                        initialScale = 1.1f,
+                    ) + fadeIn(animationSpec = defaultEffectsSpec) togetherWith
+                        scaleOut(
+                            animationSpec = fastSpatialSpec,
+                            targetScale = 0.9f,
+                        ) + fadeOut(fastEffectsSpec)
+                },
+                predictivePopTransitionSpec = {
+                    scaleIn(
+                        animationSpec = defaultSpatialSpec,
+                        initialScale = 1.1f,
+                    ) + fadeIn(animationSpec = defaultEffectsSpec) togetherWith
+                        scaleOut(
+                            animationSpec = fastSpatialSpec,
+                            targetScale = 0.9f,
+                        ) + fadeOut(fastEffectsSpec)
+                },
+                contentAlignment = Alignment.Center,
+                entryProvider = entryProvider {
 
-		animatedComposable<QRDetailsNavGraph.EditDetailsRoute> { entry ->
+                    entry<QRDetailsNavGraph.DetailsRoute> {
 
-			val analytics = koinInject<AnalyticsTracker>()
+                        val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
-			LaunchedEffect(Unit) {
-				analytics.logEvent(
-					AnalyticsEvent.SCREEN_VIEW,
-					mapOf(AnalyticsParams.SCREEN_NAME to "edit_qr_metadata_screen")
-				)
-			}
+                        UIEventsSideEffect(
+                            events = viewModel::uiEvents,
+                            onNavigateBack = { nestedNavStack.removeLastOrNull() },
+                        )
 
-			val viewModel = entry.sharedKoinViewModel<QRDetailsViewModel>(controller)
-			val screenState by viewModel.editState.collectAsStateWithLifecycle()
+                        LaunchActivityEventsSideEffect(viewModel::activityEvents)
 
-			UIEventsSideEffect(
-				events = viewModel::uiEvents,
-				onNavigateBack = dropUnlessResumed { controller.popBackStack() },
-			)
+                        QRDetailsScreen(
+                            qrId = rootRoute.qrId,
+                            state = screenState,
+                            onEvent = viewModel::onEvent,
+                            onNavigateToHome = dropUnlessResumed {
+                                val index = backStack.indexOfLast { it is NavRoutes.HomeRoute }
+                                if (index != -1 && index + 1 < backStack.size) {
+                                    backStack.subList(index + 1, backStack.size).clear()
+                                }
+                            },
+                            onNavigateToEdit = dropUnlessResumed {
+                                nestedNavStack.add(QRDetailsNavGraph.EditDetailsRoute)
+                            },
+                            onNavigateToExport = dropUnlessResumed {
+                                nestedNavStack.add(QRDetailsNavGraph.ExportRoute)
+                            },
+                            navigation = { NavigationBackArrow(backStack = backStack) },
+                        )
+                    }
 
-			CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
-				QREditScreen(
-					state = screenState,
-					onEvent = viewModel::onEditEvent,
-					navigation = {
-						if (controller.previousBackStackEntry != null)
-							IconButton(onClick = dropUnlessResumed { controller.popBackStack() }) {
-								Icon(
-									imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-									contentDescription = "Back Arrow"
-								)
-							}
-					},
-				)
-			}
-		}
+                    entry<QRDetailsNavGraph.EditDetailsRoute> {
 
-		animatedComposable<QRDetailsNavGraph.ExportRoute> { entry ->
+                        val screenState by viewModel.editState.collectAsStateWithLifecycle()
 
-			val analytics = koinInject<AnalyticsTracker>()
+                        UIEventsSideEffect(
+                            events = viewModel::uiEvents,
+                            onNavigateBack = dropUnlessResumed { nestedNavStack.removeLastOrNull() },
+                        )
 
-			LaunchedEffect(Unit) {
-				analytics.logEvent(
-					AnalyticsEvent.SCREEN_VIEW,
-					mapOf(
-						AnalyticsParams.SCREEN_NAME to "export_qr_route",
-						AnalyticsParams.PREVIOUS_SCREEN_NAME to "qr_details_screen"
-					)
-				)
-			}
+                        QREditScreen(
+                            state = screenState,
+                            onEvent = viewModel::onEditEvent,
+                            navigation = { NavigationBackArrow(nestedNavStack) },
+                        )
+                    }
 
-			val detailsViewModel = entry.sharedKoinViewModel<QRDetailsViewModel>(controller)
-			val screenState by detailsViewModel.screenState.collectAsStateWithLifecycle()
+                    entry<QRDetailsNavGraph.ExportRoute> {
 
-			val viewModel = koinViewModel<ExportQRViewModel>()
+                        val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
-			val decoration by viewModel.selectedDecoration.collectAsStateWithLifecycle()
-			val exportState by viewModel.exportScreenState.collectAsStateWithLifecycle()
+                        val exportViewmodel = koinViewModel<ExportQRViewModel>()
+                        val decoration by exportViewmodel.selectedDecoration.collectAsStateWithLifecycle()
+                        val exportState by exportViewmodel.exportScreenState.collectAsStateWithLifecycle()
 
-			UIEventsSideEffect(
-				events = { merge(detailsViewModel.uiEvents, viewModel.uiEvents) },
-				onNavigateBack = dropUnlessResumed { controller.popBackStack() },
-			)
+                        UIEventsSideEffect(
+                            events = { merge(exportViewmodel.uiEvents, exportViewmodel.uiEvents) },
+                            onNavigateBack = dropUnlessResumed { nestedNavStack.removeLastOrNull() },
+                        )
 
-			LaunchActivityEventsSideEffect(viewModel::activityEvents)
+                        LaunchActivityEventsSideEffect(exportViewmodel::activityEvents)
 
-			CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
-				ExportQRScreen(
-					decoration = decoration,
-					state = exportState,
-					generatedQR = screenState.generatedModel,
-					onEvent = viewModel::onEvent,
-					navigation = {
-						if (controller.previousBackStackEntry != null)
-							IconButton(onClick = dropUnlessResumed { controller.popBackStack() }) {
-								Icon(
-									imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-									contentDescription = "Back Arrow"
-								)
-							}
-					},
-				)
-			}
-		}
-	}
+                        ExportQRScreen(
+                            decoration = decoration,
+                            state = exportState,
+                            generatedQR = screenState.generatedModel,
+                            onEvent = exportViewmodel::onEvent,
+                            navigation = { NavigationBackArrow(nestedNavStack) },
+                        )
+                    }
+                },
+            )
+        }
+}

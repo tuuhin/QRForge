@@ -1,15 +1,11 @@
 package com.sam.qrforge.presentation.feature_create.screens
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,16 +25,13 @@ import com.sam.qrforge.R
 import com.sam.qrforge.domain.models.qr.QRContentModel
 import com.sam.qrforge.domain.models.qr.QRPlainTextModel
 import com.sam.qrforge.presentation.common.composables.AppCustomSnackBar
+import com.sam.qrforge.presentation.common.composables.AppIconVectors
 import com.sam.qrforge.presentation.common.models.GeneratedQRUIModel
 import com.sam.qrforge.presentation.common.utils.PreviewFakes
 import com.sam.qrforge.presentation.feature_create.composables.PreviewQRScreenContent
 import com.sam.qrforge.presentation.feature_create.state.CreateQREvents
 import com.sam.qrforge.ui.theme.QRForgeTheme
 
-@OptIn(
-	ExperimentalMaterial3Api::class,
-	ExperimentalSharedTransitionApi::class
-)
 @Composable
 fun PreviewQRScreen(
 	content: QRContentModel,
@@ -97,9 +90,9 @@ private fun PreviewQRScreenPreview() = QRForgeTheme {
 		onEvent = {},
 		navigation = {
 			Icon(
-				imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-				contentDescription = "Back Arrow"
-			)
+                imageVector = AppIconVectors.backArrow,
+                contentDescription = "Back Arrow",
+            )
 		},
 	)
 }

@@ -45,7 +45,7 @@
         <category android:name="android.intent.category.DEFAULT" />
 
         <data android:scheme="app" />
-        <data android:host="${applicationId}" />
+          <data android:host="com.sam.qrforge" />
       </intent-filter>
     </activity>
 
